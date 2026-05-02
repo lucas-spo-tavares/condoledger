@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "Aptos", "Segoe UI", sans-serif;
+}
+
+:root {
+  --background: #f7f4ed;
+  --foreground: #20201d;
+  --card: #fffdf8;
+  --card-foreground: #20201d;
+  --primary: #1f4a44;
+  --primary-foreground: #f7f4ed;
+  --secondary: #e7ebe2;
+  --secondary-foreground: #24342f;
+  --muted: #ece8dd;
+  --muted-foreground: #6f6a5f;
+  --accent: #d5e5df;
+  --accent-foreground: #193d38;
+  --destructive: #b42318;
+  --destructive-foreground: #fff7ed;
+  --border: #ddd6c8;
+  --input: #d2cabc;
+  --ring: #2f6f67;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  min-height: 100vh;
+  background:
+    linear-gradient(135deg, rgba(31, 74, 68, 0.08), transparent 34%),
+    linear-gradient(180deg, #f7f4ed 0%, #efeadf 100%);
+  color: var(--foreground);
+}

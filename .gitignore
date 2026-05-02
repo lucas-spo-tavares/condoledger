@@ -1,0 +1,17 @@
+.next
+node_modules
+out
+dist
+coverage
+*.tsbuildinfo
+.env
+.env*.local
+*.tfstate
+*.tfstate.*
+.terraform
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

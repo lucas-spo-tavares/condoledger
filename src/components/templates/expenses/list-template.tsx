@@ -1,0 +1,83 @@
+"use client";
+
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+
+import { AppShell } from "@/components/organisms/app-shell";
+import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatCurrency, formatDate } from "@/lib/commons/formats";
+import { useDeleteExpensesMutation } from "@/lib/hooks/expenses/useDeleteExpensesMutation";
+import { useExpensesQuery } from "@/lib/hooks/expenses/useExpensesQuery";
+
+export function ExpensesTemplate() {
+  const expensesQuery = useExpensesQuery();
+  const deleteExpensesMutation = useDeleteExpensesMutation();
+  const expenses = expensesQuery.data ?? [];
+
+  return (
+    <AppShell>
+      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-muted-foreground">Operacao do condominio</p>
+            <h1 className="text-2xl font-semibold tracking-normal">Despesas</h1>
+          </div>
+          <Button asChild>
+            <Link href="/expenses/new">
+              <Plus className="size-4" />
+              Nova despesa
+            </Link>
+          </Button>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Custos mensais</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead>Descricao</TableHead>
+                  <TableHead>Pago em</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead className="text-right">Acoes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {expenses.map((expense) => (
+                  <TableRow key={expense.id}>
+                    <TableCell className="font-medium">{expense.category}</TableCell>
+                    <TableCell>{expense.description}</TableCell>
+                    <TableCell>{formatDate(expense.paidAt)}</TableCell>
+                    <TableCell>{formatCurrency(expense.amountInCents)}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Button asChild size="icon" type="button" variant="outline">
+                          <Link href={`/expenses/${expense.id}/edit`}>
+                            <Pencil className="size-4" />
+                          </Link>
+                        </Button>
+                        <ConfirmDeleteDialog
+                          disabled={deleteExpensesMutation.isPending}
+                          description="Tem certeza que deseja remover esta despesa? Esta operacao nao pode ser desfeita."
+                          onConfirm={() => deleteExpensesMutation.mutate(expense.id)}
+                          title="Confirmar exclusao"
+                        >
+                          <Trash2 className="size-4" />
+                        </ConfirmDeleteDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </AppShell>
+  );
+}

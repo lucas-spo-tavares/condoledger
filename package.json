@@ -1,0 +1,45 @@
+{
+  "name": "condoledger",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "deploy": "bash bin/deploy.sh",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "dynamodb:seed": "tsx scripts/seed-dynamodb.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "latest",
+    "@aws-sdk/client-dynamodb": "latest",
+    "@aws-sdk/client-s3": "latest",
+    "@aws-sdk/lib-dynamodb": "latest",
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-slot": "latest",
+    "@tanstack/react-query": "^5.100.8",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "date-fns": "^4.1.0",
+    "lucide-react": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-day-picker": "^9.14.0",
+    "react-dom": "latest",
+    "react-hook-form": "^7.75.0",
+    "tailwind-merge": "latest",
+    "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tailwindcss": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
