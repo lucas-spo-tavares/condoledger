@@ -12,7 +12,8 @@ const residentBaseSchema = z.object({
   ),
   unit: z.string().min(1, "Informe a unidade."),
   type: residentTypeSchema,
-  status: residentStatusSchema
+  status: residentStatusSchema,
+  isAdministrator: z.boolean().default(false)
 });
 
 export const residentFormSchema = residentBaseSchema.extend({
@@ -33,7 +34,8 @@ export function getResidentFormDefaultValues(): ResidentFormValues {
     unit: "",
     type: "resident",
     monthlyContribution: 0,
-    status: "active"
+    status: "active",
+    isAdministrator: false
   };
 }
 

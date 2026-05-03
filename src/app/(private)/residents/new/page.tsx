@@ -1,5 +1,5 @@
 import { ResidentFormTemplate } from "@/components/templates/residents/resident-form-template";
 
-export default function ResidentCreatePage() {
+export default function ResidentNewPage() {
   return <ResidentFormTemplate />;
 }

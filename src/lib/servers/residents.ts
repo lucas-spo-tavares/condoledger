@@ -38,3 +38,15 @@ export async function deleteResident(id: string) {
   residentStore = residentStore.filter((resident) => resident.id !== id);
   return { id };
 }
+
+export async function getResidentById(id: string) {
+  return residentStore.find((resident) => resident.id === id) ?? null;
+}
+
+export async function getResidentByEmail(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  return (
+    residentStore.find((resident) => resident.email?.trim().toLowerCase() === normalizedEmail) ?? null
+  );
+}

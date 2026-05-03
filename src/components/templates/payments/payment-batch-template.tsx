@@ -5,7 +5,6 @@ import { Controller, useFieldArray } from "react-hook-form";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,8 +84,7 @@ export function PaymentBatchTemplate() {
   }
 
   return (
-    <AppShell>
-      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
         <div>
           <p className="text-sm text-muted-foreground">Controle manual</p>
           <h1 className="text-2xl font-semibold tracking-normal">Pagamentos em lote</h1>
@@ -250,7 +248,6 @@ export function PaymentBatchTemplate() {
             </form>
           </CardContent>
         </Card>
-      </div>
-    </AppShell>
+    </div>
   );
 }

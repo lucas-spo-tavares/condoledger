@@ -87,6 +87,26 @@ export function ResidentForm() {
             </FormField>
           )}
         />
+        <Controller
+          control={control}
+          name="isAdministrator"
+          render={({ field }) => (
+            <label className="md:col-span-2 flex cursor-pointer items-start gap-3 rounded-md border bg-background p-3 text-sm font-medium">
+              <input
+                checked={Boolean(field.value)}
+                className="mt-1 size-4 rounded border-input text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onChange={(event) => field.onChange(event.target.checked)}
+                type="checkbox"
+              />
+              <span className="grid gap-1">
+                <span>Administrador</span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  Pode operar a area privada com permissao de administrador.
+                </span>
+              </span>
+            </label>
+          )}
+        />
       </div>
     </div>
   );

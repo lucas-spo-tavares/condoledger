@@ -2,7 +2,6 @@
 
 import { Download, FileText } from "lucide-react";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useReportsQuery } from "@/lib/hooks/reports/useReportsQuery";
@@ -13,8 +12,7 @@ export function ReportsTemplate() {
   const currentReport = reportsQuery.data?.[0];
 
   return (
-    <AppShell>
-      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
         <div>
           <p className="text-sm text-muted-foreground">Fechamento</p>
           <h1 className="text-2xl font-semibold tracking-normal">Relatorios mensais</h1>
@@ -52,7 +50,6 @@ export function ReportsTemplate() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </AppShell>
+    </div>
   );
 }

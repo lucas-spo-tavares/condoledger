@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { AttachmentFilesCard } from "@/components/organisms/attachment-files-card";
 import { PaymentForm } from "@/components/organisms/payments/payment-form";
 import { Button } from "@/components/ui/button";
@@ -46,9 +45,8 @@ export function PaymentFormTemplate({ paymentId = null }: PaymentFormTemplatePro
   }
 
   return (
-    <AppShell>
-      <FormProvider {...form}>
-        <form className="mx-auto flex max-w-7xl flex-col gap-5" onSubmit={form.handleSubmit((values) => handleSubmit(toPayment(values)))}>
+    <FormProvider {...form}>
+      <form className="mx-auto flex max-w-7xl flex-col gap-5" onSubmit={form.handleSubmit((values) => handleSubmit(toPayment(values)))}>
           <div>
             <p className="text-sm text-muted-foreground">Controle manual</p>
             <h1 className="text-2xl font-semibold tracking-normal">
@@ -111,8 +109,7 @@ export function PaymentFormTemplate({ paymentId = null }: PaymentFormTemplatePro
               </div>
             </>
           )}
-        </form>
-      </FormProvider>
-    </AppShell>
+      </form>
+    </FormProvider>
   );
 }

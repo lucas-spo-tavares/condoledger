@@ -12,6 +12,7 @@ export type Resident = {
   type: ResidentType;
   monthlyContributionInCents: number;
   status: ResidentStatus;
+  isAdministrator: boolean;
 };
 
 export type ResidentUpsert = Omit<Resident, "id"> & {
@@ -66,4 +67,13 @@ export type MonthlyReport = {
   receivedRevenueInCents: number;
   expensesInCents: number;
   balanceInCents: number;
+};
+
+export type CurrentUser = {
+  id: string;
+  name: string;
+  email: string;
+  unit: string;
+  type: ResidentType;
+  isAdministrator: boolean;
 };

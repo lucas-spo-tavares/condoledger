@@ -4,7 +4,6 @@ import * as React from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,8 +28,7 @@ export function ResidentsTemplate() {
   const residents = residentsQuery.data ?? [];
 
   return (
-    <AppShell>
-      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">Cadastro</p>
@@ -73,6 +71,7 @@ export function ResidentsTemplate() {
                   <TableHead>Mensalidade</TableHead>
                   <TableHead>E-mail</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Admin</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -87,6 +86,11 @@ export function ResidentsTemplate() {
                     <TableCell>
                       <Badge variant={resident.status === "active" ? "success" : "secondary"}>
                         {formatResidentStatus(resident.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={resident.isAdministrator ? "success" : "outline"}>
+                        {resident.isAdministrator ? "Sim" : "Nao"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -112,7 +116,6 @@ export function ResidentsTemplate() {
             </Table>
           </CardContent>
         </Card>
-      </div>
-    </AppShell>
+    </div>
   );
 }

@@ -26,7 +26,8 @@ export function toResidentFormValues(resident: Resident): ResidentFormValues {
     unit: resident.unit,
     type: resident.type,
     monthlyContribution: resident.monthlyContributionInCents / 100,
-    status: resident.status
+    status: resident.status,
+    isAdministrator: resident.isAdministrator
   };
 }
 
@@ -37,6 +38,7 @@ export function toResident(values: ResidentFormValues): ResidentUpsert {
     unit: values.unit,
     type: values.type,
     monthlyContributionInCents: Math.round(values.monthlyContribution * 100),
-    status: values.status
+    status: values.status,
+    isAdministrator: values.isAdministrator ?? false
   };
 }

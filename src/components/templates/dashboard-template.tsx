@@ -2,7 +2,6 @@
 
 import { Banknote, CircleDollarSign, FileText, ShieldCheck } from "lucide-react";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -47,8 +46,7 @@ export function DashboardTemplate() {
   ];
 
   return (
-    <AppShell>
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm text-muted-foreground">
@@ -136,7 +134,6 @@ export function DashboardTemplate() {
             </CardContent>
           </Card>
         </section>
-      </div>
-    </AppShell>
+    </div>
   );
 }

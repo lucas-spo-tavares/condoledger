@@ -8,7 +8,8 @@ export const residents: Resident[] = [
     unit: "A-101",
     type: "resident",
     monthlyContributionInCents: 18000,
-    status: "active"
+    status: "active",
+    isAdministrator: false
   },
   {
     id: "resident-002",
@@ -17,7 +18,8 @@ export const residents: Resident[] = [
     unit: "Loja 02",
     type: "store",
     monthlyContributionInCents: 30000,
-    status: "active"
+    status: "active",
+    isAdministrator: false
   },
   {
     id: "resident-003",
@@ -26,7 +28,8 @@ export const residents: Resident[] = [
     unit: "Quadra 03",
     type: "church",
     monthlyContributionInCents: 12000,
-    status: "inactive"
+    status: "inactive",
+    isAdministrator: false
   },
   {
     id: "resident-004",
@@ -35,7 +38,8 @@ export const residents: Resident[] = [
     unit: "Bloco unico",
     type: "apartment",
     monthlyContributionInCents: 45000,
-    status: "active"
+    status: "active",
+    isAdministrator: true
   }
 ];
 

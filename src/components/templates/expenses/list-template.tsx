@@ -4,7 +4,6 @@ import * as React from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,8 +31,7 @@ export function ExpensesTemplate() {
   const expenses = expensesQuery.data ?? [];
 
   return (
-    <AppShell>
-      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">Operacao do condominio</p>
@@ -99,7 +97,6 @@ export function ExpensesTemplate() {
             </Table>
           </CardContent>
         </Card>
-      </div>
-    </AppShell>
+    </div>
   );
 }

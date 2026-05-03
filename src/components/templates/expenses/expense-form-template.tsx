@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 
-import { AppShell } from "@/components/organisms/app-shell";
 import { AttachmentFilesCard } from "@/components/organisms/attachment-files-card";
 import { ExpenseForm } from "@/components/organisms/expenses/expense-form";
 import { Button } from "@/components/ui/button";
@@ -44,9 +43,8 @@ export function ExpenseFormTemplate({ expenseId = null }: ExpenseFormTemplatePro
   }
 
   return (
-    <AppShell>
-      <FormProvider {...form}>
-        <div className="mx-auto flex max-w-7xl flex-col gap-5">
+    <FormProvider {...form}>
+      <div className="mx-auto flex max-w-7xl flex-col gap-5">
           <div>
             <p className="text-sm text-muted-foreground">Operacao do condominio</p>
             <h1 className="text-2xl font-semibold tracking-normal">{isEditing ? "Editar despesa" : "Nova despesa"}</h1>
@@ -104,8 +102,7 @@ export function ExpenseFormTemplate({ expenseId = null }: ExpenseFormTemplatePro
               </div>
             </form>
           )}
-        </div>
-      </FormProvider>
-    </AppShell>
+      </div>
+    </FormProvider>
   );
 }
