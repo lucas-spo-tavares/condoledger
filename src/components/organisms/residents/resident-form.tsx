@@ -1,29 +1,21 @@
 "use client";
 
 import { Controller } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import { FormField } from "@/components/organisms/form-field";
-import { Button } from "@/components/ui/button";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
-import { useResidentForm, toResident } from "@/lib/forms/residents/useResidentForm";
-import type { Resident } from "@/types/domain";
+import type { ResidentFormValues } from "@/lib/schemas/residents/resident-schema";
 
-type ResidentFormProps = {
-  resident?: Resident | null;
-  isSubmitting?: boolean;
-  onCancel: () => void;
-  onSubmit: (resident: Resident) => void;
-};
-
-export function ResidentForm({ resident, isSubmitting = false, onCancel, onSubmit }: ResidentFormProps) {
-  const form = useResidentForm(resident);
+export function ResidentForm() {
+  const { control } = useFormContext<ResidentFormValues>();
 
   return (
-    <form className="grid gap-4" onSubmit={form.handleSubmit((values) => onSubmit(toResident(values)))}>
+    <div className="grid gap-4">
       <div className="grid gap-3 md:grid-cols-2">
         <Controller
-          control={form.control}
+          control={control}
           name="name"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Nome">
@@ -32,7 +24,7 @@ export function ResidentForm({ resident, isSubmitting = false, onCancel, onSubmi
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="email"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="E-mail">
@@ -41,7 +33,7 @@ export function ResidentForm({ resident, isSubmitting = false, onCancel, onSubmi
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="unit"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Unidade">
@@ -50,7 +42,7 @@ export function ResidentForm({ resident, isSubmitting = false, onCancel, onSubmi
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="monthlyContribution"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Mensalidade">
@@ -64,7 +56,7 @@ export function ResidentForm({ resident, isSubmitting = false, onCancel, onSubmi
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="type"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Tipo">
@@ -81,7 +73,7 @@ export function ResidentForm({ resident, isSubmitting = false, onCancel, onSubmi
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="status"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Status">
@@ -96,14 +88,6 @@ export function ResidentForm({ resident, isSubmitting = false, onCancel, onSubmi
           )}
         />
       </div>
-      <div className="flex justify-end gap-2">
-        <Button disabled={isSubmitting} onClick={onCancel} type="button" variant="outline">
-          Cancelar
-        </Button>
-        <Button disabled={isSubmitting} type="submit">
-          Salvar morador
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 }

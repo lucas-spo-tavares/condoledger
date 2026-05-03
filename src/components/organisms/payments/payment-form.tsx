@@ -1,37 +1,27 @@
 "use client";
 
 import { Controller } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import { FormField } from "@/components/organisms/form-field";
-import { Button } from "@/components/ui/button";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Input } from "@/components/ui/input";
-import { toPayment, usePaymentForm } from "@/lib/forms/payments/usePaymentForm";
-import type { Payment, Resident } from "@/types/domain";
+import { MonthPicker } from "@/components/ui/month-picker";
+import type { PaymentFormValues } from "@/lib/schemas/payments/payment-schema";
+import type { Resident } from "@/types/domain";
 
 type PaymentFormProps = {
-  isSubmitting?: boolean;
-  onCancel: () => void;
-  onSubmit: (payment: Payment) => void;
-  payment?: Payment | null;
   residents: Resident[];
 };
 
-export function PaymentForm({
-  isSubmitting = false,
-  onCancel,
-  onSubmit,
-  payment,
-  residents
-}: PaymentFormProps) {
-  const form = usePaymentForm(payment);
+export function PaymentForm({ residents }: PaymentFormProps) {
+  const { control } = useFormContext<PaymentFormValues>();
 
   return (
-    <form className="grid gap-4" onSubmit={form.handleSubmit((values) => onSubmit(toPayment(values)))}>
+    <div className="grid gap-4">
       <div className="grid gap-3 md:grid-cols-2">
         <Controller
-          control={form.control}
+          control={control}
           name="residentId"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Morador">
@@ -50,16 +40,20 @@ export function PaymentForm({
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="month"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Mes">
-              <DatePicker onValueChange={field.onChange} placeholder="Selecione a data" value={field.value} />
+              <MonthPicker
+                onValueChange={field.onChange}
+                placeholder="Selecione o mes"
+                value={field.value}
+              />
             </FormField>
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="amount"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Valor">
@@ -73,7 +67,7 @@ export function PaymentForm({
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="status"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Status">
@@ -89,7 +83,7 @@ export function PaymentForm({
           )}
         />
         <Controller
-          control={form.control}
+          control={control}
           name="paidAt"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Pago em">
@@ -97,24 +91,7 @@ export function PaymentForm({
             </FormField>
           )}
         />
-        <Controller
-          control={form.control}
-          name="proofKey"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Comprovante">
-              <Input {...field} placeholder="proofs/2026-05/comprovante.pdf" value={field.value ?? ""} />
-            </FormField>
-          )}
-        />
       </div>
-      <div className="flex justify-end gap-2">
-        <Button disabled={isSubmitting} onClick={onCancel} type="button" variant="outline">
-          Cancelar
-        </Button>
-        <Button disabled={isSubmitting} type="submit">
-          Salvar pagamento
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 }

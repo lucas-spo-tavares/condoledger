@@ -25,7 +25,8 @@ export function toExpenseFormValues(expense: Expense): ExpenseFormValues {
     category: expense.category,
     description: expense.description,
     amount: expense.amountInCents / 100,
-    paidAt: expense.paidAt
+    paidAt: expense.paidAt,
+    attachments: expense.attachments
   };
 }
 
@@ -36,6 +37,7 @@ export function toExpense(values: ExpenseFormValues): Expense {
     category: values.category,
     description: values.description,
     amountInCents: Math.round(values.amount * 100),
-    paidAt: values.paidAt
+    paidAt: values.paidAt,
+    attachments: values.attachments
   };
 }

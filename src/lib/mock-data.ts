@@ -65,7 +65,8 @@ export const expenses: Expense[] = [
     category: "Seguranca",
     description: "Servico de ronda noturna",
     amountInCents: 420000,
-    paidAt: "2026-05-01"
+    paidAt: "2026-05-01",
+    attachments: []
   },
   {
     id: "expense-002",
@@ -73,7 +74,8 @@ export const expenses: Expense[] = [
     category: "Manutencao",
     description: "Troca de camera",
     amountInCents: 85000,
-    paidAt: "2026-05-02"
+    paidAt: "2026-05-02",
+    attachments: []
   }
 ];
 

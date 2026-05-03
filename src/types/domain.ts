@@ -24,6 +24,13 @@ export type Payment = {
   proofKey?: string;
 };
 
+export type ExpenseAttachment = {
+  id: string;
+  name: string;
+  previewUrl: string;
+  type: "application/pdf" | "image/jpeg" | "image/png";
+};
+
 export type Expense = {
   id: string;
   month: string;
@@ -31,6 +38,7 @@ export type Expense = {
   description: string;
   amountInCents: number;
   paidAt: string;
+  attachments: ExpenseAttachment[];
 };
 
 export type MonthlyReport = {
