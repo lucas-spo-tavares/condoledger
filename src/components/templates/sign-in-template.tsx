@@ -23,7 +23,6 @@ export function SignInTemplate() {
   const [step, setStep] = React.useState<AuthStep>("email");
   const [session, setSession] = React.useState("");
   const [maskedDestination, setMaskedDestination] = React.useState("");
-  const [debugCode, setDebugCode] = React.useState<string | null>(null);
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
   const [isSending, setIsSending] = React.useState(false);
@@ -40,7 +39,6 @@ export function SignInTemplate() {
       otpForm.reset({ code: "" });
       setSession(response.session);
       setMaskedDestination(response.maskedDestination);
-      setDebugCode(response.debugCode ?? null);
       setStep("otp");
       setSuccess("Enviamos um codigo de acesso.");
     } catch (caughtError) {
@@ -201,11 +199,6 @@ export function SignInTemplate() {
 
             {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            {debugCode ? (
-              <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                Código de demonstração: <span className="font-semibold">{debugCode}</span>
-              </div>
-            ) : null}
           </CardContent>
         </Card>
       </div>

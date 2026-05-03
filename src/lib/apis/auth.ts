@@ -4,7 +4,6 @@ type AuthStartResponse = {
   session: string;
   email: string;
   maskedDestination: string;
-  debugCode?: string;
 };
 
 type AuthConfirmResponse = {

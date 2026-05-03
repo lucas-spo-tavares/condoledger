@@ -48,8 +48,7 @@ export async function startOtpSignIn(email: string) {
     return {
       session,
       email: resident.email ?? email,
-      maskedDestination: maskEmail(resident.email ?? email),
-      debugCode: code
+      maskedDestination: maskEmail(resident.email ?? email)
     };
   }
 }
