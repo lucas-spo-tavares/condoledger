@@ -20,4 +20,5 @@ export const documentClient = DynamoDBDocumentClient.from(dynamoClient, {
   }
 });
 
-export const tableName = process.env.DYNAMODB_TABLE_NAME ?? "condoledger-local";
+export const tableName = process.env.DYNAMODB_TABLE_NAME ?? process.env.DYNAMODB_TABLE ?? "condoledger-local";
+export const gsi1Name = process.env.DYNAMODB_GSI1_NAME ?? "GSI1";

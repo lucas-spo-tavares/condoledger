@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "dynamodb:seed": "tsx scripts/seed-dynamodb.ts"
+    "dynamodb:seed": "tsx scripts/seed-dynamodb.ts",
+    "dynamodb:clear": "tsx scripts/clear-dynamodb.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "latest",

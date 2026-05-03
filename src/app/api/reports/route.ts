@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getZodFieldErrors } from "@/lib/commons/zod";
+import { reportSchema } from "@/lib/schemas/reports/report-schema";
 import { deleteReport, getReports, putReport } from "@/lib/servers/reports";
 
 export async function GET() {
@@ -7,9 +9,19 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
-  const report = await request.json();
+  const result = reportSchema.safeParse(await request.json());
 
-  return NextResponse.json(await putReport(report));
+  if (!result.success) {
+    return NextResponse.json(
+      {
+        message: "invalid report",
+        errors: getZodFieldErrors(result.error)
+      },
+      { status: 400 }
+    );
+  }
+
+  return NextResponse.json(await putReport(result.data));
 }
 
 export async function DELETE(request: NextRequest) {

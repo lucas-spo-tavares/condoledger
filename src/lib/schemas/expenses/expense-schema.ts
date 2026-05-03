@@ -16,7 +16,7 @@ export const expenseFormSchema = expenseBaseSchema.extend({
 });
 
 export const expenseSchema = expenseBaseSchema.extend({
-  id: z.string().min(1, "Informe o id."),
+  id: z.string().min(1, "Informe o id.").optional(),
   amountInCents: z.number().int().min(0, "Informe um valor igual ou maior que zero.")
 });
 

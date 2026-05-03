@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getZodFieldErrors } from "@/lib/commons/zod";
+import { signInConfirmSchema } from "@/lib/schemas/auth/sign-in-schema";
 import { AuthError, confirmOtpSignIn, getCurrentUserCookieName } from "@/lib/servers/auth";
 
 export async function POST(request: NextRequest) {
-  const { email, code, session } = (await request.json()) as {
-    email?: string;
-    code?: string;
-    session?: string;
-  };
+  const result = signInConfirmSchema.safeParse(await request.json());
 
-  if (!email?.trim() || !code?.trim() || !session?.trim()) {
-    return NextResponse.json({ message: "email, code and session are required" }, { status: 400 });
+  if (!result.success) {
+    return NextResponse.json(
+      {
+        message: "invalid sign in confirmation",
+        errors: getZodFieldErrors(result.error)
+      },
+      { status: 400 }
+    );
   }
 
   try {
-    const currentUser = await confirmOtpSignIn({
-      email,
-      code,
-      session
-    });
+    const currentUser = await confirmOtpSignIn(result.data);
 
     const response = NextResponse.json({ currentUser });
     response.cookies.set(getCurrentUserCookieName(), currentUser.id, {

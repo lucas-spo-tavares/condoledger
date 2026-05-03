@@ -327,12 +327,13 @@ resource "aws_lambda_function" "backend" {
 
   environment {
     variables = {
-      NODE_ENV           = "production"
-      APP_ENV            = var.environment
-      DYNAMODB_TABLE     = aws_dynamodb_table.app.name
-      PROOFS_BUCKET_NAME = aws_s3_bucket.proofs.bucket
-      COGNITO_USER_POOL  = aws_cognito_user_pool.main.id
-      AWS_REGION         = var.aws_region
+      NODE_ENV            = "production"
+      APP_ENV             = var.environment
+      DYNAMODB_TABLE_NAME = aws_dynamodb_table.app.name
+      DYNAMODB_GSI1_NAME  = "GSI1"
+      PROOFS_BUCKET_NAME  = aws_s3_bucket.proofs.bucket
+      COGNITO_USER_POOL   = aws_cognito_user_pool.main.id
+      AWS_REGION          = var.aws_region
     }
   }
 

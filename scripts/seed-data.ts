@@ -1,4 +1,4 @@
-import type { Expense, MonthlyReport, Payment, Resident } from "@/types/domain";
+import type { Expense, MonthlyReport, Payment, Resident } from "../src/types/domain";
 
 export const residents: Resident[] = [
   {
@@ -97,10 +97,12 @@ export const expenses: Expense[] = [
   }
 ];
 
-export const currentReport: MonthlyReport = {
-  month: "2026-05-01",
-  expectedRevenueInCents: 93000,
-  receivedRevenueInCents: 18000,
-  expensesInCents: 505000,
-  balanceInCents: -487000
-};
+export const reports: MonthlyReport[] = [
+  {
+    month: "2026-05-01",
+    expectedRevenueInCents: 93000,
+    receivedRevenueInCents: 18000,
+    expensesInCents: 505000,
+    balanceInCents: -487000
+  }
+];

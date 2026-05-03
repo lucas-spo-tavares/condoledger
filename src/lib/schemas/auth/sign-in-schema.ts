@@ -8,6 +8,13 @@ export const signInOtpSchema = z.object({
   code: z.string().regex(/^\d{6}$/, "Informe os 6 digitos do codigo.")
 });
 
+export const signInStartSchema = signInEmailSchema;
+
+export const signInConfirmSchema = signInEmailSchema.extend({
+  code: z.string().regex(/^\d{6}$/, "Informe os 6 digitos do codigo."),
+  session: z.string().min(1, "Informe a sessao.")
+});
+
 export type SignInEmailFormValues = z.output<typeof signInEmailSchema>;
 export type SignInEmailFormInput = z.input<typeof signInEmailSchema>;
 

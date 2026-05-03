@@ -33,6 +33,12 @@ Seed the local table:
 npm run dynamodb:seed
 ```
 
+Clear all local DynamoDB data:
+
+```bash
+npm run dynamodb:clear
+```
+
 Start the app:
 
 ```bash
@@ -53,6 +59,7 @@ AWS_ACCESS_KEY_ID=local
 AWS_SECRET_ACCESS_KEY=local
 DYNAMODB_TABLE_NAME=condoledger-local
 DYNAMODB_ENDPOINT=http://localhost:8000
+DYNAMODB_GSI1_NAME=GSI1
 COGNITO_USER_POOL_ID=
 COGNITO_CLIENT_ID=
 PROOFS_BUCKET_NAME=
@@ -117,4 +124,4 @@ UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> DynamoDB or exte
 - `src/components/organisms`: larger composed UI sections such as the app shell
 - `src/components/ui`: shadcn/ui primitives used by the Atomic Design layers
 
-The current services are mocked in memory. They are intentionally isolated behind `lib/servers` so DynamoDB persistence can be added without rewriting the UI or hooks.
+The current services persist data in DynamoDB. Seed data for local testing lives in `scripts/seed-data.ts`.

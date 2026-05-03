@@ -1,27 +1,58 @@
 import "server-only";
 
-import { currentReport } from "@/lib/mock-data";
+import { DeleteCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+
+import { documentClient, tableName } from "@/lib/dynamodb";
+import { fromDynamoItem, reportKey, toReportItem, type DynamoItem } from "@/lib/dynamodb-items";
 import type { MonthlyReport } from "@/types/domain";
 
-let reportStore = [currentReport];
-
 export async function getReports() {
-  return reportStore;
+  const reports: MonthlyReport[] = [];
+  let exclusiveStartKey: Record<string, unknown> | undefined;
+
+  do {
+    const response = await documentClient.send(
+      new ScanCommand({
+        TableName: tableName,
+        ExclusiveStartKey: exclusiveStartKey,
+        FilterExpression: "#entityType = :entityType",
+        ExpressionAttributeNames: {
+          "#entityType": "entityType"
+        },
+        ExpressionAttributeValues: {
+          ":entityType": "MonthlyReport"
+        }
+      })
+    );
+
+    reports.push(...(response.Items ?? []).map((item) => fromDynamoItem(item as DynamoItem<MonthlyReport>)));
+    exclusiveStartKey = response.LastEvaluatedKey;
+  } while (exclusiveStartKey);
+
+  return reports.sort((left, right) => right.month.localeCompare(left.month));
 }
 
 export async function putReport(report: MonthlyReport) {
-  const existingIndex = reportStore.findIndex((item) => item.month === report.month);
+  await documentClient.send(
+    new PutCommand({
+      TableName: tableName,
+      Item: toReportItem(report)
+    })
+  );
 
-  if (existingIndex >= 0) {
-    reportStore[existingIndex] = report;
-    return report;
-  }
-
-  reportStore = [report, ...reportStore];
   return report;
 }
 
 export async function deleteReport(month: string) {
-  reportStore = reportStore.filter((report) => report.month !== month);
+  await documentClient.send(
+    new DeleteCommand({
+      TableName: tableName,
+      Key: {
+        PK: reportKey(month),
+        SK: "SUMMARY"
+      }
+    })
+  );
+
   return { month };
 }

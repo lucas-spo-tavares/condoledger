@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getZodFieldErrors } from "@/lib/commons/zod";
+import { signInStartSchema } from "@/lib/schemas/auth/sign-in-schema";
 import { AuthError, startOtpSignIn } from "@/lib/servers/auth";
 
 export async function POST(request: NextRequest) {
-  const { email } = (await request.json()) as { email?: string };
+  const result = signInStartSchema.safeParse(await request.json());
 
-  if (!email?.trim()) {
-    return NextResponse.json({ message: "email is required" }, { status: 400 });
+  if (!result.success) {
+    return NextResponse.json(
+      {
+        message: "invalid sign in request",
+        errors: getZodFieldErrors(result.error)
+      },
+      { status: 400 }
+    );
   }
 
   try {
-    return NextResponse.json(await startOtpSignIn(email));
+    return NextResponse.json(await startOtpSignIn(result.data.email));
   } catch (error) {
     if (error instanceof AuthError) {
       return NextResponse.json({ message: error.message }, { status: error.status });
