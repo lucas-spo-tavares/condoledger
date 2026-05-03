@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getZodFieldErrors } from "@/lib/commons/zod";
 import { paymentSchema } from "@/lib/schemas/payments/payment-schema";
-import { deletePayment, getPayments, putPayment } from "@/lib/serves/payments";
+import { deletePayment, getPayments, putPayment } from "@/lib/servers/payments";
 
 export async function GET() {
   return NextResponse.json(await getPayments());

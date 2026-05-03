@@ -104,7 +104,7 @@ Business rules are documented in `BUSINESS_RULES.md`.
 Frontend data access follows this flow:
 
 ```text
-UI -> lib/hooks -> lib/apis -> app/api routes -> lib/serves -> DynamoDB or external services
+UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> DynamoDB or external services
 ```
 
 - `src/lib/hooks/<domain>`: TanStack Query hooks grouped by feature
@@ -112,9 +112,9 @@ UI -> lib/hooks -> lib/apis -> app/api routes -> lib/serves -> DynamoDB or exter
 - `src/lib/forms/<domain>`: React Hook Form hooks for each Zod schema
 - `src/lib/schemas/<domain>`: Zod validation schemas
 - `src/app/api`: Next.js route handlers
-- `src/lib/serves`: backend service boundary for DynamoDB and external integrations
+- `src/lib/servers`: backend service boundary for DynamoDB and external integrations
 - `src/components/templates`: page-level Atomic Design templates, including client boundaries
 - `src/components/organisms`: larger composed UI sections such as the app shell
 - `src/components/ui`: shadcn/ui primitives used by the Atomic Design layers
 
-The current services are mocked in memory. They are intentionally isolated behind `lib/serves` so DynamoDB persistence can be added without rewriting the UI or hooks.
+The current services are mocked in memory. They are intentionally isolated behind `lib/servers` so DynamoDB persistence can be added without rewriting the UI or hooks.

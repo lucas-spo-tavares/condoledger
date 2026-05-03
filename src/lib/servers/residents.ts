@@ -1,3 +1,5 @@
+import "server-only";
+
 import { residents } from "@/lib/mock-data";
 import type { Resident } from "@/types/domain";
 

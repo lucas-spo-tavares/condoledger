@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "deploy": "bash bin/deploy.sh",
+    "destroy": "bash bin/destroy.sh",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

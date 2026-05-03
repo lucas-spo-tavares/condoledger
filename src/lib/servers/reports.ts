@@ -1,3 +1,5 @@
+import "server-only";
+
 import { currentReport } from "@/lib/mock-data";
 import type { MonthlyReport } from "@/types/domain";
 

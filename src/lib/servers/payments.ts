@@ -1,3 +1,5 @@
+import "server-only";
+
 import { payments } from "@/lib/mock-data";
 import type { Payment } from "@/types/domain";
 

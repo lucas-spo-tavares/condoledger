@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getZodFieldErrors } from "@/lib/commons/zod";
 import { residentSchema } from "@/lib/schemas/residents/resident-schema";
-import { deleteResident, getResidents, putResident } from "@/lib/serves/residents";
+import { deleteResident, getResidents, putResident } from "@/lib/servers/residents";
 
 export async function GET() {
   return NextResponse.json(await getResidents());

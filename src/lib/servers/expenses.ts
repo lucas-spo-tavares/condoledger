@@ -1,3 +1,5 @@
+import "server-only";
+
 import { expenses } from "@/lib/mock-data";
 import type { Expense } from "@/types/domain";
 

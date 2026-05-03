@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { deleteReport, getReports, putReport } from "@/lib/serves/reports";
+import { deleteReport, getReports, putReport } from "@/lib/servers/reports";
 
 export async function GET() {
   return NextResponse.json(await getReports());

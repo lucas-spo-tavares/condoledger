@@ -162,7 +162,7 @@ O codigo, nomes de arquivos, tipos, funcoes, variaveis e arquitetura devem perma
 O fluxo de dados no frontend/backend deve seguir:
 
 ```text
-UI -> lib/hooks -> lib/apis -> app/api routes -> lib/serves -> banco/servicos externos
+UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> banco/servicos externos
 ```
 
 Regras arquiteturais:
@@ -171,7 +171,8 @@ Regras arquiteturais:
 - Componentes que precisam de hooks client devem ficar em templates ou componentes client especificos.
 - Hooks TanStack devem ficar em `src/lib/hooks/<domain>`.
 - Clients HTTP devem ficar em `src/lib/apis`.
-- Comunicacao com banco e servicos externos deve ficar em `src/lib/serves`.
+- Comunicacao com banco e servicos externos deve ficar em `src/lib/servers`.
+- Arquivos em `src/lib/servers` devem importar `server-only` no topo do arquivo.
 - Helpers compartilhados devem ficar em `src/lib/commons`.
 
 ## Infraestrutura
