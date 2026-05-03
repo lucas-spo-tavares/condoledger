@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getPayments } from "@/lib/apis/payments";
+import { getPayments, type PaymentQueryParams } from "@/lib/apis/payments";
 
-export function usePaymentsQuery() {
+export function usePaymentsQuery(params?: PaymentQueryParams) {
   return useQuery({
-    queryKey: ["payments"],
-    queryFn: getPayments
+    queryKey: ["payments", params?.month ?? "", params?.status ?? "all", params?.q ?? ""],
+    queryFn: () => getPayments(params)
   });
 }

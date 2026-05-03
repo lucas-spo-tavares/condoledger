@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getExpenses } from "@/lib/apis/expenses";
+import { getExpenses, type ExpenseQueryParams } from "@/lib/apis/expenses";
 
-export function useExpensesQuery() {
+export function useExpensesQuery(params?: ExpenseQueryParams) {
   return useQuery({
-    queryKey: ["expenses"],
-    queryFn: getExpenses
+    queryKey: ["expenses", params?.month ?? "", params?.q ?? ""],
+    queryFn: () => getExpenses(params)
   });
 }

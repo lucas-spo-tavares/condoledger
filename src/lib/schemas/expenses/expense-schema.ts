@@ -20,15 +20,21 @@ export const expenseSchema = expenseBaseSchema.extend({
   amountInCents: z.number().int().min(0, "Informe um valor igual ou maior que zero.")
 });
 
-export const expenseFormDefaultValues: ExpenseFormValues = {
-  id: undefined,
-  month: new Date().toISOString().slice(0, 10),
-  category: "",
-  description: "",
-  amount: 0,
-  paidAt: new Date().toISOString().slice(0, 10),
-  attachments: []
-};
+export function getExpenseFormDefaultValues(): ExpenseFormValues {
+  const today = new Date().toISOString().slice(0, 10);
+
+  return {
+    id: undefined,
+    month: today,
+    category: "",
+    description: "",
+    amount: 0,
+    paidAt: today,
+    attachments: []
+  };
+}
+
+export const expenseFormDefaultValues: ExpenseFormValues = getExpenseFormDefaultValues();
 
 export type ExpenseFormValues = z.output<typeof expenseFormSchema>;
 

@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getResidents } from "@/lib/apis/residents";
+import { getResidents, type ResidentQueryParams } from "@/lib/apis/residents";
 
-export function useResidentsQuery() {
+export function useResidentsQuery(params?: ResidentQueryParams) {
   return useQuery({
-    queryKey: ["residents"],
-    queryFn: getResidents
+    queryKey: ["residents", params?.status ?? "all", params?.q ?? ""],
+    queryFn: () => getResidents(params)
   });
 }

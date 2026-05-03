@@ -4,8 +4,13 @@ import { getZodFieldErrors } from "@/lib/commons/zod";
 import { paymentSchema } from "@/lib/schemas/payments/payment-schema";
 import { deletePayment, getPayments, putPayment } from "@/lib/servers/payments";
 
-export async function GET() {
-  return NextResponse.json(await getPayments());
+export async function GET(request: NextRequest) {
+  const month = request.nextUrl.searchParams.get("month") ?? undefined;
+  const rawStatus = request.nextUrl.searchParams.get("status");
+  const q = request.nextUrl.searchParams.get("q") ?? undefined;
+  const status = rawStatus === "pending" || rawStatus === "confirmed" || rawStatus === "voided" ? rawStatus : undefined;
+
+  return NextResponse.json(await getPayments({ month, q, status }));
 }
 
 export async function PUT(request: NextRequest) {

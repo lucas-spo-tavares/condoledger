@@ -4,8 +4,11 @@ import { getZodFieldErrors } from "@/lib/commons/zod";
 import { expenseSchema } from "@/lib/schemas/expenses/expense-schema";
 import { deleteExpense, getExpenses, putExpense } from "@/lib/servers/expenses";
 
-export async function GET() {
-  return NextResponse.json(await getExpenses());
+export async function GET(request: NextRequest) {
+  const month = request.nextUrl.searchParams.get("month") ?? undefined;
+  const q = request.nextUrl.searchParams.get("q") ?? undefined;
+
+  return NextResponse.json(await getExpenses({ month, q }));
 }
 
 export async function PUT(request: NextRequest) {

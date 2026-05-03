@@ -6,7 +6,10 @@ export const residentStatusSchema = z.enum(["active", "inactive"]);
 
 const residentBaseSchema = z.object({
   name: z.string().min(2, "Informe o nome."),
-  email: z.string().email("Informe um e-mail valido."),
+  email: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().email("Informe um e-mail valido.").optional()
+  ),
   unit: z.string().min(1, "Informe a unidade."),
   type: residentTypeSchema,
   status: residentStatusSchema
@@ -22,15 +25,19 @@ export const residentSchema = residentBaseSchema.extend({
   monthlyContributionInCents: z.number().int().min(0, "Informe um valor igual ou maior que zero.")
 });
 
-export const residentFormDefaultValues: ResidentFormValues = {
-  id: undefined,
-  name: "",
-  email: "",
-  unit: "",
-  type: "resident",
-  monthlyContribution: 0,
-  status: "active"
-};
+export function getResidentFormDefaultValues(): ResidentFormValues {
+  return {
+    id: undefined,
+    name: "",
+    email: "",
+    unit: "",
+    type: "resident",
+    monthlyContribution: 0,
+    status: "active"
+  };
+}
+
+export const residentFormDefaultValues: ResidentFormValues = getResidentFormDefaultValues();
 
 export type ResidentFormValues = z.output<typeof residentFormSchema>;
 

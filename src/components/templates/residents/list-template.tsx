@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -8,14 +9,23 @@ import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialo
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatResidentStatus, formatResidentType } from "@/lib/commons/formats";
+import { useDebounce } from "@/lib/hooks/debounce";
 import { useDeleteResidentsMutation } from "@/lib/hooks/residents/useDeleteResidentsMutation";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
+import type { ResidentStatus } from "@/types/domain";
 
 export function ResidentsTemplate() {
-  const residentsQuery = useResidentsQuery();
   const deleteResidentsMutation = useDeleteResidentsMutation();
+  const [status, setStatus] = React.useState<"all" | ResidentStatus>("all");
+  const [search, setSearch] = React.useState("");
+  const debouncedSearch = useDebounce(search, 1000);
+  const residentsQuery = useResidentsQuery({
+    status,
+    q: debouncedSearch
+  });
   const residents = residentsQuery.data ?? [];
 
   return (
@@ -32,6 +42,22 @@ export function ResidentsTemplate() {
               Novo morador
             </Link>
           </Button>
+        </div>
+        <div className="grid gap-3 rounded-lg border border-border bg-card p-4 lg:grid-cols-[220px_1fr]">
+          <select
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onChange={(event) => setStatus(event.target.value as "all" | ResidentStatus)}
+            value={status}
+          >
+            <option value="all">Todos os status</option>
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+          <Input
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar por nome"
+            value={search}
+          />
         </div>
         <Card>
           <CardHeader>
@@ -57,7 +83,7 @@ export function ResidentsTemplate() {
                     <TableCell>{resident.unit}</TableCell>
                     <TableCell>{formatResidentType(resident.type)}</TableCell>
                     <TableCell>{formatCurrency(resident.monthlyContributionInCents)}</TableCell>
-                    <TableCell>{resident.email}</TableCell>
+                    <TableCell>{resident.email ?? "—"}</TableCell>
                     <TableCell>
                       <Badge variant={resident.status === "active" ? "success" : "secondary"}>
                         {formatResidentStatus(resident.status)}

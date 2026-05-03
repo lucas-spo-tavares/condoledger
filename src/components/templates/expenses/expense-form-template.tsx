@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toExpense, useExpenseForm } from "@/lib/forms/expenses/useExpenseForm";
 import { useExpensesMutation } from "@/lib/hooks/expenses/useExpensesMutation";
+import { getExpenseFormDefaultValues } from "@/lib/schemas/expenses/expense-schema";
 import { useExpensesQuery } from "@/lib/hooks/expenses/useExpensesQuery";
-import type { Expense } from "@/types/domain";
+import type { ExpenseUpsert } from "@/types/domain";
 
 type ExpenseFormTemplateProps = {
   expenseId?: string | null;
@@ -30,9 +31,15 @@ export function ExpenseFormTemplate({ expenseId = null }: ExpenseFormTemplatePro
     router.push("/expenses");
   }
 
-  function handleSubmit(nextExpense: Expense) {
+  function handleSubmit(nextExpense: ExpenseUpsert) {
     expensesMutation.mutate(nextExpense, {
       onSuccess: () => router.push("/expenses")
+    });
+  }
+
+  function handleSubmitAndAddNew(nextExpense: ExpenseUpsert) {
+    expensesMutation.mutate(nextExpense, {
+      onSuccess: () => form.reset(getExpenseFormDefaultValues())
     });
   }
 
@@ -81,6 +88,16 @@ export function ExpenseFormTemplate({ expenseId = null }: ExpenseFormTemplatePro
                 <Button disabled={expensesMutation.isPending} onClick={handleCancel} type="button" variant="outline">
                   Cancelar
                 </Button>
+                {!isEditing ? (
+                  <Button
+                    disabled={expensesMutation.isPending}
+                    onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toExpense(values)))}
+                    type="button"
+                    variant="secondary"
+                  >
+                    Salvar e adicionar novo
+                  </Button>
+                ) : null}
                 <Button disabled={expensesMutation.isPending} type="submit">
                   Salvar despesa
                 </Button>

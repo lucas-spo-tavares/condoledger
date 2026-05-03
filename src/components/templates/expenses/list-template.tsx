@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -7,14 +8,27 @@ import { AppShell } from "@/components/organisms/app-shell";
 import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { MonthPicker } from "@/components/ui/month-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/commons/formats";
+import { useDebounce } from "@/lib/hooks/debounce";
 import { useDeleteExpensesMutation } from "@/lib/hooks/expenses/useDeleteExpensesMutation";
 import { useExpensesQuery } from "@/lib/hooks/expenses/useExpensesQuery";
 
 export function ExpensesTemplate() {
-  const expensesQuery = useExpensesQuery();
   const deleteExpensesMutation = useDeleteExpensesMutation();
+  const currentMonth = React.useMemo(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+  }, []);
+  const [month, setMonth] = React.useState(currentMonth);
+  const [search, setSearch] = React.useState("");
+  const debouncedSearch = useDebounce(search, 1000);
+  const expensesQuery = useExpensesQuery({
+    month,
+    q: debouncedSearch
+  });
   const expenses = expensesQuery.data ?? [];
 
   return (
@@ -31,6 +45,14 @@ export function ExpensesTemplate() {
               Nova despesa
             </Link>
           </Button>
+        </div>
+        <div className="grid gap-3 rounded-lg border border-border bg-card p-4 lg:grid-cols-[240px_1fr]">
+          <MonthPicker onValueChange={setMonth} value={month} />
+          <Input
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar por categoria ou descricao"
+            value={search}
+          />
         </div>
         <Card>
           <CardHeader>

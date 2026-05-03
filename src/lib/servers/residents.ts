@@ -1,24 +1,37 @@
 import "server-only";
 
 import { residents } from "@/lib/mock-data";
-import type { Resident } from "@/types/domain";
+import type { Resident, ResidentStatus, ResidentUpsert } from "@/types/domain";
 
 let residentStore = [...residents];
 
-export async function getResidents() {
-  return residentStore;
+export async function getResidents(filters?: { q?: string; status?: ResidentStatus }) {
+  const search = filters?.q?.trim().toLowerCase();
+
+  return residentStore
+    .filter((resident) => {
+      const matchesStatus = filters?.status ? resident.status === filters.status : true;
+      const matchesSearch = search ? resident.name.toLowerCase().includes(search) : true;
+
+      return matchesStatus && matchesSearch;
+    })
+    .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" }));
 }
 
-export async function putResident(resident: Resident) {
-  const existingIndex = residentStore.findIndex((item) => item.id === resident.id);
+export async function putResident(resident: ResidentUpsert) {
+  const persistedResident: Resident = {
+    ...resident,
+    id: resident.id ?? crypto.randomUUID()
+  };
+  const existingIndex = residentStore.findIndex((item) => item.id === persistedResident.id);
 
   if (existingIndex >= 0) {
-    residentStore[existingIndex] = resident;
-    return resident;
+    residentStore[existingIndex] = persistedResident;
+    return persistedResident;
   }
 
-  residentStore = [resident, ...residentStore];
-  return resident;
+  residentStore = [persistedResident, ...residentStore];
+  return persistedResident;
 }
 
 export async function deleteResident(id: string) {

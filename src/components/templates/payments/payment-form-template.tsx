@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePaymentForm, toPayment } from "@/lib/forms/payments/usePaymentForm";
 import { usePaymentsMutation } from "@/lib/hooks/payments/usePaymentsMutation";
+import { getPaymentFormDefaultValues } from "@/lib/schemas/payments/payment-schema";
 import { usePaymentsQuery } from "@/lib/hooks/payments/usePaymentsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
-import type { Payment } from "@/types/domain";
+import type { PaymentUpsert } from "@/types/domain";
 
 type PaymentFormTemplateProps = {
   paymentId?: string | null;
@@ -32,9 +33,15 @@ export function PaymentFormTemplate({ paymentId = null }: PaymentFormTemplatePro
     router.push("/payments");
   }
 
-  function handleSubmit(nextPayment: Payment) {
+  function handleSubmit(nextPayment: PaymentUpsert) {
     paymentsMutation.mutate(nextPayment, {
       onSuccess: () => router.push("/payments")
+    });
+  }
+
+  function handleSubmitAndAddNew(nextPayment: PaymentUpsert) {
+    paymentsMutation.mutate(nextPayment, {
+      onSuccess: () => form.reset(getPaymentFormDefaultValues())
     });
   }
 
@@ -88,6 +95,16 @@ export function PaymentFormTemplate({ paymentId = null }: PaymentFormTemplatePro
                 <Button disabled={paymentsMutation.isPending} onClick={handleCancel} type="button" variant="outline">
                   Cancelar
                 </Button>
+                {!isEditing ? (
+                  <Button
+                    disabled={paymentsMutation.isPending}
+                    onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toPayment(values)))}
+                    type="button"
+                    variant="secondary"
+                  >
+                    Salvar e adicionar novo
+                  </Button>
+                ) : null}
                 <Button disabled={paymentsMutation.isPending} type="submit">
                   Salvar pagamento
                 </Button>

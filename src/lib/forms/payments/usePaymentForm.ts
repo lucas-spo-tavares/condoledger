@@ -4,17 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import {
-  paymentFormDefaultValues,
+  getPaymentFormDefaultValues,
   paymentFormSchema,
   type PaymentFormInput,
   type PaymentFormValues
 } from "@/lib/schemas/payments/payment-schema";
-import type { Payment } from "@/types/domain";
+import type { Payment, PaymentUpsert } from "@/types/domain";
 
 export function usePaymentForm(payment?: Payment | null) {
   return useForm<PaymentFormInput, unknown, PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
-    defaultValues: payment ? toPaymentFormValues(payment) : paymentFormDefaultValues
+    defaultValues: payment ? toPaymentFormValues(payment) : getPaymentFormDefaultValues()
   });
 }
 
@@ -30,9 +30,8 @@ export function toPaymentFormValues(payment: Payment): PaymentFormValues {
   };
 }
 
-export function toPayment(values: PaymentFormValues): Payment {
+export function toPayment(values: PaymentFormValues): PaymentUpsert {
   return {
-    id: values.id || crypto.randomUUID(),
     residentId: values.residentId,
     month: values.month,
     amountInCents: Math.round(values.amount * 100),

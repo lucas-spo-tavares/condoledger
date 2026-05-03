@@ -4,17 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import {
-  expenseFormDefaultValues,
+  getExpenseFormDefaultValues,
   expenseFormSchema,
   type ExpenseFormInput,
   type ExpenseFormValues
 } from "@/lib/schemas/expenses/expense-schema";
-import type { Expense } from "@/types/domain";
+import type { Expense, ExpenseUpsert } from "@/types/domain";
 
 export function useExpenseForm(expense?: Expense | null) {
   return useForm<ExpenseFormInput, unknown, ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
-    defaultValues: expense ? toExpenseFormValues(expense) : expenseFormDefaultValues
+    defaultValues: expense ? toExpenseFormValues(expense) : getExpenseFormDefaultValues()
   });
 }
 
@@ -30,9 +30,8 @@ export function toExpenseFormValues(expense: Expense): ExpenseFormValues {
   };
 }
 
-export function toExpense(values: ExpenseFormValues): Expense {
+export function toExpense(values: ExpenseFormValues): ExpenseUpsert {
   return {
-    id: values.id || crypto.randomUUID(),
     month: values.month,
     category: values.category,
     description: values.description,

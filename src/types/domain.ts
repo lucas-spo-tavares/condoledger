@@ -7,11 +7,15 @@ export type PaymentStatus = "pending" | "confirmed" | "voided";
 export type Resident = {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   unit: string;
   type: ResidentType;
   monthlyContributionInCents: number;
   status: ResidentStatus;
+};
+
+export type ResidentUpsert = Omit<Resident, "id"> & {
+  id?: string;
 };
 
 export type FileAttachment = {
@@ -31,6 +35,10 @@ export type Payment = {
   proofAttachments: FileAttachment[];
 };
 
+export type PaymentUpsert = Omit<Payment, "id"> & {
+  id?: string;
+};
+
 export type ExpenseAttachment = {
   id: string;
   name: string;
@@ -46,6 +54,10 @@ export type Expense = {
   amountInCents: number;
   paidAt: string;
   attachments: FileAttachment[];
+};
+
+export type ExpenseUpsert = Omit<Expense, "id"> & {
+  id?: string;
 };
 
 export type MonthlyReport = {

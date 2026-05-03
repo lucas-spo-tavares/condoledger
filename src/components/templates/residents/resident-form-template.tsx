@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toResident, useResidentForm } from "@/lib/forms/residents/useResidentForm";
 import { useResidentsMutation } from "@/lib/hooks/residents/useResidentsMutation";
+import { getResidentFormDefaultValues } from "@/lib/schemas/residents/resident-schema";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
-import type { Resident } from "@/types/domain";
+import type { ResidentUpsert } from "@/types/domain";
 
 type ResidentFormTemplateProps = {
   residentId?: string | null;
@@ -29,9 +30,15 @@ export function ResidentFormTemplate({ residentId = null }: ResidentFormTemplate
     router.push("/residents");
   }
 
-  function handleSubmit(nextResident: Resident) {
+  function handleSubmit(nextResident: ResidentUpsert) {
     residentsMutation.mutate(nextResident, {
       onSuccess: () => router.push("/residents")
+    });
+  }
+
+  function handleSubmitAndAddNew(nextResident: ResidentUpsert) {
+    residentsMutation.mutate(nextResident, {
+      onSuccess: () => form.reset(getResidentFormDefaultValues())
     });
   }
 
@@ -79,6 +86,16 @@ export function ResidentFormTemplate({ residentId = null }: ResidentFormTemplate
                 <Button disabled={residentsMutation.isPending} onClick={handleCancel} type="button" variant="outline">
                   Cancelar
                 </Button>
+                {!isEditing ? (
+                  <Button
+                    disabled={residentsMutation.isPending}
+                    onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toResident(values)))}
+                    type="button"
+                    variant="secondary"
+                  >
+                    Salvar e adicionar novo
+                  </Button>
+                ) : null}
                 <Button disabled={residentsMutation.isPending} type="submit">
                   Salvar morador
                 </Button>

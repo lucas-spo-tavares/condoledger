@@ -22,15 +22,19 @@ export const paymentSchema = paymentBaseSchema.extend({
   amountInCents: z.number().int().min(0, "Informe um valor igual ou maior que zero.")
 });
 
-export const paymentFormDefaultValues: PaymentFormValues = {
-  id: undefined,
-  residentId: "",
-  month: new Date().toISOString().slice(0, 10),
-  amount: 0,
-  status: "pending",
-  paidAt: "",
-  proofAttachments: []
-};
+export function getPaymentFormDefaultValues(): PaymentFormValues {
+  return {
+    id: undefined,
+    residentId: "",
+    month: new Date().toISOString().slice(0, 10),
+    amount: 0,
+    status: "pending",
+    paidAt: "",
+    proofAttachments: []
+  };
+}
+
+export const paymentFormDefaultValues: PaymentFormValues = getPaymentFormDefaultValues();
 
 export type PaymentFormValues = z.output<typeof paymentFormSchema>;
 
