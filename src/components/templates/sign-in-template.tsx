@@ -66,11 +66,9 @@ export function SignInTemplate() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(31,74,68,0.18),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(214,184,125,0.26),transparent_28%)]" />
-      <div className="absolute inset-x-0 top-0 -z-10 h-64 bg-[linear-gradient(180deg,rgba(255,255,255,0.5),transparent)]" />
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="grid w-full max-w-5xl gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="hidden flex-col justify-between rounded-[2rem] border border-border/70 bg-card/70 p-8 shadow-sm backdrop-blur lg:flex">
+        <section className="hidden flex-col justify-between gap-6 rounded-[2rem] border border-border bg-card p-8 shadow-sm lg:flex">
           <div className="space-y-6">
             <Badge className="w-fit" variant="secondary">
               Acesso privado
@@ -85,9 +83,9 @@ export function SignInTemplate() {
               </p>
             </div>
           </div>
-          <div className="grid gap-3 rounded-2xl border border-border bg-background/80 p-4">
+          <div className="grid gap-3 rounded-2xl border border-border bg-background p-4">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-primary">
                 <ShieldCheck className="size-5" />
               </div>
               <div>
@@ -96,7 +94,7 @@ export function SignInTemplate() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-primary">
                 <KeyRound className="size-5" />
               </div>
               <div>
@@ -107,7 +105,7 @@ export function SignInTemplate() {
           </div>
         </section>
 
-        <Card className="border-border/70 bg-card/95 shadow-lg shadow-primary/5 backdrop-blur">
+        <Card className="border-border bg-card shadow-lg">
           <CardHeader className="space-y-3 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
@@ -119,7 +117,7 @@ export function SignInTemplate() {
               </div>
             </div>
             {step === "otp" ? (
-              <div className="rounded-xl border border-border bg-background/80 p-3 text-sm text-muted-foreground">
+              <div className="rounded-xl border border-border bg-background p-3 text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">{maskedDestination}</p>
                 <p className="mt-1">
                   Digite o código de 6 dígitos que enviamos. Se precisar, você pode pedir um novo.
