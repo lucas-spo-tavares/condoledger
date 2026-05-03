@@ -26,7 +26,7 @@ export function toPaymentFormValues(payment: Payment): PaymentFormValues {
     amount: payment.amountInCents / 100,
     status: payment.status,
     paidAt: payment.paidAt ?? "",
-    proofKey: payment.proofKey ?? ""
+    proofAttachments: payment.proofAttachments
   };
 }
 
@@ -38,6 +38,6 @@ export function toPayment(values: PaymentFormValues): Payment {
     amountInCents: Math.round(values.amount * 100),
     status: values.status,
     paidAt: values.paidAt || undefined,
-    proofKey: values.proofKey || undefined
+    proofAttachments: values.proofAttachments
   };
 }

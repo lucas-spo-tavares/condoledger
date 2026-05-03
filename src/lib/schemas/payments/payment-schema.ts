@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { attachmentSchema, type AttachmentValues } from "@/lib/schemas/commons/attachment-schema";
+
 export const paymentStatusSchema = z.enum(["pending", "confirmed", "voided"]);
 
 const paymentBaseSchema = z.object({
@@ -7,7 +9,7 @@ const paymentBaseSchema = z.object({
   month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
   status: paymentStatusSchema,
   paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD.").optional(),
-  proofKey: z.string().optional()
+  proofAttachments: z.array(attachmentSchema)
 });
 
 export const paymentFormSchema = paymentBaseSchema.extend({
@@ -27,9 +29,11 @@ export const paymentFormDefaultValues: PaymentFormValues = {
   amount: 0,
   status: "pending",
   paidAt: "",
-  proofKey: ""
+  proofAttachments: []
 };
 
 export type PaymentFormValues = z.output<typeof paymentFormSchema>;
 
 export type PaymentFormInput = z.input<typeof paymentFormSchema>;
+
+export type PaymentAttachmentValues = AttachmentValues;

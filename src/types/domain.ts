@@ -14,6 +14,13 @@ export type Resident = {
   status: ResidentStatus;
 };
 
+export type FileAttachment = {
+  id: string;
+  name: string;
+  previewUrl: string;
+  type: "application/pdf" | "image/jpeg" | "image/png";
+};
+
 export type Payment = {
   id: string;
   residentId: string;
@@ -21,7 +28,7 @@ export type Payment = {
   amountInCents: number;
   status: PaymentStatus;
   paidAt?: string;
-  proofKey?: string;
+  proofAttachments: FileAttachment[];
 };
 
 export type ExpenseAttachment = {
@@ -38,7 +45,7 @@ export type Expense = {
   description: string;
   amountInCents: number;
   paidAt: string;
-  attachments: ExpenseAttachment[];
+  attachments: FileAttachment[];
 };
 
 export type MonthlyReport = {

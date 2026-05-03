@@ -75,14 +75,14 @@ export function PaymentFormTemplate({ paymentId = null }: PaymentFormTemplatePro
               </Card>
               <AttachmentFilesCard
                 accept="application/pdf,image/jpeg,image/png"
-                addLabel="Adicionar comprovante"
+                addLabel="Adicionar comprovantes"
                 control={form.control}
-                description="Selecione o comprovante do pagamento. O arquivo abre em nova aba quando disponível."
+                description="Selecione um ou mais comprovantes do pagamento. Cada arquivo abre em nova aba."
                 emptyLabel="Nenhum comprovante anexado ainda."
-                multiple={false}
-                name="proofKey"
+                multiple
+                name="proofAttachments"
                 setValue={form.setValue}
-                title="Arquivo do pagamento"
+                title="Arquivos do pagamento"
               />
               <div className="flex justify-end gap-2">
                 <Button disabled={paymentsMutation.isPending} onClick={handleCancel} type="button" variant="outline">

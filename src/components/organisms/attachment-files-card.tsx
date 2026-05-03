@@ -211,14 +211,18 @@ export function AttachmentFilesCard<TFieldValues extends FieldValues>({
           type="file"
         />
         {items.length ? (
-          <div className={multiple ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3" : "grid gap-3"}>
+          <div className={multiple ? "grid justify-items-center gap-3 sm:grid-cols-2 lg:grid-cols-3" : "grid gap-3"}>
             {items.map((item) => {
               const previewIsImage = isImage(item.type);
               const previewIsPdf = isPdf(item.type);
 
               return (
                 <div
-                  className="group relative overflow-hidden rounded-lg border bg-muted/20 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className={
+                    multiple
+                      ? "group relative flex h-72 w-72 flex-col overflow-hidden rounded-lg border bg-muted/20 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                      : "group relative mx-auto flex h-80 w-80 flex-col overflow-hidden rounded-lg border bg-muted/20 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  }
                   key={item.id}
                 >
                   <button
@@ -229,13 +233,13 @@ export function AttachmentFilesCard<TFieldValues extends FieldValues>({
                   >
                     <X className="size-4" />
                   </button>
-                  <a className="block cursor-pointer" href={item.previewUrl} rel="noreferrer" target="_blank">
-                    <div className="flex min-h-44 items-center justify-center bg-background">
+                  <a className="flex flex-1 cursor-pointer flex-col" href={item.previewUrl} rel="noreferrer" target="_blank">
+                    <div className="relative flex h-56 items-center justify-center overflow-hidden bg-background">
                       {previewIsImage ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img alt={item.name} className="h-full w-full object-cover" src={item.previewUrl} />
+                        <img alt={item.name} className="h-full w-full object-contain p-4" src={item.previewUrl} />
                       ) : previewIsPdf ? (
-                        <div className="flex h-full w-full min-h-44 flex-col items-center justify-center gap-3 p-5 text-center">
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-5 text-center">
                           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive">
                             <FileText className="size-8" />
                           </div>
@@ -245,13 +249,13 @@ export function AttachmentFilesCard<TFieldValues extends FieldValues>({
                           </div>
                         </div>
                       ) : (
-                        <div className="flex h-full w-full min-h-44 flex-col items-center justify-center gap-3 p-5 text-center text-muted-foreground">
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-5 text-center text-muted-foreground">
                           <ImageIcon className="size-8" />
                           <p className="text-sm">Formato nao suportado para preview.</p>
                         </div>
                       )}
                     </div>
-                    <div className="border-t bg-card px-4 py-3">
+                    <div className="mt-auto shrink-0 border-t bg-card px-4 py-3">
                       <p className="truncate text-sm font-medium">{item.name}</p>
                       <p className="truncate text-xs text-muted-foreground">{item.type}</p>
                     </div>

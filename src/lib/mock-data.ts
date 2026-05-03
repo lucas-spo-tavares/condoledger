@@ -47,14 +47,28 @@ export const payments: Payment[] = [
     amountInCents: 18000,
     status: "confirmed",
     paidAt: "2026-05-02",
-    proofKey: "proofs/2026-05/ana-martins.pdf"
+    proofAttachments: [
+      {
+        id: "proof-001",
+        name: "ana-martins.pdf",
+        previewUrl: "/proofs/2026-05/ana-martins.pdf",
+        type: "application/pdf"
+      },
+      {
+        id: "proof-002",
+        name: "recibo.jpg",
+        previewUrl: "/proofs/2026-05/recibo.jpg",
+        type: "image/jpeg"
+      }
+    ]
   },
   {
     id: "payment-002",
     residentId: "resident-002",
     month: "2026-05-01",
     amountInCents: 30000,
-    status: "pending"
+    status: "pending",
+    proofAttachments: []
   }
 ];
 

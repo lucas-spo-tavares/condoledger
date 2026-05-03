@@ -62,10 +62,12 @@ export function PaymentsTemplate() {
                       <TableCell>{formatDate(payment.month)}</TableCell>
                       <TableCell>{formatCurrency(payment.amountInCents)}</TableCell>
                       <TableCell>
-                        {payment.proofKey ? (
+                        {payment.proofAttachments.length ? (
                           <span className="inline-flex items-center gap-1 text-sm text-primary">
                             <Paperclip className="size-4" />
-                            anexado
+                            {payment.proofAttachments.length > 1
+                              ? `${payment.proofAttachments.length} anexos`
+                              : "anexado"}
                           </span>
                         ) : (
                           <span className="text-sm text-muted-foreground">pendente</span>
