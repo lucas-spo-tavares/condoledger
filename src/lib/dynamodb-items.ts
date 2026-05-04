@@ -1,6 +1,6 @@
-import type { Expense, Payment, Resident } from "@/types/domain";
+import type { Expense, Receipt, Resident } from "@/types/domain";
 
-export type EntityType = "Expense" | "Payment" | "Resident";
+export type EntityType = "Expense" | "Receipt" | "Resident";
 
 export type DynamoItem<T> = T & {
   PK: string;
@@ -19,14 +19,14 @@ export function toResidentItem(resident: Resident): DynamoItem<Resident> {
   };
 }
 
-export function toPaymentItem(payment: Payment): DynamoItem<Payment> {
+export function toReceiptItem(receipt: Receipt): DynamoItem<Receipt> {
   return {
-    PK: residentKey(payment.residentId),
-    SK: `PAYMENT#${payment.month}#${payment.id}`,
-    GSI1PK: monthKey(payment.month),
-    GSI1SK: `PAYMENT#${payment.status}#${payment.id}`,
-    entityType: "Payment",
-    ...payment
+    PK: residentKey(receipt.residentId),
+    SK: `RECEIPT#${receipt.month}#${receipt.id}`,
+    GSI1PK: monthKey(receipt.month),
+    GSI1SK: `RECEIPT#${receipt.status}#${receipt.id}`,
+    entityType: "Receipt",
+    ...receipt
   };
 }
 

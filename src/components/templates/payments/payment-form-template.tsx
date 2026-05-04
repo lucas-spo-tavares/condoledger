@@ -4,111 +4,114 @@ import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 
 import { AttachmentFilesCard } from "@/components/organisms/attachment-files-card";
-import { PaymentForm } from "@/components/organisms/payments/payment-form";
+import { ReceiptForm } from "@/components/organisms/payments/payment-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { usePaymentForm, toPayment } from "@/lib/forms/payments/usePaymentForm";
-import { usePaymentsMutation } from "@/lib/hooks/payments/usePaymentsMutation";
-import { getPaymentFormDefaultValues } from "@/lib/schemas/payments/payment-schema";
-import { usePaymentsQuery } from "@/lib/hooks/payments/usePaymentsQuery";
+import { toReceipt, useReceiptForm } from "@/lib/forms/payments/usePaymentForm";
+import { useReceiptsMutation } from "@/lib/hooks/payments/usePaymentsMutation";
+import { getReceiptFormDefaultValues } from "@/lib/schemas/payments/payment-schema";
+import { useReceiptsQuery } from "@/lib/hooks/payments/usePaymentsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
-import type { PaymentUpsert } from "@/types/domain";
+import type { ReceiptUpsert } from "@/types/domain";
 
-type PaymentFormTemplateProps = {
-  paymentId?: string | null;
+type ReceiptFormTemplateProps = {
+  receiptId?: string | null;
 };
 
-export function PaymentFormTemplate({ paymentId = null }: PaymentFormTemplateProps) {
+export function ReceiptFormTemplate({ receiptId = null }: ReceiptFormTemplateProps) {
   const router = useRouter();
-  const paymentsQuery = usePaymentsQuery();
+  const receiptsQuery = useReceiptsQuery();
   const residentsQuery = useResidentsQuery();
-  const paymentsMutation = usePaymentsMutation();
-  const payment = paymentId ? paymentsQuery.data?.find((item) => item.id === paymentId) ?? null : null;
-  const form = usePaymentForm(payment);
-  const isEditing = Boolean(paymentId);
-  const isMissingPayment = Boolean(paymentId) && paymentsQuery.isSuccess && !payment;
+  const receiptsMutation = useReceiptsMutation();
+  const receipt = receiptId ? receiptsQuery.data?.find((item) => item.id === receiptId) ?? null : null;
+  const form = useReceiptForm(receipt);
+  const isEditing = Boolean(receiptId);
+  const isMissingReceipt = Boolean(receiptId) && receiptsQuery.isSuccess && !receipt;
 
   function handleCancel() {
     router.push("/payments");
   }
 
-  function handleSubmit(nextPayment: PaymentUpsert) {
-    paymentsMutation.mutate(nextPayment, {
+  function handleSubmit(nextReceipt: ReceiptUpsert) {
+    receiptsMutation.mutate(nextReceipt, {
       onSuccess: () => router.push("/payments")
     });
   }
 
-  function handleSubmitAndAddNew(nextPayment: PaymentUpsert) {
-    paymentsMutation.mutate(nextPayment, {
-      onSuccess: () => form.reset(getPaymentFormDefaultValues())
+  function handleSubmitAndAddNew(nextReceipt: ReceiptUpsert) {
+    receiptsMutation.mutate(nextReceipt, {
+      onSuccess: () => form.reset(getReceiptFormDefaultValues())
     });
   }
 
   return (
     <FormProvider {...form}>
-      <form className="mx-auto flex max-w-7xl flex-col gap-5" onSubmit={form.handleSubmit((values) => handleSubmit(toPayment(values)))}>
-          <div>
-            <p className="text-sm text-muted-foreground">Controle manual</p>
-            <h1 className="text-2xl font-semibold tracking-normal">
-              {isEditing ? "Editar pagamento" : "Registrar pagamento"}
-            </h1>
-          </div>
-          {isMissingPayment ? (
+      <form
+        className="mx-auto flex max-w-7xl flex-col gap-5"
+        onSubmit={form.handleSubmit((values) => handleSubmit(toReceipt(values)))}
+      >
+        <div>
+          <p className="text-sm text-muted-foreground">Controle manual</p>
+          <h1 className="text-2xl font-semibold tracking-normal">
+            {isEditing ? "Editar recebimento" : "Registrar recebimento"}
+          </h1>
+        </div>
+        {isMissingReceipt ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Dados do recebimento</CardTitle>
+              <CardDescription>Atualize os dados do recebimento selecionado.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Recebimento nao encontrado.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
             <Card>
               <CardHeader>
-                <CardTitle>Dados do pagamento</CardTitle>
-                <CardDescription>Atualize os dados do pagamento selecionado.</CardDescription>
+                <CardTitle>Dados do recebimento</CardTitle>
+                <CardDescription>
+                  {isEditing
+                    ? "Atualize os dados do recebimento selecionado."
+                    : "Registre um recebimento manual e, se houver, informe o comprovante."}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">Pagamento nao encontrado.</p>
+                <ReceiptForm residents={residentsQuery.data ?? []} />
               </CardContent>
             </Card>
-          ) : (
-            <>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dados do pagamento</CardTitle>
-                  <CardDescription>
-                    {isEditing
-                      ? "Atualize os dados do pagamento selecionado."
-                      : "Registre um pagamento manual e, se houver, informe o comprovante."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PaymentForm residents={residentsQuery.data ?? []} />
-                </CardContent>
-              </Card>
-              <AttachmentFilesCard
-                accept="application/pdf,image/jpeg,image/png"
-                addLabel="Adicionar comprovantes"
-                control={form.control}
-                description="Selecione um ou mais comprovantes do pagamento. Cada arquivo abre em nova aba."
-                emptyLabel="Nenhum comprovante anexado ainda."
-                multiple
-                name="proofAttachments"
-                setValue={form.setValue}
-                title="Arquivos do pagamento"
-              />
-              <div className="flex justify-end gap-2">
-                <Button disabled={paymentsMutation.isPending} onClick={handleCancel} type="button" variant="outline">
-                  Cancelar
+            <AttachmentFilesCard
+              accept="application/pdf,image/jpeg,image/png"
+              addLabel="Adicionar comprovantes"
+              control={form.control}
+              description="Selecione um ou mais comprovantes do recebimento. Cada arquivo abre em nova aba."
+              emptyLabel="Nenhum comprovante anexado ainda."
+              multiple
+              name="proofAttachments"
+              setValue={form.setValue}
+              title="Arquivos do recebimento"
+            />
+            <div className="flex justify-end gap-2">
+              <Button disabled={receiptsMutation.isPending} onClick={handleCancel} type="button" variant="outline">
+                Cancelar
+              </Button>
+              {!isEditing ? (
+                <Button
+                  disabled={receiptsMutation.isPending}
+                  onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toReceipt(values)))}
+                  type="button"
+                  variant="secondary"
+                >
+                  Salvar e adicionar novo
                 </Button>
-                {!isEditing ? (
-                  <Button
-                    disabled={paymentsMutation.isPending}
-                    onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toPayment(values)))}
-                    type="button"
-                    variant="secondary"
-                  >
-                    Salvar e adicionar novo
-                  </Button>
-                ) : null}
-                <Button disabled={paymentsMutation.isPending} type="submit">
-                  Salvar pagamento
-                </Button>
-              </div>
-            </>
-          )}
+              ) : null}
+              <Button disabled={receiptsMutation.isPending} type="submit">
+                Salvar recebimento
+              </Button>
+            </div>
+          </>
+        )}
       </form>
     </FormProvider>
   );

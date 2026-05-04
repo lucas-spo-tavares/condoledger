@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 
-import type { Expense, Payment, Resident } from "../src/types/domain";
+import type { Expense, Receipt, Resident } from "../src/types/domain";
 
-type StatementPayment = {
+type StatementReceipt = {
   name: string;
   number: string;
   complement: string;
@@ -16,14 +16,14 @@ type StatementExpense = {
 
 type MonthlyStatement = {
   month: string;
-  payments: StatementPayment[];
+  receipts: StatementReceipt[];
   expenses: StatementExpense[];
 };
 
 const statements: MonthlyStatement[] = [
   {
     "month": "2025-11-01",
-    "payments": [
+    "receipts": [
       {
         "name": "Raquel",
         "number": "162",
@@ -143,7 +143,7 @@ const statements: MonthlyStatement[] = [
   },
   {
     "month": "2025-12-01",
-    "payments": [
+    "receipts": [
       {
         "name": "Felipe",
         "number": "28",
@@ -356,7 +356,7 @@ const statements: MonthlyStatement[] = [
   },
   {
     "month": "2026-01-01",
-    "payments": [
+    "receipts": [
       {
         "name": "Felipe",
         "number": "28",
@@ -551,7 +551,7 @@ const statements: MonthlyStatement[] = [
   },
   {
     "month": "2026-02-01",
-    "payments": [
+    "receipts": [
       {
         "name": "Felipe",
         "number": "28",
@@ -736,7 +736,7 @@ const statements: MonthlyStatement[] = [
   },
   {
     "month": "2026-03-01",
-    "payments": [
+    "receipts": [
       {
         "name": "Felipe",
         "number": "28",
@@ -948,7 +948,7 @@ const statements: MonthlyStatement[] = [
 ];
 
 const residentIds = new Map<string, string>();
-const paymentIds = new Map<string, string>();
+const receiptIds = new Map<string, string>();
 const expenseIds = new Map<string, string>();
 
 function slugify(value: string) {
@@ -984,10 +984,6 @@ function buildResidentType(name: string, complement: string): Resident["type"] {
     return "store";
   }
 
-  if (text.includes("apt") || text.includes("apto") || text.includes("bloco") || text.includes("casa")) {
-    return "apartment";
-  }
-
   return "resident";
 }
 
@@ -995,20 +991,21 @@ function buildResidents(): Resident[] {
   const residents = new Map<string, Resident>();
 
   for (const statement of statements) {
-    for (const payment of statement.payments) {
-      const key = slugify([payment.name, payment.number, payment.complement].filter(Boolean).join("-"));
+    for (const receipt of statement.receipts) {
+      const key = slugify([receipt.name, receipt.number, receipt.complement].filter(Boolean).join("-"));
       const resident = residents.get(key) ?? {
         id: getOrCreateId(residentIds, key),
-        name: payment.name,
+        name: receipt.name,
         email: undefined,
-        unit: [payment.number, payment.complement].filter(Boolean).join(" ").trim(),
-        type: buildResidentType(payment.name, payment.complement),
-        monthlyContributionInCents: payment.amountInCents,
+        unit: [receipt.number, receipt.complement].filter(Boolean).join(" ").trim(),
+        type: buildResidentType(receipt.name, receipt.complement),
+        monthlyContributionInCents: receipt.amountInCents,
         status: "active",
-        isAdministrator: false
+        isAdministrator: false,
+        createdAt: statement.month
       };
 
-      resident.monthlyContributionInCents = payment.amountInCents;
+      resident.monthlyContributionInCents = receipt.amountInCents;
       residents.set(key, resident);
     }
   }
@@ -1016,16 +1013,16 @@ function buildResidents(): Resident[] {
   return [...residents.values()].sort((left, right) => left.name.localeCompare(right.name, "pt-BR"));
 }
 
-function buildPayments(): Payment[] {
+function buildReceipts(): Receipt[] {
   return statements.flatMap((statement) =>
-    statement.payments.map((payment) => {
-      const key = slugify([payment.name, payment.number, payment.complement].filter(Boolean).join("-"));
+    statement.receipts.map((receipt) => {
+      const key = slugify([receipt.name, receipt.number, receipt.complement].filter(Boolean).join("-"));
 
       return {
-        id: getOrCreateId(paymentIds, `${statement.month}|${key}|${payment.amountInCents}`),
+        id: getOrCreateId(receiptIds, `${statement.month}|${key}|${receipt.amountInCents}`),
         residentId: getOrCreateId(residentIds, key),
         month: statement.month,
-        amountInCents: payment.amountInCents,
+        amountInCents: receipt.amountInCents,
         status: "confirmed",
         paidAt: statement.month,
         proofAttachments: []
@@ -1049,5 +1046,5 @@ function buildExpenses(): Expense[] {
 }
 
 export const residents = buildResidents();
-export const payments = buildPayments();
+export const receipts = buildReceipts();
 export const expenses = buildExpenses();

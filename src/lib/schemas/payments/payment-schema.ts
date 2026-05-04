@@ -2,27 +2,27 @@ import { z } from "zod";
 
 import { attachmentSchema, type AttachmentValues } from "@/lib/schemas/commons/attachment-schema";
 
-export const paymentStatusSchema = z.enum(["pending", "confirmed", "voided"]);
+export const receiptStatusSchema = z.enum(["pending", "confirmed", "voided"]);
 
-const paymentBaseSchema = z.object({
+const receiptBaseSchema = z.object({
   residentId: z.string().min(1, "Selecione o morador."),
   month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
-  status: paymentStatusSchema,
+  status: receiptStatusSchema,
   paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD.").optional(),
   proofAttachments: z.array(attachmentSchema)
 });
 
-export const paymentFormSchema = paymentBaseSchema.extend({
+export const receiptFormSchema = receiptBaseSchema.extend({
   id: z.string().optional(),
   amount: z.coerce.number().min(0, "Informe um valor igual ou maior que zero.")
 });
 
-export const paymentSchema = paymentBaseSchema.extend({
+export const receiptSchema = receiptBaseSchema.extend({
   id: z.string().min(1, "Informe o id.").optional(),
   amountInCents: z.number().int().min(0, "Informe um valor igual ou maior que zero.")
 });
 
-export function getPaymentFormDefaultValues(): PaymentFormValues {
+export function getReceiptFormDefaultValues(): ReceiptFormValues {
   return {
     id: undefined,
     residentId: "",
@@ -34,10 +34,10 @@ export function getPaymentFormDefaultValues(): PaymentFormValues {
   };
 }
 
-export const paymentFormDefaultValues: PaymentFormValues = getPaymentFormDefaultValues();
+export const receiptFormDefaultValues: ReceiptFormValues = getReceiptFormDefaultValues();
 
-export type PaymentFormValues = z.output<typeof paymentFormSchema>;
+export type ReceiptFormValues = z.output<typeof receiptFormSchema>;
 
-export type PaymentFormInput = z.input<typeof paymentFormSchema>;
+export type ReceiptFormInput = z.input<typeof receiptFormSchema>;
 
-export type PaymentAttachmentValues = AttachmentValues;
+export type ReceiptAttachmentValues = AttachmentValues;

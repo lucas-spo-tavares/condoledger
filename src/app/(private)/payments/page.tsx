@@ -1,5 +1,5 @@
-import { PaymentsTemplate } from "@/components/templates/payments/list-template";
+import { ReceiptsTemplate } from "@/components/templates/payments/list-template";
 
 export default function PaymentsPage() {
-  return <PaymentsTemplate />;
+  return <ReceiptsTemplate />;
 }

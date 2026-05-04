@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, CreditCard, Home, ReceiptText, Users } from "lucide-react";
+import { CreditCard, Home, ReceiptText, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,9 +9,8 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { href: "/dashboard", label: "Inicio", icon: Home },
   { href: "/residents", label: "Moradores", icon: Users },
-  { href: "/payments", label: "Pagamentos", icon: CreditCard },
+  { href: "/payments", label: "Recebimentos", icon: CreditCard },
   { href: "/expenses", label: "Despesas", icon: ReceiptText },
-  { href: "/reports", label: "Relatorios", icon: ClipboardList }
 ];
 
 export function AppNavigation() {

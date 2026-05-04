@@ -7,15 +7,27 @@ import { FormField } from "@/components/organisms/form-field";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { MonthPicker } from "@/components/ui/month-picker";
-import type { PaymentFormValues } from "@/lib/schemas/payments/payment-schema";
+import type { ReceiptFormValues } from "@/lib/schemas/payments/payment-schema";
 import type { Resident } from "@/types/domain";
 
-type PaymentFormProps = {
+type ReceiptFormProps = {
   residents: Resident[];
 };
 
-export function PaymentForm({ residents }: PaymentFormProps) {
-  const { control } = useFormContext<PaymentFormValues>();
+export function ReceiptForm({ residents }: ReceiptFormProps) {
+  const { control, setValue } = useFormContext<ReceiptFormValues>();
+
+  function handleResidentChange(residentId: string, onChange: (value: string) => void) {
+    onChange(residentId);
+
+    const resident = residents.find((item) => item.id === residentId);
+    const nextAmount = resident ? resident.monthlyContributionInCents / 100 : 0;
+
+    setValue("amount", nextAmount, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
+  }
 
   return (
     <div className="grid gap-4">
@@ -27,6 +39,7 @@ export function PaymentForm({ residents }: PaymentFormProps) {
             <FormField error={fieldState.error?.message} label="Morador">
               <select
                 {...field}
+                onChange={(event) => handleResidentChange(event.target.value, field.onChange)}
                 className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Selecione</option>

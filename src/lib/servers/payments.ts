@@ -3,24 +3,24 @@ import "server-only";
 import { DeleteCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 import { documentClient, tableName } from "@/lib/dynamodb";
-import { fromDynamoItem, toPaymentItem, type DynamoItem } from "@/lib/dynamodb-items";
+import { fromDynamoItem, toReceiptItem, type DynamoItem } from "@/lib/dynamodb-items";
 import { getResidents } from "@/lib/servers/residents";
-import type { Payment, PaymentStatus, PaymentUpsert } from "@/types/domain";
+import type { Receipt, ReceiptStatus, ReceiptUpsert } from "@/types/domain";
 
-export async function getPayments(filters?: {
+export async function getReceipts(filters?: {
   month?: string;
   q?: string;
-  status?: PaymentStatus;
+  status?: ReceiptStatus;
 }) {
   const residents = await getResidents();
   const search = filters?.q?.trim().toLowerCase();
-  const payments = await scanPayments();
+  const receipts = await scanReceipts();
 
-  return payments
-    .filter((payment) => {
-      const resident = residents.find((item) => item.id === payment.residentId);
-      const matchesMonth = filters?.month ? payment.month === filters.month : true;
-      const matchesStatus = filters?.status ? payment.status === filters.status : true;
+  return receipts
+    .filter((receipt) => {
+      const resident = residents.find((item) => item.id === receipt.residentId);
+      const matchesMonth = filters?.month ? receipt.month === filters.month : true;
+      const matchesStatus = filters?.status ? receipt.status === filters.status : true;
       const matchesSearch = search ? resident?.name.toLowerCase().includes(search) : true;
 
       return matchesMonth && matchesStatus && matchesSearch;
@@ -35,16 +35,16 @@ export async function getPayments(filters?: {
     });
 }
 
-export async function putPayment(payment: PaymentUpsert) {
-  const persistedPayment: Payment = {
-    ...payment,
-    id: payment.id ?? crypto.randomUUID()
+export async function putReceipt(receipt: ReceiptUpsert) {
+  const persistedReceipt: Receipt = {
+    ...receipt,
+    id: receipt.id ?? crypto.randomUUID()
   };
-  const existingPayment = await findPaymentItemById(persistedPayment.id);
-  const nextItem = toPaymentItem(persistedPayment);
+  const existingReceipt = await findReceiptItemById(persistedReceipt.id);
+  const nextItem = toReceiptItem(persistedReceipt);
 
-  if (existingPayment && (existingPayment.PK !== nextItem.PK || existingPayment.SK !== nextItem.SK)) {
-    await deleteItem(existingPayment);
+  if (existingReceipt && (existingReceipt.PK !== nextItem.PK || existingReceipt.SK !== nextItem.SK)) {
+    await deleteItem(existingReceipt);
   }
 
   await documentClient.send(
@@ -54,33 +54,33 @@ export async function putPayment(payment: PaymentUpsert) {
     })
   );
 
-  return persistedPayment;
+  return persistedReceipt;
 }
 
-export async function deletePayment(id: string) {
-  const payment = await findPaymentItemById(id);
+export async function deleteReceipt(id: string) {
+  const receipt = await findReceiptItemById(id);
 
-  if (payment) {
-    await deleteItem(payment);
+  if (receipt) {
+    await deleteItem(receipt);
   }
 
   return { id };
 }
 
-async function scanPayments() {
-  const items = await scanPaymentItems();
+async function scanReceipts() {
+  const items = await scanReceiptItems();
 
   return items.map((item) => fromDynamoItem(item));
 }
 
-async function findPaymentItemById(id: string) {
-  const items = await scanPaymentItems(id);
+async function findReceiptItemById(id: string) {
+  const items = await scanReceiptItems(id);
 
   return items[0] ?? null;
 }
 
-async function scanPaymentItems(id?: string) {
-  const payments: DynamoItem<Payment>[] = [];
+async function scanReceiptItems(id?: string) {
+  const receipts: DynamoItem<Receipt>[] = [];
   let exclusiveStartKey: Record<string, unknown> | undefined;
 
   do {
@@ -94,20 +94,20 @@ async function scanPaymentItems(id?: string) {
           ...(id ? { "#id": "id" } : {})
         },
         ExpressionAttributeValues: {
-          ":entityType": "Payment",
+          ":entityType": "Receipt",
           ...(id ? { ":id": id } : {})
         }
       })
     );
 
-    payments.push(...((response.Items ?? []) as DynamoItem<Payment>[]));
+    receipts.push(...((response.Items ?? []) as DynamoItem<Receipt>[]));
     exclusiveStartKey = response.LastEvaluatedKey;
   } while (exclusiveStartKey);
 
-  return payments;
+  return receipts;
 }
 
-async function deleteItem(item: Pick<DynamoItem<Payment>, "PK" | "SK">) {
+async function deleteItem(item: Pick<DynamoItem<Receipt>, "PK" | "SK">) {
   await documentClient.send(
     new DeleteCommand({
       TableName: tableName,

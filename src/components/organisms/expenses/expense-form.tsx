@@ -18,15 +18,6 @@ export function ExpenseForm() {
       <div className="grid gap-3 md:grid-cols-2">
         <Controller
           control={control}
-          name="month"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Mes">
-              <DatePicker onValueChange={field.onChange} placeholder="Selecione a data" value={field.value} />
-            </FormField>
-          )}
-        />
-        <Controller
-          control={control}
           name="category"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Categoria">

@@ -2,13 +2,13 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { deletePayment } from "@/lib/apis/payments";
+import { deleteReceipt } from "@/lib/apis/payments";
 
-export function useDeletePaymentsMutation() {
+export function useDeleteReceiptsMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deletePayment,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["payments"] })
+    mutationFn: deleteReceipt,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["receipts"] })
   });
 }

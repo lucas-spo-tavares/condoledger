@@ -1,29 +1,29 @@
 import { z } from "zod";
 
-import { paymentStatusSchema } from "@/lib/schemas/payments/payment-schema";
+import { receiptStatusSchema } from "@/lib/schemas/payments/payment-schema";
 
-const paymentBatchItemSchema = z.object({
+const receiptBatchItemSchema = z.object({
   residentId: z.string().min(1, "Selecione o morador."),
   amount: z.coerce.number().min(0, "Informe um valor igual ou maior que zero."),
   month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
   paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
-  status: paymentStatusSchema
+  status: receiptStatusSchema
 });
 
-export const paymentBatchFormSchema = z.object({
-  items: z.array(paymentBatchItemSchema)
+export const receiptBatchFormSchema = z.object({
+  items: z.array(receiptBatchItemSchema)
 });
 
-export type PaymentBatchFormValues = z.output<typeof paymentBatchFormSchema>;
+export type ReceiptBatchFormValues = z.output<typeof receiptBatchFormSchema>;
 
-export type PaymentBatchFormInput = z.input<typeof paymentBatchFormSchema>;
+export type ReceiptBatchFormInput = z.input<typeof receiptBatchFormSchema>;
 
-export function createPaymentBatchItemValues(params: {
+export function createReceiptBatchItemValues(params: {
   residentId: string;
   amount: number;
   month: string;
   paidAt: string;
-  status: z.infer<typeof paymentStatusSchema>;
+  status: z.infer<typeof receiptStatusSchema>;
 }) {
   return {
     residentId: params.residentId,

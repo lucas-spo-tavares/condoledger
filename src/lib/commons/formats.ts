@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import type { PaymentStatus, ResidentStatus, ResidentType } from "@/types/domain";
+import type { ReceiptStatus, ResidentStatus, ResidentType } from "@/types/domain";
 
 export function formatCurrency(valueInCents: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -18,8 +18,8 @@ export function formatDate(value: string) {
   return format(parseISO(value), "dd/MM/yyyy", { locale: ptBR });
 }
 
-export function formatPaymentStatus(status: PaymentStatus) {
-  const labels: Record<PaymentStatus, string> = {
+export function formatReceiptStatus(status: ReceiptStatus) {
+  const labels: Record<ReceiptStatus, string> = {
     pending: "pendente",
     confirmed: "confirmado",
     voided: "cancelado"
@@ -42,7 +42,7 @@ export function formatResidentType(type: ResidentType) {
     resident: "morador",
     store: "loja",
     church: "igreja",
-    apartment: "apartamento"
+    apartment: "predio"
   };
 
   return labels[type];

@@ -3,7 +3,7 @@ import "server-only";
 import type { MonthlyReport } from "@/types/domain";
 
 import { getExpenses } from "@/lib/servers/expenses";
-import { getPayments } from "@/lib/servers/payments";
+import { getReceipts } from "@/lib/servers/payments";
 
 type MonthlyTotals = {
   expectedRevenueInCents: number;
@@ -12,19 +12,19 @@ type MonthlyTotals = {
 };
 
 export async function getReports() {
-  const [payments, expenses] = await Promise.all([getPayments(), getExpenses()]);
+  const [receipts, expenses] = await Promise.all([getReceipts(), getExpenses()]);
   const totalsByMonth = new Map<string, MonthlyTotals>();
 
-  for (const payment of payments) {
-    const totals = totalsByMonth.get(payment.month) ?? createMonthlyTotals();
+  for (const receipt of receipts) {
+    const totals = totalsByMonth.get(receipt.month) ?? createMonthlyTotals();
 
-    totals.expectedRevenueInCents += payment.amountInCents;
+    totals.expectedRevenueInCents += receipt.amountInCents;
 
-    if (payment.status === "confirmed") {
-      totals.receivedRevenueInCents += payment.amountInCents;
+    if (receipt.status === "confirmed") {
+      totals.receivedRevenueInCents += receipt.amountInCents;
     }
 
-    totalsByMonth.set(payment.month, totals);
+    totalsByMonth.set(receipt.month, totals);
   }
 
   for (const expense of expenses) {

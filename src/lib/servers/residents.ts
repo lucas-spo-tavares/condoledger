@@ -1,6 +1,6 @@
 import "server-only";
 
-import { DeleteCommand, GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 import { documentClient, tableName } from "@/lib/dynamodb";
 import { fromDynamoItem, residentKey, toResidentItem, type DynamoItem } from "@/lib/dynamodb-items";
@@ -21,9 +21,11 @@ export async function getResidents(filters?: { q?: string; status?: ResidentStat
 }
 
 export async function putResident(resident: ResidentUpsert) {
+  const existingResident = resident.id ? await getResidentById(resident.id) : null;
   const persistedResident: Resident = {
     ...resident,
-    id: resident.id ?? crypto.randomUUID()
+    id: resident.id ?? crypto.randomUUID(),
+    createdAt: existingResident?.createdAt ?? new Date().toISOString().slice(0, 10)
   };
 
   await documentClient.send(
@@ -37,13 +39,21 @@ export async function putResident(resident: ResidentUpsert) {
 }
 
 export async function deleteResident(id: string) {
+  const resident = await getResidentById(id);
+
+  if (!resident) {
+    return { id };
+  }
+
+  const inactivatedResident: Resident = {
+    ...resident,
+    status: "inactive"
+  };
+
   await documentClient.send(
-    new DeleteCommand({
+    new PutCommand({
       TableName: tableName,
-      Key: {
-        PK: residentKey(id),
-        SK: "PROFILE"
-      }
+      Item: toResidentItem(inactivatedResident)
     })
   );
 

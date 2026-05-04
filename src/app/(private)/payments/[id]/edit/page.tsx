@@ -1,4 +1,4 @@
-import { PaymentFormTemplate } from "@/components/templates/payments/payment-form-template";
+import { ReceiptFormTemplate } from "@/components/templates/payments/payment-form-template";
 
 type PaymentEditPageProps = {
   params: Promise<{
@@ -9,5 +9,5 @@ type PaymentEditPageProps = {
 export default async function PaymentEditPage({ params }: PaymentEditPageProps) {
   const { id } = await params;
 
-  return <PaymentFormTemplate paymentId={id} />;
+  return <ReceiptFormTemplate receiptId={id} />;
 }

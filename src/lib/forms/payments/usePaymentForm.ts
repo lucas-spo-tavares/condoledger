@@ -4,33 +4,33 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import {
-  getPaymentFormDefaultValues,
-  paymentFormSchema,
-  type PaymentFormInput,
-  type PaymentFormValues
+  getReceiptFormDefaultValues,
+  receiptFormSchema,
+  type ReceiptFormInput,
+  type ReceiptFormValues
 } from "@/lib/schemas/payments/payment-schema";
-import type { Payment, PaymentUpsert } from "@/types/domain";
+import type { Receipt, ReceiptUpsert } from "@/types/domain";
 
-export function usePaymentForm(payment?: Payment | null) {
-  return useForm<PaymentFormInput, unknown, PaymentFormValues>({
-    resolver: zodResolver(paymentFormSchema),
-    defaultValues: payment ? toPaymentFormValues(payment) : getPaymentFormDefaultValues()
+export function useReceiptForm(receipt?: Receipt | null) {
+  return useForm<ReceiptFormInput, unknown, ReceiptFormValues>({
+    resolver: zodResolver(receiptFormSchema),
+    defaultValues: receipt ? toReceiptFormValues(receipt) : getReceiptFormDefaultValues()
   });
 }
 
-export function toPaymentFormValues(payment: Payment): PaymentFormValues {
+export function toReceiptFormValues(receipt: Receipt): ReceiptFormValues {
   return {
-    id: payment.id,
-    residentId: payment.residentId,
-    month: payment.month,
-    amount: payment.amountInCents / 100,
-    status: payment.status,
-    paidAt: payment.paidAt ?? "",
-    proofAttachments: payment.proofAttachments
+    id: receipt.id,
+    residentId: receipt.residentId,
+    month: receipt.month,
+    amount: receipt.amountInCents / 100,
+    status: receipt.status,
+    paidAt: receipt.paidAt ?? "",
+    proofAttachments: receipt.proofAttachments
   };
 }
 
-export function toPayment(values: PaymentFormValues): PaymentUpsert {
+export function toReceipt(values: ReceiptFormValues): ReceiptUpsert {
   return {
     residentId: values.residentId,
     month: values.month,

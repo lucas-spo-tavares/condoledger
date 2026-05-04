@@ -67,7 +67,7 @@ export function ResidentForm() {
                 <option value="resident">Morador</option>
                 <option value="store">Loja</option>
                 <option value="church">Igreja</option>
-                <option value="apartment">Apartamento/edificio</option>
+                <option value="apartment">Predio</option>
               </select>
             </FormField>
           )}

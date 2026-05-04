@@ -2,14 +2,14 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { putPayment } from "@/lib/apis/payments";
-import type { PaymentUpsert } from "@/types/domain";
+import { putReceipt } from "@/lib/apis/payments";
+import type { ReceiptUpsert } from "@/types/domain";
 
-export function useBatchPaymentsMutation() {
+export function useBatchReceiptsMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payments: PaymentUpsert[]) => Promise.all(payments.map((payment) => putPayment(payment))),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["payments"] })
+    mutationFn: async (receipts: ReceiptUpsert[]) => Promise.all(receipts.map((receipt) => putReceipt(receipt))),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["receipts"] })
   });
 }

@@ -1,13 +1,13 @@
 import { request } from "@/lib/commons/request";
-import type { PaymentStatus, Payment, PaymentUpsert } from "@/types/domain";
+import type { ReceiptStatus, Receipt, ReceiptUpsert } from "@/types/domain";
 
-export type PaymentQueryParams = {
+export type ReceiptQueryParams = {
   month?: string;
   q?: string;
-  status?: PaymentStatus | "all";
+  status?: ReceiptStatus | "all";
 };
 
-export async function getPayments(params?: PaymentQueryParams) {
+export async function getReceipts(params?: ReceiptQueryParams) {
   const searchParams = new URLSearchParams();
 
   if (params?.month) {
@@ -23,17 +23,17 @@ export async function getPayments(params?: PaymentQueryParams) {
   }
 
   const queryString = searchParams.toString();
-  return request<Payment[]>(queryString ? `/api/payments?${queryString}` : "/api/payments");
+  return request<Receipt[]>(queryString ? `/api/payments?${queryString}` : "/api/payments");
 }
 
-export async function putPayment(payment: PaymentUpsert) {
-  return request<Payment>("/api/payments", {
+export async function putReceipt(receipt: ReceiptUpsert) {
+  return request<Receipt>("/api/payments", {
     method: "PUT",
-    body: JSON.stringify(payment)
+    body: JSON.stringify(receipt)
   });
 }
 
-export async function deletePayment(id: string) {
+export async function deleteReceipt(id: string) {
   return request<{ id: string }>(`/api/payments?id=${encodeURIComponent(id)}`, {
     method: "DELETE"
   });

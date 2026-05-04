@@ -3,7 +3,6 @@ import { z } from "zod";
 import { attachmentSchema, type AttachmentInput, type AttachmentValues } from "@/lib/schemas/commons/attachment-schema";
 
 const expenseBaseSchema = z.object({
-  month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
   category: z.string().min(1, "Informe a categoria."),
   description: z.string().min(2, "Informe a descricao."),
   paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
@@ -25,7 +24,6 @@ export function getExpenseFormDefaultValues(): ExpenseFormValues {
 
   return {
     id: undefined,
-    month: today,
     category: "",
     description: "",
     amount: 0,

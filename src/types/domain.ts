@@ -2,7 +2,7 @@ export type ResidentStatus = "active" | "inactive";
 
 export type ResidentType = "resident" | "store" | "church" | "apartment";
 
-export type PaymentStatus = "pending" | "confirmed" | "voided";
+export type ReceiptStatus = "pending" | "confirmed" | "voided";
 
 export type Resident = {
   id: string;
@@ -13,9 +13,10 @@ export type Resident = {
   monthlyContributionInCents: number;
   status: ResidentStatus;
   isAdministrator: boolean;
+  createdAt: string;
 };
 
-export type ResidentUpsert = Omit<Resident, "id"> & {
+export type ResidentUpsert = Omit<Resident, "id" | "createdAt"> & {
   id?: string;
 };
 
@@ -26,17 +27,17 @@ export type FileAttachment = {
   type: "application/pdf" | "image/jpeg" | "image/png";
 };
 
-export type Payment = {
+export type Receipt = {
   id: string;
   residentId: string;
   month: string;
   amountInCents: number;
-  status: PaymentStatus;
+  status: ReceiptStatus;
   paidAt?: string;
   proofAttachments: FileAttachment[];
 };
 
-export type PaymentUpsert = Omit<Payment, "id"> & {
+export type ReceiptUpsert = Omit<Receipt, "id"> & {
   id?: string;
 };
 
@@ -57,7 +58,7 @@ export type Expense = {
   attachments: FileAttachment[];
 };
 
-export type ExpenseUpsert = Omit<Expense, "id"> & {
+export type ExpenseUpsert = Omit<Expense, "id" | "month"> & {
   id?: string;
 };
 

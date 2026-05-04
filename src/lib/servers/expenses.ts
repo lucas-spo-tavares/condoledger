@@ -23,8 +23,10 @@ export async function getExpenses(filters?: { month?: string; q?: string }) {
 }
 
 export async function putExpense(expense: ExpenseUpsert) {
+  const month = getExpenseMonth(expense.paidAt);
   const persistedExpense: Expense = {
     ...expense,
+    month,
     id: expense.id ?? crypto.randomUUID()
   };
   const existingExpense = await findExpenseItemById(persistedExpense.id);
@@ -104,4 +106,8 @@ async function deleteItem(item: Pick<DynamoItem<Expense>, "PK" | "SK">) {
       }
     })
   );
+}
+
+function getExpenseMonth(paidAt: string) {
+  return `${paidAt.slice(0, 7)}-01`;
 }

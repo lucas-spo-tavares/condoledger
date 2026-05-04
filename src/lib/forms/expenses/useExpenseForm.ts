@@ -21,7 +21,6 @@ export function useExpenseForm(expense?: Expense | null) {
 export function toExpenseFormValues(expense: Expense): ExpenseFormValues {
   return {
     id: expense.id,
-    month: expense.month,
     category: expense.category,
     description: expense.description,
     amount: expense.amountInCents / 100,
@@ -32,7 +31,6 @@ export function toExpenseFormValues(expense: Expense): ExpenseFormValues {
 
 export function toExpense(values: ExpenseFormValues): ExpenseUpsert {
   return {
-    month: values.month,
     category: values.category,
     description: values.description,
     amountInCents: Math.round(values.amount * 100),

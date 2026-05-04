@@ -102,9 +102,9 @@ export function ResidentsTemplate() {
                         </Button>
                         <ConfirmDeleteDialog
                           disabled={deleteResidentsMutation.isPending}
-                          description="Tem certeza que deseja remover este morador? Esta operacao nao pode ser desfeita."
+                          description="Tem certeza que deseja desativar este morador? Ele continuara registrado para historico e demonstracao de pagamentos."
                           onConfirm={() => deleteResidentsMutation.mutate(resident.id)}
-                          title="Confirmar exclusao"
+                          title="Confirmar desativacao"
                         >
                           <Trash2 className="size-4" />
                         </ConfirmDeleteDialog>

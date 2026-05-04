@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getPayments, type PaymentQueryParams } from "@/lib/apis/payments";
+import { getReceipts, type ReceiptQueryParams } from "@/lib/apis/payments";
 
-export function usePaymentsQuery(params?: PaymentQueryParams) {
+export function useReceiptsQuery(params?: ReceiptQueryParams) {
   return useQuery({
-    queryKey: ["payments", params?.month ?? "", params?.status ?? "all", params?.q ?? ""],
-    queryFn: () => getPayments(params)
+    queryKey: ["receipts", params?.month ?? "", params?.status ?? "all", params?.q ?? ""],
+    queryFn: () => getReceipts(params)
   });
 }
