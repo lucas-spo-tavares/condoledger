@@ -89,12 +89,6 @@ export function MonthPicker({
     selectedDate?.getFullYear() ?? new Date().getFullYear()
   );
 
-  React.useEffect(() => {
-    if (selectedDate) {
-      setMenuYear(selectedDate.getFullYear());
-    }
-  }, [selectedDate]);
-
   const buttonLabel = selectedDate
     ? format(selectedDate, "MMMM yyyy", { locale: ptBR })
     : placeholder;
@@ -116,13 +110,13 @@ export function MonthPicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[280px] p-3">
-        <div className="flex items-center justify-center pb-2">
+        <div className="flex items-center justify-between pb-2">
           <button
             type="button"
             onClick={() => setMenuYear((current) => current - 1)}
             className={cn(
               buttonVariants({ variant: variant?.chevrons ?? "outline" }),
-              "absolute left-3 h-7 w-7 p-0"
+              "h-7 w-7 p-0"
             )}
           >
             <ChevronLeft className="h-4 w-4 opacity-50" />
@@ -133,7 +127,7 @@ export function MonthPicker({
             onClick={() => setMenuYear((current) => current + 1)}
             className={cn(
               buttonVariants({ variant: variant?.chevrons ?? "outline" }),
-              "absolute right-3 h-7 w-7 p-0"
+              "h-7 w-7 p-0"
             )}
           >
             <ChevronRight className="h-4 w-4 opacity-50" />

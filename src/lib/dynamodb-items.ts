@@ -1,6 +1,6 @@
-import type { Expense, MonthlyReport, Payment, Resident } from "@/types/domain";
+import type { Expense, Payment, Resident } from "@/types/domain";
 
-export type EntityType = "Expense" | "MonthlyReport" | "Payment" | "Resident";
+export type EntityType = "Expense" | "Payment" | "Resident";
 
 export type DynamoItem<T> = T & {
   PK: string;
@@ -41,17 +41,6 @@ export function toExpenseItem(expense: Expense): DynamoItem<Expense> {
   };
 }
 
-export function toReportItem(report: MonthlyReport): DynamoItem<MonthlyReport> {
-  return {
-    PK: reportKey(report.month),
-    SK: "SUMMARY",
-    GSI1PK: "REPORTS",
-    GSI1SK: `REPORT#${report.month}`,
-    entityType: "MonthlyReport",
-    ...report
-  };
-}
-
 export function fromDynamoItem<T>(item: DynamoItem<T>): T {
   const { PK, SK, GSI1PK, GSI1SK, entityType, ...entity } = item;
 
@@ -64,8 +53,4 @@ export function residentKey(id: string) {
 
 export function monthKey(month: string) {
   return `MONTH#${month}`;
-}
-
-export function reportKey(month: string) {
-  return `REPORT#${month}`;
 }

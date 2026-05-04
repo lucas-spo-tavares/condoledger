@@ -1,9 +1,10 @@
 import type { CurrentUser } from "@/types/domain";
 
 type AuthStartResponse = {
-  session: string;
   email: string;
-  maskedDestination: string;
+  session?: string;
+  maskedDestination?: string;
+  currentUser?: CurrentUser;
 };
 
 type AuthConfirmResponse = {

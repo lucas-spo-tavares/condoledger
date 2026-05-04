@@ -32,7 +32,7 @@ export function PaymentForm({ residents }: PaymentFormProps) {
                 <option value="">Selecione</option>
                 {residents.map((resident) => (
                   <option key={resident.id} value={resident.id}>
-                    {resident.name}
+                    {resident.name} | {resident.unit}
                   </option>
                 ))}
               </select>

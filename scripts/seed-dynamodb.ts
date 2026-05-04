@@ -2,8 +2,13 @@ import { CreateTableCommand, ResourceInUseException } from "@aws-sdk/client-dyna
 import { BatchWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { loadEnvConfig } from "@next/env";
 
-import { toExpenseItem, toPaymentItem, toReportItem, toResidentItem } from "../src/lib/dynamodb-items";
-import { expenses, payments, reports, residents } from "./seed-data";
+import { toExpenseItem, toPaymentItem, toResidentItem } from "../src/lib/dynamodb-items";
+import { expenses, payments, residents } from "./seed-data";
+
+type SeedItem =
+  | ReturnType<typeof toResidentItem>
+  | ReturnType<typeof toPaymentItem>
+  | ReturnType<typeof toExpenseItem>;
 
 async function main() {
   loadEnvConfig(process.cwd());
@@ -11,28 +16,35 @@ async function main() {
 
   await createTable();
 
-  const items = [
-    ...residents.map(toResidentItem),
-    ...payments.map(toPaymentItem),
-    ...expenses.map(toExpenseItem),
-    ...reports.map(toReportItem)
+  const seedGroups: Array<{ label: string; items: SeedItem[] }> = [
+    { label: "residents", items: residents.map(toResidentItem) },
+    { label: "payments", items: payments.map(toPaymentItem) },
+    { label: "expenses", items: expenses.map(toExpenseItem) }
   ];
 
-  for (const chunk of chunkItems(items, 25)) {
-    await documentClient.send(
-      new BatchWriteCommand({
-        RequestItems: {
-          [tableName]: chunk.map((item) => ({
-            PutRequest: {
-              Item: item
-            }
-          }))
-        }
-      })
-    );
+  for (const group of seedGroups) {
+    for (const chunk of chunkItems(group.items, 25)) {
+      await documentClient.send(
+        new BatchWriteCommand({
+          RequestItems: {
+            [tableName]: chunk.map((item) => ({
+              PutRequest: {
+                Item: item
+              }
+            }))
+          }
+        })
+      );
+    }
   }
 
-  console.log(`Seeded ${items.length} items into ${tableName}.`);
+  const itemCount = seedGroups.reduce((total, group) => total + group.items.length, 0);
+
+  console.log(
+    `Seeded ${itemCount} items into ${tableName} (${seedGroups
+      .map((group) => `${group.label}: ${group.items.length}`)
+      .join(", ")}).`
+  );
 }
 
 async function createTable() {

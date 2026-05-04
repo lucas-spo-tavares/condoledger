@@ -11,9 +11,11 @@ CondoLedger is a web-based condo management system for monthly dues, manual paym
 - Amazon DynamoDB
 - Amazon Cognito with email OTP
 - Terraform
-- Docker Compose with DynamoDB Local
+- Docker Compose with Amazon DynamoDB Local
 
 ## Local Development
+
+Use Node.js `24.15.0` for this project. If you use `nvm`, run `nvm use` in the repo root.
 
 Install dependencies:
 
@@ -21,11 +23,13 @@ Install dependencies:
 npm install
 ```
 
-Start DynamoDB Local:
+Start the local DynamoDB container:
 
 ```bash
 docker compose up -d
 ```
+
+The compose file stores DynamoDB Local data in `./.dynamodb`, so the container can write its SQLite files without relying on a Docker-managed named volume.
 
 Seed the local table:
 
@@ -39,6 +43,12 @@ Clear all local DynamoDB data:
 npm run dynamodb:clear
 ```
 
+Open a simple browser UI to inspect the local tables:
+
+```bash
+npm run dynamodb:admin
+```
+
 Start the app:
 
 ```bash
@@ -46,8 +56,6 @@ npm run dev
 ```
 
 The app runs at `http://localhost:3000`.
-
-DynamoDB Admin runs at `http://localhost:8001`.
 
 ## Environment
 
@@ -60,10 +68,13 @@ AWS_SECRET_ACCESS_KEY=local
 DYNAMODB_TABLE_NAME=condoledger-local
 DYNAMODB_ENDPOINT=http://localhost:8000
 DYNAMODB_GSI1_NAME=GSI1
+AUTH_MODE=local
 COGNITO_USER_POOL_ID=
 COGNITO_CLIENT_ID=
 PROOFS_BUCKET_NAME=
 ```
+
+Set `AUTH_MODE=local` to skip OTP during local development. Use the default `AUTH_MODE=cognito` to keep the email verification flow.
 
 Next.js loads `.env.local` automatically during `npm run dev`, `npm run build`, and `npm run start`.
 
@@ -102,7 +113,7 @@ This runs typecheck, builds the app, initializes Terraform, creates a plan, appl
 - Expense tracking
 - Monthly report screen
 - Passwordless Cognito helper functions
-- Local DynamoDB testing setup
+- Amazon DynamoDB Local container testing setup
 
 Business rules are documented in `BUSINESS_RULES.md`.
 

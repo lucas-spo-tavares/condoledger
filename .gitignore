@@ -6,6 +6,8 @@ coverage
 *.tsbuildinfo
 .env
 .env*.local
+csvs/
+.dynamodb
 *.tfstate
 *.tfstate.*
 .terraform

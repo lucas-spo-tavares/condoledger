@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getZodFieldErrors } from "@/lib/commons/zod";
 import { signInConfirmSchema } from "@/lib/schemas/auth/sign-in-schema";
-import { AuthError, confirmOtpSignIn, getCurrentUserCookieName } from "@/lib/servers/auth";
+import {
+  AuthError,
+  SESSION_COOKIE_MAX_AGE_SECONDS,
+  confirmOtpSignIn,
+  getCurrentUserCookieName
+} from "@/lib/servers/auth";
 
 export async function POST(request: NextRequest) {
   const result = signInConfirmSchema.safeParse(await request.json());
@@ -26,7 +31,7 @@ export async function POST(request: NextRequest) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 30
+      maxAge: SESSION_COOKIE_MAX_AGE_SECONDS
     });
     return response;
   } catch (error) {

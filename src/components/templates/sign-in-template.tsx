@@ -35,10 +35,17 @@ export function SignInTemplate() {
 
     try {
       const response = await startAuthOtp(values.email);
+
+      if (response.currentUser) {
+        router.replace("/dashboard");
+        router.refresh();
+        return;
+      }
+
       emailForm.reset({ email: response.email });
       otpForm.reset({ code: "" });
-      setSession(response.session);
-      setMaskedDestination(response.maskedDestination);
+      setSession(response.session ?? "");
+      setMaskedDestination(response.maskedDestination ?? "");
       setStep("otp");
       setSuccess("Enviamos um codigo de acesso.");
     } catch (caughtError) {

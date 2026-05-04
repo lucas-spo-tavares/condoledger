@@ -1,58 +1,56 @@
 import "server-only";
 
-import { DeleteCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-
-import { documentClient, tableName } from "@/lib/dynamodb";
-import { fromDynamoItem, reportKey, toReportItem, type DynamoItem } from "@/lib/dynamodb-items";
 import type { MonthlyReport } from "@/types/domain";
 
+import { getExpenses } from "@/lib/servers/expenses";
+import { getPayments } from "@/lib/servers/payments";
+
+type MonthlyTotals = {
+  expectedRevenueInCents: number;
+  receivedRevenueInCents: number;
+  expensesInCents: number;
+};
+
 export async function getReports() {
-  const reports: MonthlyReport[] = [];
-  let exclusiveStartKey: Record<string, unknown> | undefined;
+  const [payments, expenses] = await Promise.all([getPayments(), getExpenses()]);
+  const totalsByMonth = new Map<string, MonthlyTotals>();
 
-  do {
-    const response = await documentClient.send(
-      new ScanCommand({
-        TableName: tableName,
-        ExclusiveStartKey: exclusiveStartKey,
-        FilterExpression: "#entityType = :entityType",
-        ExpressionAttributeNames: {
-          "#entityType": "entityType"
-        },
-        ExpressionAttributeValues: {
-          ":entityType": "MonthlyReport"
-        }
-      })
-    );
+  for (const payment of payments) {
+    const totals = totalsByMonth.get(payment.month) ?? createMonthlyTotals();
 
-    reports.push(...(response.Items ?? []).map((item) => fromDynamoItem(item as DynamoItem<MonthlyReport>)));
-    exclusiveStartKey = response.LastEvaluatedKey;
-  } while (exclusiveStartKey);
+    totals.expectedRevenueInCents += payment.amountInCents;
 
-  return reports.sort((left, right) => right.month.localeCompare(left.month));
+    if (payment.status === "confirmed") {
+      totals.receivedRevenueInCents += payment.amountInCents;
+    }
+
+    totalsByMonth.set(payment.month, totals);
+  }
+
+  for (const expense of expenses) {
+    const totals = totalsByMonth.get(expense.month) ?? createMonthlyTotals();
+
+    totals.expensesInCents += expense.amountInCents;
+    totalsByMonth.set(expense.month, totals);
+  }
+
+  const reports: MonthlyReport[] = [...totalsByMonth.entries()]
+    .map(([month, totals]) => ({
+      month,
+      expectedRevenueInCents: totals.expectedRevenueInCents,
+      receivedRevenueInCents: totals.receivedRevenueInCents,
+      expensesInCents: totals.expensesInCents,
+      balanceInCents: totals.receivedRevenueInCents - totals.expensesInCents
+    }))
+    .sort((left, right) => right.month.localeCompare(left.month));
+
+  return reports;
 }
 
-export async function putReport(report: MonthlyReport) {
-  await documentClient.send(
-    new PutCommand({
-      TableName: tableName,
-      Item: toReportItem(report)
-    })
-  );
-
-  return report;
-}
-
-export async function deleteReport(month: string) {
-  await documentClient.send(
-    new DeleteCommand({
-      TableName: tableName,
-      Key: {
-        PK: reportKey(month),
-        SK: "SUMMARY"
-      }
-    })
-  );
-
-  return { month };
+function createMonthlyTotals(): MonthlyTotals {
+  return {
+    expectedRevenueInCents: 0,
+    receivedRevenueInCents: 0,
+    expensesInCents: 0
+  };
 }

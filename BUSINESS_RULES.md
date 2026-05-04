@@ -184,7 +184,7 @@ Stack definida:
 - shadcn/ui
 - TanStack Query
 - DynamoDB
-- DynamoDB Local via Docker Compose
+- Amazon DynamoDB Local via Docker Compose
 - Cognito com OTP
 - Terraform
 - S3 privado para comprovantes

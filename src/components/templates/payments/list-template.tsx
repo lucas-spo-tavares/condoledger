@@ -24,7 +24,7 @@ export function PaymentsTemplate() {
   const residents = residentsQuery.data ?? [];
   const currentMonth = React.useMemo(() => {
     const today = new Date();
-    return new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+    return new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 10);
   }, []);
   const [month, setMonth] = React.useState(currentMonth);
   const [status, setStatus] = React.useState<"all" | PaymentStatus>("all");
@@ -83,6 +83,7 @@ export function PaymentsTemplate() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Morador</TableHead>
+                  <TableHead>Unidade</TableHead>
                   <TableHead>Mes</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Comprovante</TableHead>
@@ -97,6 +98,7 @@ export function PaymentsTemplate() {
                   return (
                     <TableRow key={payment.id}>
                       <TableCell className="font-medium">{resident?.name}</TableCell>
+                      <TableCell>{resident?.unit}</TableCell>
                       <TableCell>{formatDate(payment.month)}</TableCell>
                       <TableCell>{formatCurrency(payment.amountInCents)}</TableCell>
                       <TableCell>

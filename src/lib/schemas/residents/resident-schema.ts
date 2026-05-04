@@ -10,7 +10,7 @@ const residentBaseSchema = z.object({
     (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
     z.string().email("Informe um e-mail valido.").optional()
   ),
-  unit: z.string().min(1, "Informe a unidade."),
+  unit: z.string().trim().min(1, "Informe a unidade."),
   type: residentTypeSchema,
   status: residentStatusSchema,
   isAdministrator: z.boolean().default(false)

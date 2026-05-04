@@ -35,7 +35,7 @@ export function toResident(values: ResidentFormValues): ResidentUpsert {
   return {
     name: values.name,
     email: values.email?.trim() || undefined,
-    unit: values.unit,
+    unit: values.unit.trim(),
     type: values.type,
     monthlyContributionInCents: Math.round(values.monthlyContribution * 100),
     status: values.status,

@@ -31,7 +31,7 @@ variable "allowed_logout_urls" {
 variable "lambda_runtime" {
   description = "Runtime used by backend Lambda."
   type        = string
-  default     = "nodejs22.x"
+  default     = "nodejs24.x"
 }
 
 variable "lambda_memory_size" {

@@ -5,9 +5,31 @@ import { getResidentByEmail, getResidentById } from "@/lib/servers/residents";
 import type { CurrentUser } from "@/types/domain";
 
 const SESSION_COOKIE_NAME = "condoledger_user";
+export const SESSION_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 5;
+const AUTH_MODE = process.env.AUTH_MODE ?? "cognito";
 const localOtpSessions = new Map<string, { code: string; email: string; expiresAt: number }>();
+const LOCAL_CURRENT_USER: CurrentUser = {
+  id: "local-user",
+  name: "Local User",
+  email: "local@condoledger.local",
+  unit: "Local",
+  type: "resident",
+  isAdministrator: false
+};
 
 type ResidentLookup = Awaited<ReturnType<typeof getResidentByEmail>>;
+type StartOtpSignInResult =
+  | {
+      email: string;
+      maskedDestination: string;
+      session: string;
+    }
+  | {
+      currentUser: CurrentUser;
+      email: string;
+      maskedDestination?: string;
+      session?: string;
+    };
 
 export class AuthError extends Error {
   constructor(
@@ -19,8 +41,15 @@ export class AuthError extends Error {
   }
 }
 
-export async function startOtpSignIn(email: string) {
+export async function startOtpSignIn(email: string): Promise<StartOtpSignInResult> {
   const resident = await requireActiveResident(email);
+
+  if (isLocalAuthMode()) {
+    return {
+      currentUser: LOCAL_CURRENT_USER,
+      email: resident.email ?? email
+    };
+  }
 
   try {
     const response = await startEmailOtpSignIn(resident.email ?? email);
@@ -55,6 +84,10 @@ export async function startOtpSignIn(email: string) {
 
 export async function confirmOtpSignIn(params: { email: string; code: string; session: string }) {
   const resident = await requireActiveResident(params.email);
+
+  if (isLocalAuthMode()) {
+    return LOCAL_CURRENT_USER;
+  }
 
   if (params.session.startsWith("local:")) {
     const localSession = localOtpSessions.get(params.session);
@@ -95,17 +128,27 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
 }
 
 export async function getCurrentUserFromResidentId(residentId: string | undefined): Promise<CurrentUser | null> {
-  if (!residentId) {
+  if (isLocalAuthMode()) {
+    return getLocalCurrentUser();
+  }
+
+  if (residentId) {
+    const resident = await getResidentById(residentId);
+
+    if (resident && resident.status === "active") {
+      return buildCurrentUser(resident);
+    }
+  }
+
+  return null;
+}
+
+export async function getLocalCurrentUser() {
+  if (!isLocalAuthMode()) {
     return null;
   }
 
-  const resident = await getResidentById(residentId);
-
-  if (!resident || resident.status !== "active") {
-    return null;
-  }
-
-  return buildCurrentUser(resident);
+  return LOCAL_CURRENT_USER;
 }
 
 export function getCurrentUserCookieName() {
@@ -157,4 +200,8 @@ function maskEmail(email: string) {
   }
 
   return `${name.slice(0, 2)}***@${domain}`;
+}
+
+function isLocalAuthMode() {
+  return AUTH_MODE.toLowerCase() === "local";
 }
