@@ -26,7 +26,7 @@ export function toReceiptFormValues(receipt: Receipt): ReceiptFormValues {
     description: receipt.description ?? "",
     amount: receipt.amountInCents / 100,
     status: receipt.status,
-    paidAt: receipt.paidAt ?? "",
+    receivedAt: receipt.receivedAt ?? "",
     proofAttachments: receipt.proofAttachments
   };
 }
@@ -38,7 +38,7 @@ export function toReceipt(values: ReceiptFormValues): ReceiptUpsert {
     description: values.description?.trim() || undefined,
     amountInCents: Math.round(values.amount * 100),
     status: values.status,
-    paidAt: values.paidAt || undefined,
+    receivedAt: values.receivedAt || undefined,
     proofAttachments: values.proofAttachments
   };
 }

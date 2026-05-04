@@ -34,7 +34,7 @@ export type Receipt = {
   description?: string;
   amountInCents: number;
   status: ReceiptStatus;
-  paidAt?: string;
+  receivedAt?: string;
   proofAttachments: FileAttachment[];
 };
 

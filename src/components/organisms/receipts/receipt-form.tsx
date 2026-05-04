@@ -6,8 +6,8 @@ import { useFormContext } from "react-hook-form";
 import { FormField } from "@/components/organisms/form-field";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
 import { MonthPicker } from "@/components/ui/month-picker";
-import { Textarea } from "@/components/ui/textarea";
 import type { ReceiptFormValues } from "@/lib/schemas/receipts/receipt-schema";
 import type { Resident } from "@/types/domain";
 
@@ -99,9 +99,9 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
         />
         <Controller
           control={control}
-          name="paidAt"
+          name="receivedAt"
           render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Pago em">
+            <FormField error={fieldState.error?.message} label="Recebido em">
               <DatePicker onValueChange={field.onChange} value={field.value ?? ""} />
             </FormField>
           )}
@@ -111,9 +111,8 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
           name="description"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Descricao">
-              <Textarea
+              <Input
                 {...field}
-                className="min-h-28"
                 placeholder="Observacoes sobre este recebimento"
                 value={field.value ?? ""}
               />

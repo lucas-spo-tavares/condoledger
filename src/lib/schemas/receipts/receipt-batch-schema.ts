@@ -7,7 +7,7 @@ const receiptBatchItemSchema = z.object({
   description: z.string().optional(),
   amount: z.coerce.number().min(0, "Informe um valor igual ou maior que zero."),
   month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
-  paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
+  receivedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
   status: receiptStatusSchema
 });
 
@@ -24,7 +24,7 @@ export function createReceiptBatchItemValues(params: {
   description?: string;
   amount: number;
   month: string;
-  paidAt: string;
+  receivedAt: string;
   status: z.infer<typeof receiptStatusSchema>;
 }) {
   return {
@@ -32,7 +32,7 @@ export function createReceiptBatchItemValues(params: {
     description: params.description ?? "",
     amount: params.amount,
     month: params.month,
-    paidAt: params.paidAt,
+    receivedAt: params.receivedAt,
     status: params.status
   };
 }

@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { useBatchReceiptsMutation } from "@/lib/hooks/receipts/useBatchReceiptsMutation";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
 import { createReceiptBatchItemValues } from "@/lib/schemas/receipts/receipt-batch-schema";
@@ -34,7 +34,7 @@ function createDefaultItem(resident: Resident) {
     residentId: resident.id,
     amount: resident.monthlyContributionInCents / 100,
     month: getCurrentMonthValue(),
-    paidAt: getTodayValue(),
+    receivedAt: getTodayValue(),
     status: "confirmed"
   });
 }
@@ -76,7 +76,7 @@ export function ReceiptBatchTemplate() {
         amountInCents: Math.round(item.amount * 100),
         description: item.description?.trim() || undefined,
         status: item.status,
-        paidAt: item.paidAt,
+        receivedAt: item.receivedAt,
         proofAttachments: []
       })),
       {
@@ -124,7 +124,7 @@ export function ReceiptBatchTemplate() {
                   <TableHead>Unidade</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Mês</TableHead>
-                  <TableHead>Pago em</TableHead>
+                  <TableHead>Recebido em</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Descricao</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
@@ -175,10 +175,10 @@ export function ReceiptBatchTemplate() {
                       <TableCell>
                         <Controller
                           control={control}
-                          name={`items.${index}.paidAt`}
-                          render={({ field: paidAtField, fieldState }) => (
+                          name={`items.${index}.receivedAt`}
+                          render={({ field: receivedAtField, fieldState }) => (
                             <div className="grid gap-1">
-                              <DatePicker onValueChange={paidAtField.onChange} value={paidAtField.value} />
+                              <DatePicker onValueChange={receivedAtField.onChange} value={receivedAtField.value} />
                               <span className="min-h-4 text-xs text-destructive">
                                 {fieldState.error?.message || "\u00A0"}
                               </span>
@@ -213,9 +213,9 @@ export function ReceiptBatchTemplate() {
                           name={`items.${index}.description`}
                           render={({ field: descriptionField, fieldState }) => (
                             <div className="grid gap-1">
-                              <Textarea
+                              <Input
                                 {...descriptionField}
-                                className="min-h-20 min-w-64"
+                                className="min-w-64"
                                 placeholder="Descricao"
                                 value={descriptionField.value ?? ""}
                               />

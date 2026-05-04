@@ -9,7 +9,7 @@ const receiptBaseSchema = z.object({
   month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
   description: z.string().optional(),
   status: receiptStatusSchema,
-  paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD.").optional(),
+  receivedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD.").optional(),
   proofAttachments: z.array(attachmentSchema)
 });
 
@@ -31,7 +31,7 @@ export function getReceiptFormDefaultValues(): ReceiptFormValues {
     description: "",
     amount: 0,
     status: "pending",
-    paidAt: "",
+    receivedAt: "",
     proofAttachments: []
   };
 }
