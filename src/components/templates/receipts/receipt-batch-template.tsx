@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Controller, useFieldArray } from "react-hook-form";
 import { Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import { MonthPicker } from "@/components/ui/month-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useBatchReceiptsMutation } from "@/lib/hooks/receipts/useBatchReceiptsMutation";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
+import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
 import { createReceiptBatchItemValues } from "@/lib/schemas/receipts/receipt-batch-schema";
 import { useReceiptBatchForm } from "@/lib/forms/receipts/useReceiptBatchForm";
 import type { ReceiptBatchFormValues } from "@/lib/schemas/receipts/receipt-batch-schema";
@@ -40,7 +40,7 @@ function createDefaultItem(resident: Resident) {
 }
 
 export function ReceiptBatchTemplate() {
-  const router = useRouter();
+  const goBack = useSafeBackNavigation("/receipts");
   const residentsQuery = useResidentsQuery({ status: "active" });
   const batchReceiptsMutation = useBatchReceiptsMutation();
   const residents = residentsQuery.data ?? [];
@@ -80,7 +80,7 @@ export function ReceiptBatchTemplate() {
         proofAttachments: []
       })),
       {
-        onSuccess: () => router.push("/receipts")
+        onSuccess: () => goBack()
       }
     );
   }
@@ -258,7 +258,7 @@ export function ReceiptBatchTemplate() {
             </Table>
 
             <div className="mt-5 flex justify-end gap-2">
-              <Button onClick={() => router.push("/receipts")} type="button" variant="outline">
+              <Button onClick={goBack} type="button" variant="outline">
                 Cancelar
               </Button>
               <Button

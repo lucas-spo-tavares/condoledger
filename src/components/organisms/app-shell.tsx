@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Building2, LogOut, UserCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -7,10 +8,13 @@ import { AppNavigation } from "@/components/organisms/app-navigation";
 import { useCurrentUser } from "@/components/providers/current-user-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useTrackPrivateRoute } from "@/lib/navigation/safe-back";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const currentUser = useCurrentUser();
+
+  useTrackPrivateRoute();
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 
 import { AttachmentFilesCard } from "@/components/organisms/attachment-files-card";
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toReceipt, useReceiptForm } from "@/lib/forms/receipts/useReceiptForm";
 import { useReceiptsMutation } from "@/lib/hooks/receipts/useReceiptsMutation";
+import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
 import { getReceiptFormDefaultValues } from "@/lib/schemas/receipts/receipt-schema";
 import { useReceiptsQuery } from "@/lib/hooks/receipts/useReceiptsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
@@ -19,7 +19,7 @@ type ReceiptFormTemplateProps = {
 };
 
 export function ReceiptFormTemplate({ receiptId = null }: ReceiptFormTemplateProps) {
-  const router = useRouter();
+  const goBack = useSafeBackNavigation("/receipts");
   const receiptsQuery = useReceiptsQuery();
   const residentsQuery = useResidentsQuery();
   const receiptsMutation = useReceiptsMutation();
@@ -29,12 +29,12 @@ export function ReceiptFormTemplate({ receiptId = null }: ReceiptFormTemplatePro
   const isMissingReceipt = Boolean(receiptId) && receiptsQuery.isSuccess && !receipt;
 
   function handleCancel() {
-    router.push("/receipts");
+    goBack();
   }
 
   function handleSubmit(nextReceipt: ReceiptUpsert) {
     receiptsMutation.mutate(nextReceipt, {
-      onSuccess: () => router.push("/receipts")
+      onSuccess: () => goBack()
     });
   }
 

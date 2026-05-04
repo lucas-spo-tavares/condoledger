@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Pencil, Plus, Trash2, Paperclip } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +52,9 @@ function ReceiptDescription({ description }: { description: string }) {
 }
 
 export function ReceiptsTemplate() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const residentsQuery = useResidentsQuery();
   const deleteReceiptsMutation = useDeleteReceiptsMutation();
   const residents = residentsQuery.data ?? [];
@@ -58,10 +62,26 @@ export function ReceiptsTemplate() {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 10);
   }, []);
-  const [month, setMonth] = React.useState(currentMonth);
-  const [status, setStatus] = React.useState<"all" | ReceiptStatus>("all");
-  const [nameSearch, setNameSearch] = React.useState("");
+  const month = searchParams.get("month") ?? currentMonth;
+  const status = (searchParams.get("status") ?? "all") as "all" | ReceiptStatus;
+  const nameSearch = searchParams.get("q") ?? "";
   const debouncedNameSearch = useDebounce(nameSearch, 1000);
+
+  function updateSearchParams(nextParams: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    for (const [key, value] of Object.entries(nextParams)) {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
   const receiptsQuery = useReceiptsQuery({
     month,
     status,
@@ -90,10 +110,10 @@ export function ReceiptsTemplate() {
         </div>
       </div>
       <div className="grid gap-3 rounded-lg border border-border bg-card p-4 lg:grid-cols-[240px_220px_1fr]">
-        <MonthPicker onValueChange={setMonth} value={month} />
+        <MonthPicker onValueChange={(value) => updateSearchParams({ month: value })} value={month} />
         <select
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onChange={(event) => setStatus(event.target.value as "all" | ReceiptStatus)}
+          onChange={(event) => updateSearchParams({ status: event.target.value })}
           value={status}
         >
           <option value="all">Todos os status</option>
@@ -102,7 +122,7 @@ export function ReceiptsTemplate() {
           <option value="voided">Cancelado</option>
         </select>
         <Input
-          onChange={(event) => setNameSearch(event.target.value)}
+          onChange={(event) => updateSearchParams({ q: event.target.value || null })}
           placeholder="Buscar por nome do morador"
           value={nameSearch}
         />
@@ -163,7 +183,7 @@ export function ReceiptsTemplate() {
                         <Badge variant={receipt.status === "confirmed" ? "success" : "warning"}>
                           {formatReceiptStatus(receipt.status)}
                         </Badge>
-                      </TableCell>
+                    </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-2">
                           <Button asChild size="icon" type="button" variant="outline">

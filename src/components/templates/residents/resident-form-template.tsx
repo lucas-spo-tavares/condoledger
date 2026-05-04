@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 
 import { ResidentForm } from "@/components/organisms/residents/resident-form";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toResident, useResidentForm } from "@/lib/forms/residents/useResidentForm";
 import { useResidentsMutation } from "@/lib/hooks/residents/useResidentsMutation";
+import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
 import { getResidentFormDefaultValues } from "@/lib/schemas/residents/resident-schema";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
 import type { ResidentUpsert } from "@/types/domain";
@@ -17,7 +17,7 @@ type ResidentFormTemplateProps = {
 };
 
 export function ResidentFormTemplate({ residentId = null }: ResidentFormTemplateProps) {
-  const router = useRouter();
+  const goBack = useSafeBackNavigation("/residents");
   const residentsQuery = useResidentsQuery();
   const residentsMutation = useResidentsMutation();
   const resident = residentId ? residentsQuery.data?.find((item) => item.id === residentId) ?? null : null;
@@ -26,12 +26,12 @@ export function ResidentFormTemplate({ residentId = null }: ResidentFormTemplate
   const isMissingResident = Boolean(residentId) && residentsQuery.isSuccess && !resident;
 
   function handleCancel() {
-    router.push("/residents");
+    goBack();
   }
 
   function handleSubmit(nextResident: ResidentUpsert) {
     residentsMutation.mutate(nextResident, {
-      onSuccess: () => router.push("/residents")
+      onSuccess: () => goBack()
     });
   }
 
