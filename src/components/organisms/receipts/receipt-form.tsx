@@ -7,7 +7,8 @@ import { FormField } from "@/components/organisms/form-field";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { MonthPicker } from "@/components/ui/month-picker";
-import type { ReceiptFormValues } from "@/lib/schemas/payments/payment-schema";
+import { Textarea } from "@/components/ui/textarea";
+import type { ReceiptFormValues } from "@/lib/schemas/receipts/receipt-schema";
 import type { Resident } from "@/types/domain";
 
 type ReceiptFormProps = {
@@ -71,6 +72,7 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Valor">
               <CurrencyInput
+                className="min-w-32"
                 onBlur={field.onBlur}
                 onValueChange={field.onChange}
                 ref={field.ref}
@@ -86,7 +88,7 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
             <FormField error={fieldState.error?.message} label="Status">
               <select
                 {...field}
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-9 w-full min-w-36 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="pending">Pendente</option>
                 <option value="confirmed">Confirmado</option>
@@ -101,6 +103,20 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Pago em">
               <DatePicker onValueChange={field.onChange} value={field.value ?? ""} />
+            </FormField>
+          )}
+        />
+        <Controller
+          control={control}
+          name="description"
+          render={({ field, fieldState }) => (
+            <FormField error={fieldState.error?.message} label="Descricao">
+              <Textarea
+                {...field}
+                className="min-h-28"
+                placeholder="Observacoes sobre este recebimento"
+                value={field.value ?? ""}
+              />
             </FormField>
           )}
         />

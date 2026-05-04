@@ -7,7 +7,7 @@ import {
   receiptBatchFormSchema,
   type ReceiptBatchFormInput,
   type ReceiptBatchFormValues
-} from "@/lib/schemas/payments/payment-batch-schema";
+} from "@/lib/schemas/receipts/receipt-batch-schema";
 
 export function useReceiptBatchForm(defaultValues: ReceiptBatchFormValues) {
   return useForm<ReceiptBatchFormInput, unknown, ReceiptBatchFormValues>({

@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { useExpensesQuery } from "@/lib/hooks/expenses/useExpensesQuery";
-import { useReceiptsQuery } from "@/lib/hooks/payments/usePaymentsQuery";
+import { useReceiptsQuery } from "@/lib/hooks/receipts/useReceiptsQuery";
 import { useReportsQuery } from "@/lib/hooks/reports/useReportsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
 import { formatCurrency, formatMonth } from "@/lib/commons/formats";

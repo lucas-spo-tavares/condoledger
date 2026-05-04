@@ -1,6 +1,6 @@
-import type { Expense, Receipt, Resident } from "@/types/domain";
+import type { Expense, InitialBalance, Receipt, Resident } from "@/types/domain";
 
-export type EntityType = "Expense" | "Receipt" | "Resident";
+export type EntityType = "Expense" | "InitialBalance" | "Receipt" | "Resident";
 
 export type DynamoItem<T> = T & {
   PK: string;
@@ -38,6 +38,17 @@ export function toExpenseItem(expense: Expense): DynamoItem<Expense> {
     GSI1SK: `EXPENSE#${expense.category}#${expense.id}`,
     entityType: "Expense",
     ...expense
+  };
+}
+
+export function toInitialBalanceItem(initialBalance: InitialBalance): DynamoItem<InitialBalance> {
+  return {
+    PK: monthKey(initialBalance.month),
+    SK: `INITIAL_BALANCE#${initialBalance.id}`,
+    GSI1PK: monthKey(initialBalance.month),
+    GSI1SK: `INITIAL_BALANCE#${initialBalance.id}`,
+    entityType: "InitialBalance",
+    ...initialBalance
   };
 }
 

@@ -5,9 +5,11 @@ dist
 coverage
 *.tsbuildinfo
 .env
+.env.prod
 .env*.local
 csvs/
 .dynamodb
+infra/lambda/*.zip
 *.tfstate
 *.tfstate.*
 .terraform

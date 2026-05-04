@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getZodFieldErrors } from "@/lib/commons/zod";
-import { receiptSchema } from "@/lib/schemas/payments/payment-schema";
-import { deleteReceipt, getReceipts, putReceipt } from "@/lib/servers/payments";
+import { receiptSchema } from "@/lib/schemas/receipts/receipt-schema";
+import { deleteReceipt, getReceipts, putReceipt } from "@/lib/servers/receipts";
 
 export async function GET(request: NextRequest) {
   const month = request.nextUrl.searchParams.get("month") ?? undefined;

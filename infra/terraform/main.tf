@@ -17,8 +17,6 @@ locals {
 resource "aws_dynamodb_table" "app" {
   name         = local.name
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "PK"
-  range_key    = "SK"
 
   attribute {
     name = "PK"
@@ -40,11 +38,29 @@ resource "aws_dynamodb_table" "app" {
     type = "S"
   }
 
+  key_schema {
+    attribute_name = "PK"
+    key_type       = "HASH"
+  }
+
+  key_schema {
+    attribute_name = "SK"
+    key_type       = "RANGE"
+  }
+
   global_secondary_index {
     name            = "GSI1"
-    hash_key        = "GSI1PK"
-    range_key       = "GSI1SK"
     projection_type = "ALL"
+
+    key_schema {
+      attribute_name = "GSI1PK"
+      key_type       = "HASH"
+    }
+
+    key_schema {
+      attribute_name = "GSI1SK"
+      key_type       = "RANGE"
+    }
   }
 
   point_in_time_recovery {

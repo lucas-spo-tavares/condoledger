@@ -8,7 +8,7 @@ import {
   receiptFormSchema,
   type ReceiptFormInput,
   type ReceiptFormValues
-} from "@/lib/schemas/payments/payment-schema";
+} from "@/lib/schemas/receipts/receipt-schema";
 import type { Receipt, ReceiptUpsert } from "@/types/domain";
 
 export function useReceiptForm(receipt?: Receipt | null) {
@@ -23,6 +23,7 @@ export function toReceiptFormValues(receipt: Receipt): ReceiptFormValues {
     id: receipt.id,
     residentId: receipt.residentId,
     month: receipt.month,
+    description: receipt.description ?? "",
     amount: receipt.amountInCents / 100,
     status: receipt.status,
     paidAt: receipt.paidAt ?? "",
@@ -34,6 +35,7 @@ export function toReceipt(values: ReceiptFormValues): ReceiptUpsert {
   return {
     residentId: values.residentId,
     month: values.month,
+    description: values.description?.trim() || undefined,
     amountInCents: Math.round(values.amount * 100),
     status: values.status,
     paidAt: values.paidAt || undefined,

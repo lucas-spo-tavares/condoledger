@@ -2,13 +2,14 @@ import { CreateTableCommand, ResourceInUseException } from "@aws-sdk/client-dyna
 import { BatchWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { loadEnvConfig } from "@next/env";
 
-import { toExpenseItem, toReceiptItem, toResidentItem } from "../src/lib/dynamodb-items";
-import { expenses, receipts, residents } from "./seed-data";
+import { toExpenseItem, toInitialBalanceItem, toReceiptItem, toResidentItem } from "../src/lib/dynamodb-items";
+import { expenses, initialBalances, receipts, residents } from "./seed-data";
 
 type SeedItem =
   | ReturnType<typeof toResidentItem>
   | ReturnType<typeof toReceiptItem>
-  | ReturnType<typeof toExpenseItem>;
+  | ReturnType<typeof toExpenseItem>
+  | ReturnType<typeof toInitialBalanceItem>;
 
 async function main() {
   loadEnvConfig(process.cwd());
@@ -19,7 +20,8 @@ async function main() {
   const seedGroups: Array<{ label: string; items: SeedItem[] }> = [
     { label: "residents", items: residents.map(toResidentItem) },
     { label: "receipts", items: receipts.map(toReceiptItem) },
-    { label: "expenses", items: expenses.map(toExpenseItem) }
+    { label: "expenses", items: expenses.map(toExpenseItem) },
+    { label: "initial balances", items: initialBalances.map(toInitialBalanceItem) }
   ];
 
   for (const group of seedGroups) {

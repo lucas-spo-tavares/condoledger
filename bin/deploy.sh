@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TERRAFORM_DIR="$ROOT_DIR/infra/terraform"
 FRONTEND_DIR="$ROOT_DIR/out"
+PROD_ENV_FILE="$ROOT_DIR/.env.prod"
 
 if ! command -v terraform >/dev/null 2>&1; then
   echo "terraform is required but was not found."
@@ -15,17 +16,35 @@ if ! command -v aws >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ ! -f "$PROD_ENV_FILE" ]]; then
+  echo ".env.prod is required for production deploys but was not found at $PROD_ENV_FILE."
+  exit 1
+fi
+
+set -a
+# shellcheck source=/dev/null
+source "$PROD_ENV_FILE"
+set +a
+
 echo "Running checks and build"
 npm run typecheck
+
+echo "Initializing Terraform"
+terraform -chdir="$TERRAFORM_DIR" init
+
 npm run build
 
-echo "Applying Terraform"
-terraform -chdir="$TERRAFORM_DIR" init
-terraform -chdir="$TERRAFORM_DIR" plan -out=tfplan
-terraform -chdir="$TERRAFORM_DIR" apply tfplan
-
 FRONTEND_BUCKET="$(terraform -chdir="$TERRAFORM_DIR" output -raw frontend_bucket_name)"
+if [[ -z "$FRONTEND_BUCKET" ]]; then
+  echo "Terraform output frontend_bucket_name is missing. Run terraform apply first."
+  exit 1
+fi
+
 CLOUDFRONT_DISTRIBUTION_ID="$(terraform -chdir="$TERRAFORM_DIR" output -raw frontend_cloudfront_distribution_id)"
+if [[ -z "$CLOUDFRONT_DISTRIBUTION_ID" ]]; then
+  echo "Terraform output frontend_cloudfront_distribution_id is missing. Run terraform apply first."
+  exit 1
+fi
 
 if [[ -d "$FRONTEND_DIR" ]]; then
   echo "Uploading static frontend to S3"

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { Expense, Receipt, Resident } from "../src/types/domain";
+import type { Expense, InitialBalance, Receipt, Resident } from "../src/types/domain";
 
 type StatementReceipt = {
   name: string;
@@ -1048,3 +1048,11 @@ function buildExpenses(): Expense[] {
 export const residents = buildResidents();
 export const receipts = buildReceipts();
 export const expenses = buildExpenses();
+export const initialBalances: InitialBalance[] = [
+  {
+    id: "initial-balance-2025-11",
+    month: "2025-11-01",
+    description: "Saldo inicial",
+    amountInCents: 313651
+  }
+];

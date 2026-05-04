@@ -12,12 +12,13 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { MonthPicker } from "@/components/ui/month-picker";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useBatchReceiptsMutation } from "@/lib/hooks/payments/useBatchPaymentsMutation";
+import { Textarea } from "@/components/ui/textarea";
+import { useBatchReceiptsMutation } from "@/lib/hooks/receipts/useBatchReceiptsMutation";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
-import { createReceiptBatchItemValues } from "@/lib/schemas/payments/payment-batch-schema";
-import { useReceiptBatchForm } from "@/lib/forms/payments/usePaymentBatchForm";
-import type { ReceiptBatchFormValues } from "@/lib/schemas/payments/payment-batch-schema";
-import type { ReceiptStatus, Resident } from "@/types/domain";
+import { createReceiptBatchItemValues } from "@/lib/schemas/receipts/receipt-batch-schema";
+import { useReceiptBatchForm } from "@/lib/forms/receipts/useReceiptBatchForm";
+import type { ReceiptBatchFormValues } from "@/lib/schemas/receipts/receipt-batch-schema";
+import type { Resident } from "@/types/domain";
 
 function getTodayValue() {
   return new Date().toISOString().slice(0, 10);
@@ -73,12 +74,13 @@ export function ReceiptBatchTemplate() {
         residentId: item.residentId,
         month: item.month,
         amountInCents: Math.round(item.amount * 100),
+        description: item.description?.trim() || undefined,
         status: item.status,
         paidAt: item.paidAt,
         proofAttachments: []
       })),
       {
-        onSuccess: () => router.push("/payments")
+        onSuccess: () => router.push("/receipts")
       }
     );
   }
@@ -124,6 +126,7 @@ export function ReceiptBatchTemplate() {
                   <TableHead>Mês</TableHead>
                   <TableHead>Pago em</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Descricao</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -142,6 +145,7 @@ export function ReceiptBatchTemplate() {
                           render={({ field: amountField, fieldState }) => (
                             <div className="grid gap-1">
                               <CurrencyInput
+                                className="min-w-32"
                                 onBlur={amountField.onBlur}
                                 onValueChange={amountField.onChange}
                                 ref={amountField.ref}
@@ -190,12 +194,31 @@ export function ReceiptBatchTemplate() {
                             <div className="grid gap-1">
                               <select
                                 {...statusField}
-                                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                className="flex h-9 w-full min-w-36 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                               >
                                 <option value="confirmed">Confirmado</option>
                                 <option value="pending">Pendente</option>
                                 <option value="voided">Cancelado</option>
                               </select>
+                              <span className="min-h-4 text-xs text-destructive">
+                                {fieldState.error?.message || "\u00A0"}
+                              </span>
+                            </div>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Controller
+                          control={control}
+                          name={`items.${index}.description`}
+                          render={({ field: descriptionField, fieldState }) => (
+                            <div className="grid gap-1">
+                              <Textarea
+                                {...descriptionField}
+                                className="min-h-20 min-w-64"
+                                placeholder="Descricao"
+                                value={descriptionField.value ?? ""}
+                              />
                               <span className="min-h-4 text-xs text-destructive">
                                 {fieldState.error?.message || "\u00A0"}
                               </span>
@@ -220,13 +243,13 @@ export function ReceiptBatchTemplate() {
                 })}
                 {isLoadingResidents ? (
                   <TableRow>
-                    <TableCell className="text-sm text-muted-foreground" colSpan={7}>
+                    <TableCell className="text-sm text-muted-foreground" colSpan={8}>
                       Carregando moradores ativos...
                     </TableCell>
                   </TableRow>
                 ) : !fields.length ? (
                   <TableRow>
-                    <TableCell className="text-sm text-muted-foreground" colSpan={7}>
+                    <TableCell className="text-sm text-muted-foreground" colSpan={8}>
                       Cadastre ou ative moradores para habilitar o lançamento em lote.
                     </TableCell>
                   </TableRow>
@@ -235,7 +258,7 @@ export function ReceiptBatchTemplate() {
             </Table>
 
             <div className="mt-5 flex justify-end gap-2">
-              <Button onClick={() => router.push("/payments")} type="button" variant="outline">
+              <Button onClick={() => router.push("/receipts")} type="button" variant="outline">
                 Cancelar
               </Button>
               <Button

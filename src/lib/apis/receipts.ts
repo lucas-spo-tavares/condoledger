@@ -23,18 +23,18 @@ export async function getReceipts(params?: ReceiptQueryParams) {
   }
 
   const queryString = searchParams.toString();
-  return request<Receipt[]>(queryString ? `/api/payments?${queryString}` : "/api/payments");
+  return request<Receipt[]>(queryString ? `/api/receipts?${queryString}` : "/api/receipts");
 }
 
 export async function putReceipt(receipt: ReceiptUpsert) {
-  return request<Receipt>("/api/payments", {
+  return request<Receipt>("/api/receipts", {
     method: "PUT",
     body: JSON.stringify(receipt)
   });
 }
 
 export async function deleteReceipt(id: string) {
-  return request<{ id: string }>(`/api/payments?id=${encodeURIComponent(id)}`, {
+  return request<{ id: string }>(`/api/receipts?id=${encodeURIComponent(id)}`, {
     method: "DELETE"
   });
 }

@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 
 import { AttachmentFilesCard } from "@/components/organisms/attachment-files-card";
-import { ReceiptForm } from "@/components/organisms/payments/payment-form";
+import { ReceiptForm } from "@/components/organisms/receipts/receipt-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toReceipt, useReceiptForm } from "@/lib/forms/payments/usePaymentForm";
-import { useReceiptsMutation } from "@/lib/hooks/payments/usePaymentsMutation";
-import { getReceiptFormDefaultValues } from "@/lib/schemas/payments/payment-schema";
-import { useReceiptsQuery } from "@/lib/hooks/payments/usePaymentsQuery";
+import { toReceipt, useReceiptForm } from "@/lib/forms/receipts/useReceiptForm";
+import { useReceiptsMutation } from "@/lib/hooks/receipts/useReceiptsMutation";
+import { getReceiptFormDefaultValues } from "@/lib/schemas/receipts/receipt-schema";
+import { useReceiptsQuery } from "@/lib/hooks/receipts/useReceiptsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
 import type { ReceiptUpsert } from "@/types/domain";
 
@@ -29,12 +29,12 @@ export function ReceiptFormTemplate({ receiptId = null }: ReceiptFormTemplatePro
   const isMissingReceipt = Boolean(receiptId) && receiptsQuery.isSuccess && !receipt;
 
   function handleCancel() {
-    router.push("/payments");
+    router.push("/receipts");
   }
 
   function handleSubmit(nextReceipt: ReceiptUpsert) {
     receiptsMutation.mutate(nextReceipt, {
-      onSuccess: () => router.push("/payments")
+      onSuccess: () => router.push("/receipts")
     });
   }
 

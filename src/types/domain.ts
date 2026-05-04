@@ -31,6 +31,7 @@ export type Receipt = {
   id: string;
   residentId: string;
   month: string;
+  description?: string;
   amountInCents: number;
   status: ReceiptStatus;
   paidAt?: string;
@@ -60,6 +61,13 @@ export type Expense = {
 
 export type ExpenseUpsert = Omit<Expense, "id" | "month"> & {
   id?: string;
+};
+
+export type InitialBalance = {
+  id: string;
+  month: string;
+  description: string;
+  amountInCents: number;
 };
 
 export type MonthlyReport = {

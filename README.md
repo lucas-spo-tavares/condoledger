@@ -80,6 +80,21 @@ Next.js loads `.env.local` automatically during `npm run dev`, `npm run build`, 
 
 Terraform does not read `.env.local` automatically. Use AWS environment variables for credentials and either Terraform defaults, `TF_VAR_*` variables, or a `*.tfvars` file for Terraform inputs.
 
+For production deploys, create a local `.env.prod` file after Terraform has been applied. This repo ignores that file, and `npm run deploy` reads it before building or deploying.
+
+```bash
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+DYNAMODB_TABLE_NAME=<terraform output>
+DYNAMODB_ENDPOINT=
+DYNAMODB_GSI1_NAME=GSI1
+AUTH_MODE=cognito
+COGNITO_USER_POOL_ID=<terraform output>
+COGNITO_CLIENT_ID=<terraform output>
+PROOFS_BUCKET_NAME=<terraform output>
+```
+
 ## Infrastructure
 
 Terraform lives in `infra/terraform` and provisions:
@@ -100,10 +115,12 @@ terraform apply
 For the manual deploy flow:
 
 ```bash
+terraform -chdir=infra/terraform init
+terraform -chdir=infra/terraform apply
 npm run deploy
 ```
 
-This runs typecheck, builds the app, initializes Terraform, creates a plan, applies it, and prints Terraform outputs.
+`npm run deploy` loads `.env.prod`, runs typecheck and build, reads the existing Terraform outputs, uploads the static frontend when `out/` exists, and prints Terraform outputs.
 
 ## Current Scope
 

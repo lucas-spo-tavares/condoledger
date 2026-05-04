@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { putReceipt } from "@/lib/apis/payments";
+import { putReceipt } from "@/lib/apis/receipts";
 import type { ReceiptUpsert } from "@/types/domain";
 
 export function useBatchReceiptsMutation() {

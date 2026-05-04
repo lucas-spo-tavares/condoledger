@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getReceipts, type ReceiptQueryParams } from "@/lib/apis/payments";
+import { getReceipts, type ReceiptQueryParams } from "@/lib/apis/receipts";
 
 export function useReceiptsQuery(params?: ReceiptQueryParams) {
   return useQuery({
