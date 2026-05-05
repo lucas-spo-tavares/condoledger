@@ -16,13 +16,6 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "database_url" {
-  description = "PostgreSQL connection URL used by the application."
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
 variable "allowed_callback_urls" {
   description = "Allowed callback URLs for Cognito clients."
   type        = list(string)
@@ -33,30 +26,6 @@ variable "allowed_logout_urls" {
   description = "Allowed logout URLs for Cognito clients."
   type        = list(string)
   default     = ["http://localhost:3000/sign-in"]
-}
-
-variable "lambda_runtime" {
-  description = "Runtime used by backend Lambda."
-  type        = string
-  default     = "nodejs24.x"
-}
-
-variable "lambda_memory_size" {
-  description = "Memory size in MB for backend Lambda."
-  type        = number
-  default     = 256
-}
-
-variable "lambda_timeout_seconds" {
-  description = "Timeout in seconds for backend Lambda."
-  type        = number
-  default     = 10
-}
-
-variable "frontend_allowed_origins" {
-  description = "Allowed CORS origins for backend API."
-  type        = list(string)
-  default     = ["http://localhost:3000"]
 }
 
 variable "enable_bucket_force_destroy" {

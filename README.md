@@ -73,7 +73,7 @@ Next.js loads `.env.local` automatically during `npm run dev`, `npm run build`, 
 
 Terraform does not read `.env.local` automatically. Use AWS environment variables for credentials and either Terraform defaults, `TF_VAR_*` variables, or a `*.tfvars` file for Terraform inputs.
 
-For production deploys, create a local `.env.prod` file after Terraform has been applied. This repo ignores that file, and `npm run deploy` reads it before building or deploying.
+For production deploys, create a local `.env.prod` file after you have the Neon connection string and the Terraform-managed AWS resources. This repo ignores that file, and `npm run deploy` reads it before building or deploying.
 
 ```bash
 AWS_REGION=us-east-1
@@ -90,7 +90,6 @@ PROOFS_BUCKET_NAME=<terraform output>
 
 Terraform lives in `infra/terraform` and provisions:
 
-- PostgreSQL connection URL for the application
 - S3 bucket for payment proofs
 - Cognito User Pool
 - Cognito web app client
@@ -106,13 +105,10 @@ terraform apply
 For the manual deploy flow:
 
 ```bash
-terraform -chdir=infra/terraform init
-terraform -chdir=infra/terraform apply
-npm run db:deploy
 npm run deploy
 ```
 
-`npm run db:deploy` applies pending Prisma migrations to the configured PostgreSQL database. `npm run deploy` loads `.env.prod`, runs typecheck and build, reads the existing Terraform outputs, uploads the static frontend when `out/` exists, and prints Terraform outputs.
+`npm run deploy` loads `.env.prod`, runs typecheck and build, applies Prisma migrations, applies the Terraform-managed AWS infrastructure, and prints Terraform outputs. Deploying the Next.js app itself is handled by Amplify.
 
 ## Current Scope
 
