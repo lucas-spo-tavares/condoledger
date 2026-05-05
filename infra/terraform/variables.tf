@@ -39,3 +39,26 @@ variable "cognito_deletion_protection" {
   type        = string
   default     = "INACTIVE"
 }
+
+variable "amplify_repository_url" {
+  description = "Git repository URL for the Amplify app."
+  type        = string
+}
+
+variable "amplify_access_token" {
+  description = "GitHub access token used by Amplify to connect the repository. This value is stored in Terraform state."
+  type        = string
+  sensitive   = true
+}
+
+variable "amplify_branch_name" {
+  description = "Repository branch that Amplify should deploy."
+  type        = string
+  default     = "main"
+}
+
+variable "amplify_environment_variables" {
+  description = "Additional environment variables for the Amplify app."
+  type        = map(string)
+  default     = {}
+}

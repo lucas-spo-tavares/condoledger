@@ -86,6 +86,16 @@ COGNITO_CLIENT_ID=<terraform output>
 PROOFS_BUCKET_NAME=<terraform output>
 ```
 
+If you are provisioning Amplify through Terraform, also add these values to `.env.prod` as `TF_VAR_*` variables:
+
+```bash
+TF_VAR_amplify_repository_url=<git repo url>
+TF_VAR_amplify_access_token=<github token>
+TF_VAR_amplify_branch_name=main
+```
+
+You can also pass extra Amplify environment variables with `TF_VAR_amplify_environment_variables`, for example to override `DATABASE_URL` or add `NEXT_PUBLIC_*` values.
+
 ## Infrastructure
 
 Terraform lives in `infra/terraform` and provisions:
@@ -94,6 +104,7 @@ Terraform lives in `infra/terraform` and provisions:
 - Cognito User Pool
 - Cognito web app client
 - Cognito groups for admins and residents
+- Amplify app and production branch for the Next.js SSR site
 
 ```bash
 cd infra/terraform

@@ -104,3 +104,53 @@ resource "aws_cognito_user_group" "residents" {
   user_pool_id = aws_cognito_user_pool.main.id
   description  = "CondoLedger residents with scoped portal access."
 }
+
+resource "aws_amplify_app" "web" {
+  name         = local.name
+  description  = "CondoLedger Next.js SSR app"
+  repository   = var.amplify_repository_url
+  platform     = "WEB_COMPUTE"
+  access_token = var.amplify_access_token
+
+  enable_branch_auto_build = true
+
+  environment_variables = merge(
+    {
+      AUTH_MODE            = "cognito"
+      COGNITO_USER_POOL_ID = aws_cognito_user_pool.main.id
+      COGNITO_CLIENT_ID    = aws_cognito_user_pool_client.web.id
+      PROOFS_BUCKET_NAME   = aws_s3_bucket.proofs.bucket
+    },
+    var.amplify_environment_variables
+  )
+
+  build_spec = <<-YAML
+    version: 1
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - npm ci
+        build:
+          commands:
+            - npm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+  YAML
+
+  tags = local.tags
+}
+
+resource "aws_amplify_branch" "main" {
+  app_id      = aws_amplify_app.web.id
+  branch_name = var.amplify_branch_name
+
+  enable_auto_build = true
+}
