@@ -44,7 +44,7 @@ resource "aws_cognito_user_pool" "main" {
   deletion_protection      = var.cognito_deletion_protection
 
   sign_in_policy {
-    allowed_first_auth_factors = ["EMAIL_OTP"]
+    allowed_first_auth_factors = ["PASSWORD", "EMAIL_OTP"]
   }
 
   account_recovery_setting {
@@ -124,26 +124,7 @@ resource "aws_amplify_app" "web" {
     var.amplify_environment_variables
   )
 
-  build_spec = <<-YAML
-    version: 1
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - nvm install 22
-            - nvm use 22
-            - npm ci
-        build:
-          commands:
-            - npm run build
-      artifacts:
-        baseDirectory: .next
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - node_modules/**/*
-  YAML
+  build_spec = file("${path.module}/amplify.yml")
 
   tags = local.tags
 }

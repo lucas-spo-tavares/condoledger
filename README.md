@@ -15,7 +15,7 @@ CondoLedger is a web-based condo management system for monthly dues, manual paym
 
 ## Local Development
 
-Use Node.js `24.15.0` for this project. If you use `nvm`, run `nvm use` in the repo root.
+Use Node.js `22.16.0` for this project. If you use `nvm`, run `nvm use` in the repo root.
 
 Install dependencies:
 
@@ -96,6 +96,22 @@ TF_VAR_amplify_branch_name=main
 
 You can also pass extra Amplify environment variables with `TF_VAR_amplify_environment_variables`, for example to override `DATABASE_URL` or add `NEXT_PUBLIC_*` values.
 
+If you want GitHub to run deploys automatically on `main`, add these repository secrets and use `.github/workflows/deploy.yml`:
+
+- `AWS_REGION`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `DATABASE_URL`
+- `DIRECT_DATABASE_URL`
+- `COGNITO_USER_POOL_ID`
+- `COGNITO_CLIENT_ID`
+- `PROOFS_BUCKET_NAME`
+- `TF_VAR_amplify_repository_url`
+- `TF_VAR_amplify_access_token`
+- `TF_VAR_amplify_branch_name`
+
+The workflow uses `ubuntu-latest`, which is the standard free GitHub-hosted runner for public repositories.
+
 ## Infrastructure
 
 Terraform lives in `infra/terraform` and provisions:
@@ -119,7 +135,7 @@ For the manual deploy flow:
 npm run deploy
 ```
 
-`npm run deploy` loads `.env.prod`, runs typecheck and build, applies Prisma migrations, applies the Terraform-managed AWS infrastructure, and prints Terraform outputs. Deploying the Next.js app itself is handled by Amplify.
+`npm run deploy` loads `.env.prod`, runs typecheck and build, applies Prisma migrations, applies the Terraform-managed AWS infrastructure, and prints Terraform outputs. When the GitHub Actions workflow is enabled, pushes to `main` will run that deploy automatically on the free GitHub-hosted runner.
 
 ## Current Scope
 
