@@ -12,6 +12,31 @@ locals {
   }
 }
 
+resource "aws_iam_role" "amplify_service" {
+  name = "${local.name}-amplify-service-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Statement1"
+        Effect = "Allow"
+        Principal = {
+          Service = ["amplify.amazonaws.com"]
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "amplify_service" {
+  role       = aws_iam_role.amplify_service.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess-Amplify"
+}
+
 resource "aws_s3_bucket" "proofs" {
   bucket_prefix = "${local.name}-proofs-"
   force_destroy = var.enable_bucket_force_destroy
@@ -106,11 +131,12 @@ resource "aws_cognito_user_group" "residents" {
 }
 
 resource "aws_amplify_app" "web" {
-  name         = local.name
-  description  = "CondoLedger Next.js SSR app"
-  repository   = var.amplify_repository_url
-  platform     = "WEB_COMPUTE"
-  access_token = var.amplify_access_token
+  name                 = local.name
+  description          = "CondoLedger Next.js SSR app"
+  repository           = var.amplify_repository_url
+  platform             = "WEB_COMPUTE"
+  access_token         = var.amplify_access_token
+  iam_service_role_arn = aws_iam_role.amplify_service.arn
 
   enable_branch_auto_build = true
 

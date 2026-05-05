@@ -21,6 +21,7 @@ source "$PROD_ENV_FILE"
 set +a
 
 echo "Running checks and build"
+npm run db:generate
 npm run typecheck
 
 echo "Initializing Terraform"
