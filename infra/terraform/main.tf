@@ -14,62 +14,6 @@ locals {
   }
 }
 
-resource "aws_dynamodb_table" "app" {
-  name         = local.name
-  billing_mode = "PAY_PER_REQUEST"
-
-  attribute {
-    name = "PK"
-    type = "S"
-  }
-
-  attribute {
-    name = "SK"
-    type = "S"
-  }
-
-  attribute {
-    name = "GSI1PK"
-    type = "S"
-  }
-
-  attribute {
-    name = "GSI1SK"
-    type = "S"
-  }
-
-  key_schema {
-    attribute_name = "PK"
-    key_type       = "HASH"
-  }
-
-  key_schema {
-    attribute_name = "SK"
-    key_type       = "RANGE"
-  }
-
-  global_secondary_index {
-    name            = "GSI1"
-    projection_type = "ALL"
-
-    key_schema {
-      attribute_name = "GSI1PK"
-      key_type       = "HASH"
-    }
-
-    key_schema {
-      attribute_name = "GSI1SK"
-      key_type       = "RANGE"
-    }
-  }
-
-  point_in_time_recovery {
-    enabled = true
-  }
-
-  tags = local.tags
-}
-
 resource "aws_s3_bucket" "proofs" {
   bucket_prefix = "${local.name}-proofs-"
   force_destroy = var.enable_bucket_force_destroy
@@ -293,23 +237,6 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 
 data "aws_iam_policy_document" "backend_lambda_access" {
   statement {
-    sid    = "DynamoDbAccess"
-    effect = "Allow"
-    actions = [
-      "dynamodb:GetItem",
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-      "dynamodb:DeleteItem",
-      "dynamodb:Query",
-      "dynamodb:Scan"
-    ]
-    resources = [
-      aws_dynamodb_table.app.arn,
-      "${aws_dynamodb_table.app.arn}/index/*"
-    ]
-  }
-
-  statement {
     sid    = "ProofsBucketAccess"
     effect = "Allow"
     actions = [
@@ -343,13 +270,12 @@ resource "aws_lambda_function" "backend" {
 
   environment {
     variables = {
-      NODE_ENV            = "production"
-      APP_ENV             = var.environment
-      DYNAMODB_TABLE_NAME = aws_dynamodb_table.app.name
-      DYNAMODB_GSI1_NAME  = "GSI1"
-      PROOFS_BUCKET_NAME  = aws_s3_bucket.proofs.bucket
-      COGNITO_USER_POOL   = aws_cognito_user_pool.main.id
-      AWS_REGION          = var.aws_region
+      NODE_ENV           = "production"
+      APP_ENV            = var.environment
+      DATABASE_URL       = var.database_url
+      PROOFS_BUCKET_NAME = aws_s3_bucket.proofs.bucket
+      COGNITO_USER_POOL  = aws_cognito_user_pool.main.id
+      AWS_REGION         = var.aws_region
     }
   }
 

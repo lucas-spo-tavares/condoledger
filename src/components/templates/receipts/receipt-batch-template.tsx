@@ -34,8 +34,7 @@ function createDefaultItem(resident: Resident) {
     residentId: resident.id,
     amount: resident.monthlyContributionInCents / 100,
     month: getCurrentMonthValue(),
-    receivedAt: getTodayValue(),
-    status: "confirmed"
+    receivedAt: getTodayValue()
   });
 }
 
@@ -75,7 +74,6 @@ export function ReceiptBatchTemplate() {
         month: item.month,
         amountInCents: Math.round(item.amount * 100),
         description: item.description?.trim() || undefined,
-        status: item.status,
         receivedAt: item.receivedAt,
         proofAttachments: []
       })),
@@ -99,7 +97,7 @@ export function ReceiptBatchTemplate() {
             <CardTitle className="text-base">Somente moradores ativos entram neste lote</CardTitle>
           </div>
           <CardDescription>
-            O sistema vai gerar um recebimento confirmado para cada morador ativo, usando a mensalidade cadastrada.
+            O sistema vai gerar um recebimento para cada morador ativo, usando a mensalidade cadastrada.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -125,7 +123,6 @@ export function ReceiptBatchTemplate() {
                   <TableHead>Valor</TableHead>
                   <TableHead>Mês</TableHead>
                   <TableHead>Recebido em</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Descricao</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
                 </TableRow>
@@ -189,27 +186,6 @@ export function ReceiptBatchTemplate() {
                       <TableCell>
                         <Controller
                           control={control}
-                          name={`items.${index}.status`}
-                          render={({ field: statusField, fieldState }) => (
-                            <div className="grid gap-1">
-                              <select
-                                {...statusField}
-                                className="flex h-9 w-full min-w-36 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              >
-                                <option value="confirmed">Confirmado</option>
-                                <option value="pending">Pendente</option>
-                                <option value="voided">Cancelado</option>
-                              </select>
-                              <span className="min-h-4 text-xs text-destructive">
-                                {fieldState.error?.message || "\u00A0"}
-                              </span>
-                            </div>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Controller
-                          control={control}
                           name={`items.${index}.description`}
                           render={({ field: descriptionField, fieldState }) => (
                             <div className="grid gap-1">
@@ -243,13 +219,13 @@ export function ReceiptBatchTemplate() {
                 })}
                 {isLoadingResidents ? (
                   <TableRow>
-                    <TableCell className="text-sm text-muted-foreground" colSpan={8}>
+                    <TableCell className="text-sm text-muted-foreground" colSpan={7}>
                       Carregando moradores ativos...
                     </TableCell>
                   </TableRow>
                 ) : !fields.length ? (
                   <TableRow>
-                    <TableCell className="text-sm text-muted-foreground" colSpan={8}>
+                    <TableCell className="text-sm text-muted-foreground" colSpan={7}>
                       Cadastre ou ative moradores para habilitar o lançamento em lote.
                     </TableCell>
                   </TableRow>

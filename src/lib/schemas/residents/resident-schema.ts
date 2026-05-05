@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-export const residentTypeSchema = z.enum(["resident", "store", "church", "apartment"]);
-
 export const residentStatusSchema = z.enum(["active", "inactive"]);
 
 const residentBaseSchema = z.object({
@@ -11,7 +9,7 @@ const residentBaseSchema = z.object({
     z.string().email("Informe um e-mail valido.").optional()
   ),
   unit: z.string().trim().min(1, "Informe a unidade."),
-  type: residentTypeSchema,
+  residentTypeId: z.string().min(1, "Selecione o tipo."),
   status: residentStatusSchema,
   isAdministrator: z.boolean().default(false)
 });
@@ -32,7 +30,7 @@ export function getResidentFormDefaultValues(): ResidentFormValues {
     name: "",
     email: "",
     unit: "",
-    type: "resident",
+    residentTypeId: "",
     monthlyContribution: 0,
     status: "active",
     isAdministrator: false

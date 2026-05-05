@@ -1,22 +1,25 @@
 export type ResidentStatus = "active" | "inactive";
 
-export type ResidentType = "resident" | "store" | "church" | "apartment";
-
-export type ReceiptStatus = "pending" | "confirmed" | "voided";
+export type ResidentType = {
+  id: string;
+  label: string;
+  active: boolean;
+};
 
 export type Resident = {
   id: string;
   name: string;
   email?: string;
   unit: string;
-  type: ResidentType;
+  residentTypeId: string;
+  residentTypeLabel: string;
   monthlyContributionInCents: number;
   status: ResidentStatus;
   isAdministrator: boolean;
   createdAt: string;
 };
 
-export type ResidentUpsert = Omit<Resident, "id" | "createdAt"> & {
+export type ResidentUpsert = Omit<Resident, "id" | "createdAt" | "residentTypeLabel"> & {
   id?: string;
 };
 
@@ -33,8 +36,7 @@ export type Receipt = {
   month: string;
   description?: string;
   amountInCents: number;
-  status: ReceiptStatus;
-  receivedAt?: string;
+  receivedAt: string;
   proofAttachments: FileAttachment[];
 };
 
@@ -83,6 +85,6 @@ export type CurrentUser = {
   name: string;
   email: string;
   unit: string;
-  type: ResidentType;
+  residentTypeLabel: string;
   isAdministrator: boolean;
 };

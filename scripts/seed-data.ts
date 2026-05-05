@@ -2,6 +2,10 @@ import { randomUUID } from "node:crypto";
 
 import type { Expense, InitialBalance, Receipt, Resident } from "../src/types/domain";
 
+export type SeedResident = Omit<Resident, "residentTypeId" | "residentTypeLabel"> & {
+  residentTypeLabel: string;
+};
+
 type StatementReceipt = {
   name: string;
   number: string;
@@ -973,22 +977,22 @@ function getOrCreateId(store: Map<string, string>, key: string) {
   return id;
 }
 
-function buildResidentType(name: string, complement: string): Resident["type"] {
+function buildResidentType(name: string, complement: string): SeedResident["residentTypeLabel"] {
   const text = (name + " " + complement).toLowerCase();
 
   if (text.includes("igreja")) {
-    return "church";
+    return "Igreja";
   }
 
   if (text.includes("pizzaria") || text.includes("importação") || text.includes("importacao") || text.includes("mercado")) {
-    return "store";
+    return "Loja";
   }
 
-  return "resident";
+  return "Morador";
 }
 
-function buildResidents(): Resident[] {
-  const residents = new Map<string, Resident>();
+function buildResidents(): SeedResident[] {
+  const residents = new Map<string, SeedResident>();
 
   for (const statement of statements) {
     for (const receipt of statement.receipts) {
@@ -998,7 +1002,7 @@ function buildResidents(): Resident[] {
         name: receipt.name,
         email: undefined,
         unit: [receipt.number, receipt.complement].filter(Boolean).join(" ").trim(),
-        type: buildResidentType(receipt.name, receipt.complement),
+        residentTypeLabel: buildResidentType(receipt.name, receipt.complement),
         monthlyContributionInCents: receipt.amountInCents,
         status: "active",
         isAdministrator: false,
@@ -1023,7 +1027,6 @@ function buildReceipts(): Receipt[] {
         residentId: getOrCreateId(residentIds, key),
         month: statement.month,
         amountInCents: receipt.amountInCents,
-        status: "confirmed",
         receivedAt: statement.month,
         proofAttachments: []
       };

@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,12 +13,11 @@ import { MonthPicker } from "@/components/ui/month-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatCurrency, formatDate, formatReceiptStatus } from "@/lib/commons/formats";
+import { formatCurrency, formatDate } from "@/lib/commons/formats";
 import { useDebounce } from "@/lib/hooks/debounce";
 import { useDeleteReceiptsMutation } from "@/lib/hooks/receipts/useDeleteReceiptsMutation";
 import { useReceiptsQuery } from "@/lib/hooks/receipts/useReceiptsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
-import type { ReceiptStatus } from "@/types/domain";
 
 function ReceiptDescription({ description }: { description: string }) {
   return (
@@ -63,7 +61,6 @@ export function ReceiptsTemplate() {
     return new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 10);
   }, []);
   const month = searchParams.get("month") ?? currentMonth;
-  const status = (searchParams.get("status") ?? "all") as "all" | ReceiptStatus;
   const nameSearch = searchParams.get("q") ?? "";
   const debouncedNameSearch = useDebounce(nameSearch, 1000);
 
@@ -84,7 +81,6 @@ export function ReceiptsTemplate() {
 
   const receiptsQuery = useReceiptsQuery({
     month,
-    status,
     q: debouncedNameSearch
   });
   const receipts = receiptsQuery.data ?? [];
@@ -109,18 +105,8 @@ export function ReceiptsTemplate() {
           </Button>
         </div>
       </div>
-      <div className="grid gap-3 rounded-lg border border-border bg-card p-4 lg:grid-cols-[240px_220px_1fr]">
+      <div className="grid gap-3 rounded-lg border border-border bg-card p-4 lg:grid-cols-[240px_1fr]">
         <MonthPicker onValueChange={(value) => updateSearchParams({ month: value })} value={month} />
-        <select
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onChange={(event) => updateSearchParams({ status: event.target.value })}
-          value={status}
-        >
-          <option value="all">Todos os status</option>
-          <option value="confirmed">Confirmado</option>
-          <option value="pending">Pendente</option>
-          <option value="voided">Cancelado</option>
-        </select>
         <Input
           onChange={(event) => updateSearchParams({ q: event.target.value || null })}
           placeholder="Buscar por nome do morador"
@@ -146,7 +132,6 @@ export function ReceiptsTemplate() {
                   <TableHead>Valor</TableHead>
                   <TableHead className="max-w-24">Descricao</TableHead>
                   <TableHead>Comprovante</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -179,11 +164,6 @@ export function ReceiptsTemplate() {
                           <span className="text-sm text-muted-foreground">pendente</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={receipt.status === "confirmed" ? "success" : "warning"}>
-                          {formatReceiptStatus(receipt.status)}
-                        </Badge>
-                    </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-2">
                           <Button asChild size="icon" type="button" variant="outline">

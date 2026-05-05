@@ -6,7 +6,7 @@ import { getReceipts, type ReceiptQueryParams } from "@/lib/apis/receipts";
 
 export function useReceiptsQuery(params?: ReceiptQueryParams) {
   return useQuery({
-    queryKey: ["receipts", params?.month ?? "", params?.status ?? "all", params?.q ?? ""],
+    queryKey: ["receipts", params?.month ?? "", params?.q ?? ""],
     queryFn: () => getReceipts(params)
   });
 }

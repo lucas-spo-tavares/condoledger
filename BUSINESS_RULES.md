@@ -73,11 +73,7 @@ O fluxo atual esperado e:
 
 O sistema nao confirma automaticamente se o dinheiro caiu na conta.
 
-Status iniciais de pagamento:
-
-- Pendente
-- Confirmado
-- Cancelado
+Um recebimento registrado representa um pagamento recebido. Pagamentos pendentes sao derivados pela ausencia de recebimento para um contribuinte ativo no mes de referencia.
 
 ## Comprovantes
 
@@ -88,7 +84,7 @@ Formatos esperados:
 - Imagem
 - PDF
 
-Os comprovantes devem ser armazenados fora do DynamoDB. A infraestrutura inicial preve um bucket S3 privado para esse uso.
+Os comprovantes devem ser armazenados fora do PostgreSQL. A infraestrutura inicial preve um bucket S3 privado para esse uso, enquanto o banco guarda a URL/metadados essenciais.
 
 ## Pix
 
@@ -146,7 +142,7 @@ O contribuinte deve conseguir visualizar:
 
 - Dados cadastrais proprios
 - Pagamentos proprios
-- Status dos pagamentos
+- Historico de pagamentos
 - Historico mensal proprio
 
 A exibicao do relatorio completo do condominio ainda precisa ser decidida.
@@ -162,7 +158,7 @@ O codigo, nomes de arquivos, tipos, funcoes, variaveis e arquitetura devem perma
 O fluxo de dados no frontend/backend deve seguir:
 
 ```text
-UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> banco/servicos externos
+UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> lib/repositories -> banco/servicos externos
 ```
 
 Regras arquiteturais:
@@ -171,7 +167,8 @@ Regras arquiteturais:
 - Componentes que precisam de hooks client devem ficar em templates ou componentes client especificos.
 - Hooks TanStack devem ficar em `src/lib/hooks/<domain>`.
 - Clients HTTP devem ficar em `src/lib/apis`.
-- Comunicacao com banco e servicos externos deve ficar em `src/lib/servers`.
+- Regras de negocio e coordenacao com servicos externos devem ficar em `src/lib/servers`.
+- Comunicacao direta com banco deve ficar em `src/lib/repositories`.
 - Arquivos em `src/lib/servers` devem importar `server-only` no topo do arquivo.
 - Helpers compartilhados devem ficar em `src/lib/commons`.
 
@@ -183,8 +180,9 @@ Stack definida:
 - Tailwind CSS
 - shadcn/ui
 - TanStack Query
-- DynamoDB
-- Amazon DynamoDB Local via Docker Compose
+- PostgreSQL
+- Prisma
+- PostgreSQL via Docker Compose
 - Cognito com OTP
 - Terraform
 - S3 privado para comprovantes

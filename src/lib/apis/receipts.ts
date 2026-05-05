@@ -1,10 +1,9 @@
 import { request } from "@/lib/commons/request";
-import type { ReceiptStatus, Receipt, ReceiptUpsert } from "@/types/domain";
+import type { Receipt, ReceiptUpsert } from "@/types/domain";
 
 export type ReceiptQueryParams = {
   month?: string;
   q?: string;
-  status?: ReceiptStatus | "all";
 };
 
 export async function getReceipts(params?: ReceiptQueryParams) {
@@ -12,10 +11,6 @@ export async function getReceipts(params?: ReceiptQueryParams) {
 
   if (params?.month) {
     searchParams.set("month", params.month);
-  }
-
-  if (params?.status && params.status !== "all") {
-    searchParams.set("status", params.status);
   }
 
   if (params?.q) {

@@ -8,10 +8,10 @@ CondoLedger is a web-based condo management system for monthly dues, manual paym
 - TypeScript
 - Tailwind CSS
 - shadcn/ui components
-- Amazon DynamoDB
+- PostgreSQL with Prisma
 - Amazon Cognito with email OTP
 - Terraform
-- Docker Compose with Amazon DynamoDB Local
+- Docker Compose with PostgreSQL
 
 ## Local Development
 
@@ -23,30 +23,25 @@ Install dependencies:
 npm install
 ```
 
-Start the local DynamoDB container:
+Start the local PostgreSQL container:
 
 ```bash
 docker compose up -d
 ```
 
-The compose file stores DynamoDB Local data in `./.dynamodb`, so the container can write its SQLite files without relying on a Docker-managed named volume.
+The compose file stores PostgreSQL data in a Docker-managed `postgres-data` volume.
 
-Seed the local table:
+Apply migrations and seed the local database:
 
 ```bash
-npm run dynamodb:seed
+npm run db:migrate
+npm run db:seed
 ```
 
-Clear all local DynamoDB data:
+Open Prisma Studio to inspect local data:
 
 ```bash
-npm run dynamodb:clear
-```
-
-Open a simple browser UI to inspect the local tables:
-
-```bash
-npm run dynamodb:admin
+npm run db:studio
 ```
 
 Start the app:
@@ -65,9 +60,7 @@ Copy `.env.example` to `.env.local` and fill the Cognito values after applying T
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=local
 AWS_SECRET_ACCESS_KEY=local
-DYNAMODB_TABLE_NAME=condoledger-local
-DYNAMODB_ENDPOINT=http://localhost:8000
-DYNAMODB_GSI1_NAME=GSI1
+DATABASE_URL=postgresql://condoledger:condoledger@localhost:5432/condoledger?schema=public
 AUTH_MODE=local
 COGNITO_USER_POOL_ID=
 COGNITO_CLIENT_ID=
@@ -86,9 +79,7 @@ For production deploys, create a local `.env.prod` file after Terraform has been
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
-DYNAMODB_TABLE_NAME=<terraform output>
-DYNAMODB_ENDPOINT=
-DYNAMODB_GSI1_NAME=GSI1
+DATABASE_URL=<postgres connection url>
 AUTH_MODE=cognito
 COGNITO_USER_POOL_ID=<terraform output>
 COGNITO_CLIENT_ID=<terraform output>
@@ -99,7 +90,7 @@ PROOFS_BUCKET_NAME=<terraform output>
 
 Terraform lives in `infra/terraform` and provisions:
 
-- DynamoDB single-table storage
+- PostgreSQL connection URL for the application
 - S3 bucket for payment proofs
 - Cognito User Pool
 - Cognito web app client
@@ -117,10 +108,11 @@ For the manual deploy flow:
 ```bash
 terraform -chdir=infra/terraform init
 terraform -chdir=infra/terraform apply
+npm run db:deploy
 npm run deploy
 ```
 
-`npm run deploy` loads `.env.prod`, runs typecheck and build, reads the existing Terraform outputs, uploads the static frontend when `out/` exists, and prints Terraform outputs.
+`npm run db:deploy` applies pending Prisma migrations to the configured PostgreSQL database. `npm run deploy` loads `.env.prod`, runs typecheck and build, reads the existing Terraform outputs, uploads the static frontend when `out/` exists, and prints Terraform outputs.
 
 ## Current Scope
 
@@ -130,7 +122,7 @@ npm run deploy
 - Expense tracking
 - Monthly report screen
 - Passwordless Cognito helper functions
-- Amazon DynamoDB Local container testing setup
+- PostgreSQL local development setup
 
 Business rules are documented in `BUSINESS_RULES.md`.
 
@@ -139,7 +131,7 @@ Business rules are documented in `BUSINESS_RULES.md`.
 Frontend data access follows this flow:
 
 ```text
-UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> DynamoDB or external services
+UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> lib/repositories -> Prisma/PostgreSQL or external services
 ```
 
 - `src/lib/hooks/<domain>`: TanStack Query hooks grouped by feature
@@ -147,9 +139,11 @@ UI -> lib/hooks -> lib/apis -> app/api routes -> lib/servers -> DynamoDB or exte
 - `src/lib/forms/<domain>`: React Hook Form hooks for each Zod schema
 - `src/lib/schemas/<domain>`: Zod validation schemas
 - `src/app/api`: Next.js route handlers
-- `src/lib/servers`: backend service boundary for DynamoDB and external integrations
+- `src/lib/servers`: backend service boundary for business workflows and external integrations
+- `src/lib/repositories`: Prisma-backed persistence functions
+- `src/lib/db`: database client setup
 - `src/components/templates`: page-level Atomic Design templates, including client boundaries
 - `src/components/organisms`: larger composed UI sections such as the app shell
 - `src/components/ui`: shadcn/ui primitives used by the Atomic Design layers
 
-The current services persist data in DynamoDB. Seed data for local testing lives in `scripts/seed-data.ts`.
+The current services persist data in PostgreSQL through Prisma. Seed data for local testing lives in `scripts/seed-data.ts` and is loaded by `prisma/seed.ts`.

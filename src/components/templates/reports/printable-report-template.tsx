@@ -3,7 +3,6 @@
 import * as React from "react";
 import { FileText } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardCharts } from "@/components/templates/dashboard/dashboard-charts";
 import { PreviewPage } from "@/components/templates/reports/preview-page";
@@ -166,7 +165,6 @@ export function PrintableReportTemplate({
                       <th>Morador</th>
                       <th>Unidade</th>
                       <th>Descrição</th>
-                      <th>Status</th>
                       <th className="text-right">Valor</th>
                     </tr>
                   </thead>
@@ -180,22 +178,13 @@ export function PrintableReportTemplate({
                             <td className="font-medium">{resident?.name ?? "Morador removido"}</td>
                             <td>{resident?.unit ?? "-"}</td>
                             <td>{receipt.description ?? "-"}</td>
-                            <td>
-                              <Badge variant={receipt.status === "confirmed" ? "success" : "warning"}>
-                                {receipt.status === "confirmed"
-                                  ? "confirmado"
-                                  : receipt.status === "pending"
-                                    ? "pendente"
-                                    : "cancelado"}
-                              </Badge>
-                            </td>
                             <td className="text-right">{formatCurrency(receipt.amountInCents)}</td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td className="px-3 py-6 text-center text-sm text-muted-foreground" colSpan={5}>
+                        <td className="px-3 py-6 text-center text-sm text-muted-foreground" colSpan={4}>
                           Nenhum recebimento encontrado para este período.
                         </td>
                       </tr>

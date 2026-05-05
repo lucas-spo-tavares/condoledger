@@ -13,7 +13,7 @@ const LOCAL_CURRENT_USER: CurrentUser = {
   name: "Local User",
   email: "local@condoledger.local",
   unit: "Local",
-  type: "resident",
+  residentTypeLabel: "Morador",
   isAdministrator: false
 };
 
@@ -165,7 +165,7 @@ function buildCurrentUser(resident: NonNullable<ResidentLookup>) {
     name: resident.name,
     email: resident.email,
     unit: resident.unit,
-    type: resident.type,
+    residentTypeLabel: resident.residentTypeLabel,
     isAdministrator: resident.isAdministrator
   } satisfies CurrentUser;
 }

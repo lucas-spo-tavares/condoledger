@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatCurrency, formatResidentStatus, formatResidentType } from "@/lib/commons/formats";
+import { formatCurrency, formatResidentStatus } from "@/lib/commons/formats";
 import { useDebounce } from "@/lib/hooks/debounce";
 import { useDeleteResidentsMutation } from "@/lib/hooks/residents/useDeleteResidentsMutation";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
@@ -96,7 +96,7 @@ export function ResidentsTemplate() {
                 <TableRow key={resident.id}>
                   <TableCell className="font-medium">{resident.name}</TableCell>
                   <TableCell>{resident.unit}</TableCell>
-                  <TableCell>{formatResidentType(resident.type)}</TableCell>
+                  <TableCell>{resident.residentTypeLabel}</TableCell>
                   <TableCell>{formatCurrency(resident.monthlyContributionInCents)}</TableCell>
                   <TableCell>{resident.email ?? "—"}</TableCell>
                   <TableCell>

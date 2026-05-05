@@ -7,8 +7,13 @@ import { FormField } from "@/components/organisms/form-field";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import type { ResidentFormValues } from "@/lib/schemas/residents/resident-schema";
+import type { ResidentType } from "@/types/domain";
 
-export function ResidentForm() {
+type ResidentFormProps = {
+  residentTypes: ResidentType[];
+};
+
+export function ResidentForm({ residentTypes }: ResidentFormProps) {
   const { control } = useFormContext<ResidentFormValues>();
 
   return (
@@ -57,17 +62,19 @@ export function ResidentForm() {
         />
         <Controller
           control={control}
-          name="type"
+          name="residentTypeId"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Tipo">
               <select
                 {...field}
                 className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <option value="resident">Morador</option>
-                <option value="store">Loja</option>
-                <option value="church">Igreja</option>
-                <option value="apartment">Predio</option>
+                <option value="">Selecione</option>
+                {residentTypes.map((residentType) => (
+                  <option key={residentType.id} value={residentType.id}>
+                    {residentType.label}
+                  </option>
+                ))}
               </select>
             </FormField>
           )}

@@ -24,7 +24,7 @@ export function toResidentFormValues(resident: Resident): ResidentFormValues {
     name: resident.name,
     email: resident.email ?? "",
     unit: resident.unit,
-    type: resident.type,
+    residentTypeId: resident.residentTypeId,
     monthlyContribution: resident.monthlyContributionInCents / 100,
     status: resident.status,
     isAdministrator: resident.isAdministrator
@@ -36,7 +36,7 @@ export function toResident(values: ResidentFormValues): ResidentUpsert {
     name: values.name,
     email: values.email?.trim() || undefined,
     unit: values.unit.trim(),
-    type: values.type,
+    residentTypeId: values.residentTypeId,
     monthlyContributionInCents: Math.round(values.monthlyContribution * 100),
     status: values.status,
     isAdministrator: values.isAdministrator ?? false

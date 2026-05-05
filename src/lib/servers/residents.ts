@@ -1,110 +1,37 @@
 import "server-only";
 
-import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
-
-import { documentClient, tableName } from "@/lib/dynamodb";
-import { fromDynamoItem, residentKey, toResidentItem, type DynamoItem } from "@/lib/dynamodb-items";
-import type { Resident, ResidentStatus, ResidentUpsert } from "@/types/domain";
+import {
+  findResidentByEmail,
+  findResidentById,
+  findResidents,
+  inactivateResident,
+  upsertResident
+} from "@/lib/repositories/residents-repository";
+import type { ResidentStatus, ResidentUpsert } from "@/types/domain";
 
 export async function getResidents(filters?: { q?: string; status?: ResidentStatus }) {
-  const search = filters?.q?.trim().toLowerCase();
-  const residents = await scanResidents();
-
-  return residents
-    .filter((resident) => {
-      const matchesStatus = filters?.status ? resident.status === filters.status : true;
-      const matchesSearch = search ? resident.name.toLowerCase().includes(search) : true;
-
-      return matchesStatus && matchesSearch;
-    })
-    .sort((left, right) => left.name.localeCompare(right.name, "pt-BR", { sensitivity: "base" }));
+  return findResidents(filters);
 }
 
 export async function putResident(resident: ResidentUpsert) {
-  const existingResident = resident.id ? await getResidentById(resident.id) : null;
-  const persistedResident: Resident = {
-    ...resident,
-    id: resident.id ?? crypto.randomUUID(),
-    createdAt: existingResident?.createdAt ?? new Date().toISOString().slice(0, 10)
-  };
-
-  await documentClient.send(
-    new PutCommand({
-      TableName: tableName,
-      Item: toResidentItem(persistedResident)
-    })
-  );
-
-  return persistedResident;
+  return upsertResident(resident);
 }
 
 export async function deleteResident(id: string) {
-  const resident = await getResidentById(id);
+  const resident = await findResidentById(id);
 
   if (!resident) {
     return { id };
   }
 
-  const inactivatedResident: Resident = {
-    ...resident,
-    status: "inactive"
-  };
-
-  await documentClient.send(
-    new PutCommand({
-      TableName: tableName,
-      Item: toResidentItem(inactivatedResident)
-    })
-  );
-
+  await inactivateResident(id);
   return { id };
 }
 
 export async function getResidentById(id: string) {
-  const response = await documentClient.send(
-    new GetCommand({
-      TableName: tableName,
-      Key: {
-        PK: residentKey(id),
-        SK: "PROFILE"
-      }
-    })
-  );
-
-  return response.Item ? fromDynamoItem(response.Item as DynamoItem<Resident>) : null;
+  return findResidentById(id);
 }
 
 export async function getResidentByEmail(email: string) {
-  const normalizedEmail = email.trim().toLowerCase();
-  const residents = await scanResidents();
-
-  return (
-    residents.find((resident) => resident.email?.trim().toLowerCase() === normalizedEmail) ?? null
-  );
-}
-
-async function scanResidents() {
-  const residents: Resident[] = [];
-  let exclusiveStartKey: Record<string, unknown> | undefined;
-
-  do {
-    const response = await documentClient.send(
-      new ScanCommand({
-        TableName: tableName,
-        ExclusiveStartKey: exclusiveStartKey,
-        FilterExpression: "#entityType = :entityType",
-        ExpressionAttributeNames: {
-          "#entityType": "entityType"
-        },
-        ExpressionAttributeValues: {
-          ":entityType": "Resident"
-        }
-      })
-    );
-
-    residents.push(...(response.Items ?? []).map((item) => fromDynamoItem(item as DynamoItem<Resident>)));
-    exclusiveStartKey = response.LastEvaluatedKey;
-  } while (exclusiveStartKey);
-
-  return residents;
+  return findResidentByEmail(email);
 }

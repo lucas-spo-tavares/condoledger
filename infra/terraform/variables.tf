@@ -16,6 +16,13 @@ variable "environment" {
   default     = "dev"
 }
 
+variable "database_url" {
+  description = "PostgreSQL connection URL used by the application."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "allowed_callback_urls" {
   description = "Allowed callback URLs for Cognito clients."
   type        = list(string)

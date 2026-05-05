@@ -1,14 +1,11 @@
 import { z } from "zod";
 
-import { receiptStatusSchema } from "@/lib/schemas/receipts/receipt-schema";
-
 const receiptBatchItemSchema = z.object({
   residentId: z.string().min(1, "Selecione o morador."),
   description: z.string().optional(),
   amount: z.coerce.number().min(0, "Informe um valor igual ou maior que zero."),
   month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
-  receivedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
-  status: receiptStatusSchema
+  receivedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD.")
 });
 
 export const receiptBatchFormSchema = z.object({
@@ -25,14 +22,12 @@ export function createReceiptBatchItemValues(params: {
   amount: number;
   month: string;
   receivedAt: string;
-  status: z.infer<typeof receiptStatusSchema>;
 }) {
   return {
     residentId: params.residentId,
     description: params.description ?? "",
     amount: params.amount,
     month: params.month,
-    receivedAt: params.receivedAt,
-    status: params.status
+    receivedAt: params.receivedAt
   };
 }

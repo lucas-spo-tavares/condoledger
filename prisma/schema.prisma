@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ResidentStatus {
+  active
+  inactive
+
+  @@map("resident_status")
+}
+
+model ResidentType {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  label     String     @unique
+  active    Boolean    @default(true)
+  residents Resident[]
+
+  @@index([active])
+  @@map("resident_types")
+}
+
+model Resident {
+  id                         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                       String
+  email                      String?        @unique
+  unit                       String
+  residentTypeId             String         @map("resident_type_id") @db.Uuid
+  monthlyContributionInCents Int            @default(0) @map("monthly_contribution_in_cents")
+  status                     ResidentStatus @default(active)
+  isAdministrator            Boolean        @default(false) @map("is_administrator")
+  createdAt                  DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  residentType               ResidentType   @relation(fields: [residentTypeId], references: [id])
+  receipts                   Receipt[]
+
+  @@index([name])
+  @@index([unit])
+  @@index([status])
+  @@index([residentTypeId])
+  @@map("residents")
+}
+
+model Receipt {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  residentId    String       @map("resident_id") @db.Uuid
+  month         DateTime     @db.Date
+  description   String?
+  amountInCents Int          @default(0) @map("amount_in_cents")
+  receivedAt    DateTime     @default(now()) @map("received_at") @db.Timestamptz(6)
+  resident      Resident     @relation(fields: [residentId], references: [id])
+  attachments   Attachment[]
+
+  @@index([residentId])
+  @@index([month])
+  @@index([residentId, month])
+  @@map("receipts")
+}
+
+model Expense {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  month         DateTime     @db.Date
+  category      String
+  description   String
+  amountInCents Int          @default(0) @map("amount_in_cents")
+  paidAt        DateTime     @map("paid_at") @db.Timestamptz(6)
+  attachments   Attachment[]
+
+  @@index([month])
+  @@index([category])
+  @@index([month, category])
+  @@index([paidAt])
+  @@map("expenses")
+}
+
+model Attachment {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  receiptId  String?  @map("receipt_id") @db.Uuid
+  expenseId  String?  @map("expense_id") @db.Uuid
+  previewUrl String   @map("preview_url")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  receipt    Receipt? @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  expense    Expense? @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+
+  @@index([receiptId])
+  @@index([expenseId])
+  @@map("attachments")
+}
+
+model InitialBalance {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  month         DateTime @db.Date
+  description   String
+  amountInCents Int      @default(0) @map("amount_in_cents")
+
+  @@index([month])
+  @@map("initial_balances")
+}

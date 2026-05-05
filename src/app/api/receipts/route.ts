@@ -6,11 +6,9 @@ import { deleteReceipt, getReceipts, putReceipt } from "@/lib/servers/receipts";
 
 export async function GET(request: NextRequest) {
   const month = request.nextUrl.searchParams.get("month") ?? undefined;
-  const rawStatus = request.nextUrl.searchParams.get("status");
   const q = request.nextUrl.searchParams.get("q") ?? undefined;
-  const status = rawStatus === "pending" || rawStatus === "confirmed" || rawStatus === "voided" ? rawStatus : undefined;
 
-  return NextResponse.json(await getReceipts({ month, q, status }));
+  return NextResponse.json(await getReceipts({ month, q }));
 }
 
 export async function PUT(request: NextRequest) {

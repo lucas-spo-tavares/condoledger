@@ -1,9 +1,19 @@
 services:
-  dynamodb:
-    image: amazon/dynamodb-local:latest
-    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+  postgres:
+    image: postgres:18-alpine
     ports:
-      - "8000:8000"
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: condoledger
+      POSTGRES_USER: condoledger
+      POSTGRES_PASSWORD: condoledger
     volumes:
-      - ./.dynamodb:/home/dynamodblocal/data
-    working_dir: /home/dynamodblocal
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U condoledger -d condoledger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:

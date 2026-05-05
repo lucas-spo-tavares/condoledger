@@ -83,22 +83,6 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
         />
         <Controller
           control={control}
-          name="status"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Status">
-              <select
-                {...field}
-                className="flex h-9 w-full min-w-36 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="pending">Pendente</option>
-                <option value="confirmed">Confirmado</option>
-                <option value="voided">Cancelado</option>
-              </select>
-            </FormField>
-          )}
-        />
-        <Controller
-          control={control}
           name="receivedAt"
           render={({ field, fieldState }) => (
             <FormField error={fieldState.error?.message} label="Recebido em">

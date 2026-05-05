@@ -9,6 +9,7 @@ import { toResident, useResidentForm } from "@/lib/forms/residents/useResidentFo
 import { useResidentsMutation } from "@/lib/hooks/residents/useResidentsMutation";
 import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
 import { getResidentFormDefaultValues } from "@/lib/schemas/residents/resident-schema";
+import { useResidentTypesQuery } from "@/lib/hooks/residents/useResidentTypesQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
 import type { ResidentUpsert } from "@/types/domain";
 
@@ -18,6 +19,7 @@ type ResidentFormTemplateProps = {
 
 export function ResidentFormTemplate({ residentId = null }: ResidentFormTemplateProps) {
   const goBack = useSafeBackNavigation("/residents");
+  const residentTypesQuery = useResidentTypesQuery();
   const residentsQuery = useResidentsQuery();
   const residentsMutation = useResidentsMutation();
   const resident = residentId ? residentsQuery.data?.find((item) => item.id === residentId) ?? null : null;
@@ -77,7 +79,7 @@ export function ResidentFormTemplate({ residentId = null }: ResidentFormTemplate
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResidentForm />
+                  <ResidentForm residentTypes={residentTypesQuery.data ?? []} />
                 </CardContent>
               </Card>
               <div className="flex justify-end gap-2">
