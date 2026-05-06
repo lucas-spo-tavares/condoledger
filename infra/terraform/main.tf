@@ -2,12 +2,8 @@ provider "aws" {
   region = var.aws_region
 }
 
-data "aws_caller_identity" "current" {}
-
 locals {
   name = "${var.project_name}-${var.environment}"
-
-  amplify_source_arn = "arn:aws:amplify:${var.aws_region}:${data.aws_caller_identity.current.account_id}:apps/*"
 
   tags = {
     Project     = "CondoLedger"
@@ -122,14 +118,6 @@ resource "aws_iam_role" "amplify_service" {
           Service = ["amplify.amazonaws.com"]
         }
         Action = "sts:AssumeRole"
-        Condition = {
-          ArnLike = {
-            "aws:SourceArn" = local.amplify_source_arn
-          }
-          StringEquals = {
-            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
-          }
-        }
       }
     ]
   })
