@@ -2,8 +2,12 @@ provider "aws" {
   region = var.aws_region
 }
 
+data "aws_caller_identity" "current" {}
+
 locals {
   name = "${var.project_name}-${var.environment}"
+
+  amplify_source_arn = "arn:aws:amplify:${var.aws_region}:${data.aws_caller_identity.current.account_id}:apps/*"
 
   tags = {
     Project     = "CondoLedger"
@@ -118,6 +122,14 @@ resource "aws_iam_role" "amplify_service" {
           Service = ["amplify.amazonaws.com"]
         }
         Action = "sts:AssumeRole"
+        Condition = {
+          ArnLike = {
+            "aws:SourceArn" = local.amplify_source_arn
+          }
+          StringEquals = {
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
       }
     ]
   })
@@ -130,6 +142,60 @@ resource "aws_iam_role_policy_attachment" "amplify_service" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess-Amplify"
 }
 
+resource "aws_iam_role" "amplify_compute" {
+  name = "${local.name}-amplify-compute-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Statement1"
+        Effect = "Allow"
+        Principal = {
+          Service = ["amplify.amazonaws.com"]
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = local.tags
+}
+
+resource "aws_iam_policy" "amplify_compute_proofs" {
+  name        = "${local.name}-amplify-compute-proofs"
+  description = "Allows Amplify SSR compute to access the proofs bucket."
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ListProofsBucket"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = aws_s3_bucket.proofs.arn
+      },
+      {
+        Sid    = "ManageProofObjects"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.proofs.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "amplify_compute" {
+  role       = aws_iam_role.amplify_compute.name
+  policy_arn = aws_iam_policy.amplify_compute_proofs.arn
+}
+
 resource "aws_amplify_app" "web" {
   name                 = local.name
   description          = "CondoLedger Next.js SSR app"
@@ -137,6 +203,7 @@ resource "aws_amplify_app" "web" {
   platform             = "WEB_COMPUTE"
   access_token         = var.amplify_access_token
   iam_service_role_arn = aws_iam_role.amplify_service.arn
+  compute_role_arn     = aws_iam_role.amplify_compute.arn
 
   enable_branch_auto_build = true
 
@@ -155,7 +222,8 @@ resource "aws_amplify_app" "web" {
   build_spec = file("${path.module}/amplify.yml")
 
   depends_on = [
-    aws_iam_role_policy_attachment.amplify_service
+    aws_iam_role_policy_attachment.amplify_service,
+    aws_iam_role_policy_attachment.amplify_compute
   ]
 
   tags = local.tags
