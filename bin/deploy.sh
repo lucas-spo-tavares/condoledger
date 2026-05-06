@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TERRAFORM_DIR="$ROOT_DIR/infra/terraform"
 PROD_ENV_FILE="$ROOT_DIR/.env.prod"
+DEPLOY_INFRA_SCRIPT="$ROOT_DIR/bin/deploy-infra.sh"
 
 if ! command -v terraform >/dev/null 2>&1; then
   echo "terraform is required but was not found."
@@ -20,22 +20,13 @@ set -a
 source "$PROD_ENV_FILE"
 set +a
 
-echo "Running checks and build"
+echo "Running checks"
 npm run db:generate
 npm run typecheck
-
-echo "Initializing Terraform"
-terraform -chdir="$TERRAFORM_DIR" init
-
-npm run build
 
 echo "Applying Prisma migrations"
 npm run db:deploy
 
-echo "Applying Terraform infrastructure"
-terraform -chdir="$TERRAFORM_DIR" apply -auto-approve
-
-echo "Terraform outputs"
-terraform -chdir="$TERRAFORM_DIR" output
+bash "$DEPLOY_INFRA_SCRIPT"
 
 echo "Deploy finished"

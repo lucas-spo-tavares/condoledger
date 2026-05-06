@@ -12,31 +12,6 @@ locals {
   }
 }
 
-resource "aws_iam_role" "amplify_service" {
-  name = "${local.name}-amplify-service-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "Statement1"
-        Effect = "Allow"
-        Principal = {
-          Service = ["amplify.amazonaws.com"]
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = local.tags
-}
-
-resource "aws_iam_role_policy_attachment" "amplify_service" {
-  role       = aws_iam_role.amplify_service.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess-Amplify"
-}
-
 resource "aws_s3_bucket" "proofs" {
   bucket_prefix = "${local.name}-proofs-"
   force_destroy = var.enable_bucket_force_destroy
@@ -130,6 +105,31 @@ resource "aws_cognito_user_group" "residents" {
   description  = "CondoLedger residents with scoped portal access."
 }
 
+resource "aws_iam_role" "amplify_service" {
+  name = "${local.name}-amplify-service-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Statement1"
+        Effect = "Allow"
+        Principal = {
+          Service = ["amplify.amazonaws.com"]
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "amplify_service" {
+  role       = aws_iam_role.amplify_service.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess-Amplify"
+}
+
 resource "aws_amplify_app" "web" {
   name                 = local.name
   description          = "CondoLedger Next.js SSR app"
@@ -146,11 +146,17 @@ resource "aws_amplify_app" "web" {
       COGNITO_USER_POOL_ID = aws_cognito_user_pool.main.id
       COGNITO_CLIENT_ID    = aws_cognito_user_pool_client.web.id
       PROOFS_BUCKET_NAME   = aws_s3_bucket.proofs.bucket
+      DATABASE_URL         = var.database_url
+      DIRECT_DATABASE_URL  = var.direct_database_url
     },
     var.amplify_environment_variables
   )
 
   build_spec = file("${path.module}/amplify.yml")
+
+  depends_on = [
+    aws_iam_role_policy_attachment.amplify_service
+  ]
 
   tags = local.tags
 }

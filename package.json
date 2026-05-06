@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "deploy": "bash bin/deploy.sh",
+    "deploy:infra": "bash bin/deploy-infra.sh",
     "destroy": "bash bin/destroy.sh",
     "start": "next start",
     "lint": "next lint",

@@ -40,6 +40,18 @@ variable "cognito_deletion_protection" {
   default     = "INACTIVE"
 }
 
+variable "database_url" {
+  description = "Primary database connection string for the Amplify app."
+  type        = string
+  sensitive   = true
+}
+
+variable "direct_database_url" {
+  description = "Direct database connection string used by Prisma config and migrations."
+  type        = string
+  sensitive   = true
+}
+
 variable "amplify_repository_url" {
   description = "Git repository URL for the Amplify app."
   type        = string
