@@ -1,7 +1,7 @@
 import "server-only";
 
+import { toDateOnlyString } from "@/lib/mappers/dates";
 import { prisma } from "@/lib/db/prisma";
-import { toDateOnlyString } from "@/lib/repositories/mappers";
 import type { InitialBalance } from "@/types/domain";
 
 export async function findInitialBalances(): Promise<InitialBalance[]> {

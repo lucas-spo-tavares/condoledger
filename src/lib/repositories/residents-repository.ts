@@ -1,8 +1,8 @@
 import "server-only";
 
 import { isCognitoUserInGroupByEmail } from "@/lib/cognito";
+import { mapResident } from "@/lib/mappers/residents";
 import { prisma } from "@/lib/db/prisma";
-import { mapResident } from "@/lib/repositories/mappers";
 import type { ResidentStatus, ResidentUpsert } from "@/types/domain";
 
 const residentInclude = {

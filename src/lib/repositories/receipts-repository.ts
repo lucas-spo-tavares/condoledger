@@ -1,7 +1,8 @@
 import "server-only";
 
+import { mapReceipt, mapReceiptListItem } from "@/lib/mappers/receipts";
+import { toMonthDate, toTimestamp } from "@/lib/mappers/dates";
 import { prisma } from "@/lib/db/prisma";
-import { mapReceipt, mapReceiptListItem, toMonthDate, toTimestamp } from "@/lib/repositories/mappers";
 import type { ReceiptUpsert } from "@/types/domain";
 
 const receiptInclude = {

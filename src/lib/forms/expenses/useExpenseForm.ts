@@ -10,6 +10,7 @@ import {
   type ExpenseFormInput,
   type ExpenseFormValues
 } from "@/lib/schemas/expenses/expense-schema";
+import { toDateOnlyString } from "@/lib/mappers/dates";
 import type { Expense, ExpenseUpsert } from "@/types/domain";
 
 export function useExpenseForm(expense?: Expense | null) {
@@ -33,7 +34,7 @@ export function toExpenseFormValues(expense: Expense): ExpenseFormValues {
     category: expense.category,
     description: expense.description,
     amount: expense.amountInCents / 100,
-    paidAt: expense.paidAt,
+    paidAt: toDateOnlyString(new Date(expense.paidAt)),
     attachments: expense.attachments
   };
 }

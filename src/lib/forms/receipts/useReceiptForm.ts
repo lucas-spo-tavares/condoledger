@@ -10,6 +10,7 @@ import {
   type ReceiptFormInput,
   type ReceiptFormValues
 } from "@/lib/schemas/receipts/receipt-schema";
+import { toDateOnlyString } from "@/lib/mappers/dates";
 import type { Receipt, ReceiptUpsert } from "@/types/domain";
 
 export function useReceiptForm(receipt?: Receipt | null) {
@@ -34,7 +35,7 @@ export function toReceiptFormValues(receipt: Receipt): ReceiptFormValues {
     month: receipt.month,
     description: receipt.description ?? "",
     amount: receipt.amountInCents / 100,
-    receivedAt: receipt.receivedAt,
+    receivedAt: toDateOnlyString(new Date(receipt.receivedAt)),
     proofAttachments: receipt.proofAttachments
   };
 }

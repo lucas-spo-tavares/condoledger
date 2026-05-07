@@ -1,7 +1,8 @@
 import "server-only";
 
+import { mapExpense, mapExpenseListItem } from "@/lib/mappers/expenses";
+import { toMonthDate, toTimestamp } from "@/lib/mappers/dates";
 import { prisma } from "@/lib/db/prisma";
-import { mapExpense, mapExpenseListItem, toMonthDate, toTimestamp } from "@/lib/repositories/mappers";
 import type { ExpenseUpsert } from "@/types/domain";
 
 const expenseInclude = {
