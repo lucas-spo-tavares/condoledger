@@ -23,7 +23,6 @@ type ResidentRecord = {
   residentTypeId: string;
   monthlyContributionInCents: number;
   status: "active" | "inactive";
-  isAdministrator: boolean;
   createdAt: Date;
   residentType: ResidentTypeRecord;
 };
@@ -92,7 +91,7 @@ export function mapResidentType(record: ResidentTypeRecord): ResidentType {
   };
 }
 
-export function mapResident(record: ResidentRecord): Resident {
+export function mapResident(record: ResidentRecord, isAdministrator = false): Resident {
   return {
     id: record.id,
     name: record.name,
@@ -102,7 +101,7 @@ export function mapResident(record: ResidentRecord): Resident {
     residentTypeLabel: record.residentType.label,
     monthlyContributionInCents: record.monthlyContributionInCents,
     status: record.status,
-    isAdministrator: record.isAdministrator,
+    isAdministrator,
     createdAt: record.createdAt.toISOString()
   };
 }

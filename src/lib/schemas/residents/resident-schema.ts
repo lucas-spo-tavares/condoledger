@@ -17,11 +17,27 @@ const residentBaseSchema = z.object({
 export const residentFormSchema = residentBaseSchema.extend({
   id: z.string().optional(),
   monthlyContribution: z.coerce.number().min(0, "Informe um valor igual ou maior que zero.")
+}).superRefine((value, context) => {
+  if (value.isAdministrator && !value.email) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["email"],
+      message: "Informe um e-mail para permitir acesso de administrador."
+    });
+  }
 });
 
 export const residentSchema = residentBaseSchema.extend({
   id: z.string().min(1, "Informe o id.").optional(),
   monthlyContributionInCents: z.number().int().min(0, "Informe um valor igual ou maior que zero.")
+}).superRefine((value, context) => {
+  if (value.isAdministrator && !value.email) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["email"],
+      message: "Informe um e-mail para permitir acesso de administrador."
+    });
+  }
 });
 
 export function getResidentFormDefaultValues(): ResidentFormValues {

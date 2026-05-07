@@ -23,6 +23,8 @@ set +a
 echo "Running checks"
 npm run db:generate
 npm run typecheck
+npm run cognito:sync-residents
+npm run cognito:sync-admins
 npm run build:lambda
 
 echo "Applying Prisma migrations"

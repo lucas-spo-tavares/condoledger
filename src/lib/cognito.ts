@@ -1,5 +1,8 @@
 import {
   AdminCreateUserCommand,
+  AdminAddUserToGroupCommand,
+  AdminListGroupsForUserCommand,
+  AdminRemoveUserFromGroupCommand,
   AdminUpdateUserAttributesCommand,
   CognitoIdentityProviderClient,
   InitiateAuthCommand,
@@ -10,6 +13,7 @@ import {
 const client = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION ?? "us-east-1"
 });
+const ADMIN_GROUP_NAME = "Admins";
 
 export async function startEmailOtpSignIn(email: string) {
   const clientId = requireCognitoClientId();
@@ -125,6 +129,100 @@ export async function ensureCognitoUserForEmail(params: { email: string; previou
   );
 
   return response.User ?? null;
+}
+
+export async function isCognitoUserInGroupByEmail(email: string, groupName = ADMIN_GROUP_NAME) {
+  const userPoolId = getCognitoUserPoolId();
+
+  if (!userPoolId) {
+    return false;
+  }
+
+  const user = await findCognitoUserByEmail(email);
+
+  if (!user?.Username) {
+    return false;
+  }
+
+  const response = await client.send(
+    new AdminListGroupsForUserCommand({
+      UserPoolId: userPoolId,
+      Username: user.Username
+    })
+  );
+
+  return response.Groups?.some((group) => group.GroupName === groupName) ?? false;
+}
+
+export async function addCognitoUserToGroupByEmail(email: string, groupName = ADMIN_GROUP_NAME) {
+  const userPoolId = getCognitoUserPoolId();
+
+  if (!userPoolId) {
+    return;
+  }
+
+  const user = await findCognitoUserByEmail(email);
+
+  if (!user?.Username) {
+    return;
+  }
+
+  await client.send(
+    new AdminAddUserToGroupCommand({
+      UserPoolId: userPoolId,
+      Username: user.Username,
+      GroupName: groupName
+    })
+  );
+}
+
+export async function removeCognitoUserFromGroupByEmail(email: string, groupName = ADMIN_GROUP_NAME) {
+  const userPoolId = getCognitoUserPoolId();
+
+  if (!userPoolId) {
+    return;
+  }
+
+  const user = await findCognitoUserByEmail(email);
+
+  if (!user?.Username) {
+    return;
+  }
+
+  await client.send(
+    new AdminRemoveUserFromGroupCommand({
+      UserPoolId: userPoolId,
+      Username: user.Username,
+      GroupName: groupName
+    })
+  );
+}
+
+export async function syncCognitoAdminGroupMembership(params: {
+  email?: string;
+  previousEmail?: string;
+  isAdministrator: boolean;
+}) {
+  const currentEmail = params.email?.trim().toLowerCase();
+  const previousEmail = params.previousEmail?.trim().toLowerCase();
+
+  if (params.isAdministrator) {
+    if (!currentEmail) {
+      throw new Error("Administrator users must have an e-mail address.");
+    }
+
+    await addCognitoUserToGroupByEmail(currentEmail);
+    return;
+  }
+
+  if (currentEmail) {
+    await removeCognitoUserFromGroupByEmail(currentEmail);
+    return;
+  }
+
+  if (previousEmail) {
+    await removeCognitoUserFromGroupByEmail(previousEmail);
+  }
 }
 
 function requireCognitoClientId() {

@@ -6,7 +6,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "CondoLedger",
-  description: "Gestao de condominio para mensalidades, comprovantes, despesas e relatorios."
+  description: "Gestao de condominio para mensalidades, comprovantes, despesas e relatorios.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg"
+  }
 };
 
 export default function RootLayout({

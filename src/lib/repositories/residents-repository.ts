@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isCognitoUserInGroupByEmail } from "@/lib/cognito";
 import { prisma } from "@/lib/db/prisma";
 import { mapResident } from "@/lib/repositories/mappers";
 import type { ResidentStatus, ResidentUpsert } from "@/types/domain";
@@ -27,7 +28,7 @@ export async function findResidents(filters?: { q?: string; status?: ResidentSta
     }
   });
 
-  return residents.map(mapResident);
+  return Promise.all(residents.map(async (resident) => mapResident(resident, await isResidentAdministrator(resident.email))));
 }
 
 export async function findResidentById(id: string) {
@@ -36,7 +37,7 @@ export async function findResidentById(id: string) {
     where: { id }
   });
 
-  return resident ? mapResident(resident) : null;
+  return resident ? mapResident(resident, await isResidentAdministrator(resident.email)) : null;
 }
 
 export async function findResidentByEmail(email: string) {
@@ -50,7 +51,7 @@ export async function findResidentByEmail(email: string) {
     }
   });
 
-  return resident ? mapResident(resident) : null;
+  return resident ? mapResident(resident, await isResidentAdministrator(resident.email)) : null;
 }
 
 export async function upsertResident(resident: ResidentUpsert) {
@@ -65,8 +66,7 @@ export async function upsertResident(resident: ResidentUpsert) {
       unit: resident.unit,
       residentTypeId: resident.residentTypeId,
       monthlyContributionInCents: resident.monthlyContributionInCents,
-      status: resident.status,
-      isAdministrator: resident.isAdministrator
+      status: resident.status
     },
     update: {
       name: resident.name,
@@ -74,12 +74,11 @@ export async function upsertResident(resident: ResidentUpsert) {
       unit: resident.unit,
       residentTypeId: resident.residentTypeId,
       monthlyContributionInCents: resident.monthlyContributionInCents,
-      status: resident.status,
-      isAdministrator: resident.isAdministrator
+      status: resident.status
     }
   });
 
-  return mapResident(persistedResident);
+  return mapResident(persistedResident, await isResidentAdministrator(persistedResident.email));
 }
 
 export async function inactivateResident(id: string) {
@@ -91,5 +90,13 @@ export async function inactivateResident(id: string) {
     }
   });
 
-  return mapResident(resident);
+  return mapResident(resident, await isResidentAdministrator(resident.email));
+}
+
+async function isResidentAdministrator(email: string | null) {
+  if (!email) {
+    return false;
+  }
+
+  return isCognitoUserInGroupByEmail(email);
 }

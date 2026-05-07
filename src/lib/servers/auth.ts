@@ -4,6 +4,7 @@ import {
   confirmEmailOtpSignIn,
   ensureCognitoUserForEmail,
   findCognitoUserByEmail,
+  isCognitoUserInGroupByEmail,
   normalizeEmail,
   startEmailOtpSignIn
 } from "@/lib/cognito";
@@ -23,7 +24,7 @@ const LOCAL_CURRENT_USER: CurrentUser = {
   email: "local@condoledger.local",
   unit: "Local",
   residentTypeLabel: "Morador",
-  isAdministrator: false
+  isAdministrator: true
 };
 
 type ResidentLookup = Awaited<ReturnType<typeof getResidentByEmail>>;
@@ -129,7 +130,7 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
       }
 
       return {
-        currentUser: buildCurrentUser(resident),
+        currentUser: await buildCurrentUser(resident),
         sessionToken: getCurrentUserSessionToken(resident.id)
       };
     }
@@ -161,7 +162,7 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
     }
 
     return {
-      currentUser: buildCurrentUser(resident),
+      currentUser: await buildCurrentUser(resident),
       sessionToken: getCurrentUserSessionToken(resident.id)
     };
   }
@@ -203,7 +204,7 @@ export async function getCurrentUserFromSessionToken(sessionToken: string | unde
     const resident = await getResidentById(residentId);
 
     if (resident && resident.status === "active") {
-      return buildCurrentUser(resident);
+      return await buildCurrentUser(resident);
     }
   }
 
@@ -222,10 +223,12 @@ export function getCurrentUserCookieName() {
   return SESSION_COOKIE_NAME;
 }
 
-function buildCurrentUser(resident: NonNullable<ResidentLookup>) {
+async function buildCurrentUser(resident: NonNullable<ResidentLookup>) {
   if (!resident.email) {
     throw new AuthError("Morador sem e-mail cadastrado.", 403);
   }
+
+  const isAdministrator = await isCognitoUserInGroupByEmail(resident.email);
 
   return {
     id: resident.id,
@@ -233,7 +236,7 @@ function buildCurrentUser(resident: NonNullable<ResidentLookup>) {
     email: resident.email,
     unit: resident.unit,
     residentTypeLabel: resident.residentTypeLabel,
-    isAdministrator: resident.isAdministrator
+    isAdministrator
   } satisfies CurrentUser;
 }
 

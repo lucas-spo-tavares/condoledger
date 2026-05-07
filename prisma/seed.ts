@@ -58,7 +58,6 @@ async function main() {
         residentTypeId,
         monthlyContributionInCents: resident.monthlyContributionInCents,
         status: resident.status,
-        isAdministrator: resident.isAdministrator,
         createdAt: toTimestamp(resident.createdAt)
       }
     });

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ensureCognitoUserForEmail, syncCognitoAdminGroupMembership } from "@/lib/cognito";
 import {
   findResidentByEmail,
   findResidentById,
@@ -7,7 +8,6 @@ import {
   inactivateResident,
   upsertResident
 } from "@/lib/repositories/residents-repository";
-import { ensureCognitoUserForEmail } from "@/lib/cognito";
 import type { ResidentStatus, ResidentUpsert } from "@/types/domain";
 
 export async function getResidents(filters?: { q?: string; status?: ResidentStatus }) {
@@ -16,6 +16,10 @@ export async function getResidents(filters?: { q?: string; status?: ResidentStat
 
 export async function putResident(resident: ResidentUpsert) {
   const existingResident = resident.id ? await findResidentById(resident.id) : null;
+  if (resident.isAdministrator && !resident.email?.trim()) {
+    throw new Error("Morador administrador precisa ter e-mail cadastrado.");
+  }
+
   const persistedResident = await upsertResident(resident);
 
   if (persistedResident.email) {
@@ -24,6 +28,12 @@ export async function putResident(resident: ResidentUpsert) {
       previousEmail: existingResident?.email
     });
   }
+
+  await syncCognitoAdminGroupMembership({
+    email: persistedResident.email,
+    previousEmail: existingResident?.email,
+    isAdministrator: resident.isAdministrator
+  });
 
   return persistedResident;
 }

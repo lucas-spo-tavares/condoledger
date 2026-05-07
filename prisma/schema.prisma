@@ -31,7 +31,6 @@ model Resident {
   residentTypeId             String         @map("resident_type_id") @db.Uuid
   monthlyContributionInCents Int            @default(0) @map("monthly_contribution_in_cents")
   status                     ResidentStatus @default(active)
-  isAdministrator            Boolean        @default(false) @map("is_administrator")
   createdAt                  DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   residentType               ResidentType   @relation(fields: [residentTypeId], references: [id])
   receipts                   Receipt[]
