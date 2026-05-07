@@ -41,7 +41,7 @@ variable "cognito_deletion_protection" {
 }
 
 variable "database_url" {
-  description = "Primary database connection string for the Amplify app."
+  description = "Primary database connection string."
   type        = string
   sensitive   = true
 }
@@ -50,27 +50,4 @@ variable "direct_database_url" {
   description = "Direct database connection string used by Prisma config and migrations."
   type        = string
   sensitive   = true
-}
-
-variable "amplify_repository_url" {
-  description = "Git repository URL for the Amplify app."
-  type        = string
-}
-
-variable "amplify_access_token" {
-  description = "GitHub access token used by Amplify to connect the repository. This value is stored in Terraform state."
-  type        = string
-  sensitive   = true
-}
-
-variable "amplify_branch_name" {
-  description = "Repository branch that Amplify should deploy."
-  type        = string
-  default     = "main"
-}
-
-variable "amplify_environment_variables" {
-  description = "Additional environment variables for the Amplify app."
-  type        = map(string)
-  default     = {}
 }

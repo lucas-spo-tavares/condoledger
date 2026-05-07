@@ -10,6 +10,7 @@ CondoLedger is a web-based condo management system for monthly dues, manual paym
 - shadcn/ui components
 - PostgreSQL with Prisma
 - Amazon Cognito with email OTP
+- AWS Lambda for standalone deployment
 - Terraform
 - Docker Compose with PostgreSQL
 
@@ -86,16 +87,6 @@ COGNITO_CLIENT_ID=<terraform output>
 PROOFS_BUCKET_NAME=<terraform output>
 ```
 
-If you are provisioning Amplify through Terraform, also add these values to `.env.prod` as `TF_VAR_*` variables:
-
-```bash
-TF_VAR_amplify_repository_url=<git repo url>
-TF_VAR_amplify_access_token=<github token>
-TF_VAR_amplify_branch_name=main
-```
-
-You can also pass extra Amplify environment variables with `TF_VAR_amplify_environment_variables`, for example to add `NEXT_PUBLIC_*` values.
-
 `bin/deploy.sh` maps `DATABASE_URL` and `DIRECT_DATABASE_URL` from `.env.prod` to the Terraform `TF_VAR_*` inputs automatically, so you do not need to duplicate those values.
 
 ## Infrastructure
@@ -106,7 +97,7 @@ Terraform lives in `infra/terraform` and provisions:
 - Cognito User Pool
 - Cognito web app client
 - Cognito groups for admins and residents
-- Amplify app and production branch for the Next.js SSR site
+- Standalone Lambda deployment resources will be added in the next phase
 
 ```bash
 cd infra/terraform
@@ -121,7 +112,7 @@ For the manual deploy flow:
 npm run deploy
 ```
 
-`npm run deploy` loads `.env.prod`, runs typecheck, applies Prisma migrations, applies the Terraform-managed AWS infrastructure, and prints Terraform outputs. The application build itself is handled by Amplify through `infra/terraform/amplify.yml`.
+`npm run deploy` loads `.env.prod`, runs typecheck, applies Prisma migrations, applies the Terraform-managed AWS infrastructure, and prints Terraform outputs.
 
 If you only want the Terraform-managed AWS infrastructure, run:
 
