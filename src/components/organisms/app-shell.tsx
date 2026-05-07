@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b bg-card/85 backdrop-blur lg:min-h-screen lg:border-b-0 lg:border-r">
+      <aside className="border-b bg-card lg:min-h-screen lg:border-b-0 lg:border-r">
         <div className="flex h-16 items-center gap-3 px-5">
           <div className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Building2 className="size-5" />
@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <AppNavigation />
       </aside>
       <div className="flex min-h-screen flex-col">
-        <header className="border-b bg-card/70 backdrop-blur">
+        <header className="border-b bg-card">
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">

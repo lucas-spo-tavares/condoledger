@@ -10,6 +10,7 @@
     "build": "next build",
     "build:lambda": "next build && bash bin/package-lambda.sh",
     "package:lambda": "bash bin/package-lambda.sh",
+    "cognito:sync-residents": "tsx scripts/sync-cognito-users.ts",
     "deploy": "bash bin/deploy.sh",
     "deploy:infra": "bash bin/deploy-infra.sh",
     "destroy": "bash bin/destroy.sh",

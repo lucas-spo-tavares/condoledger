@@ -7,6 +7,7 @@ import {
   inactivateResident,
   upsertResident
 } from "@/lib/repositories/residents-repository";
+import { ensureCognitoUserForEmail } from "@/lib/cognito";
 import type { ResidentStatus, ResidentUpsert } from "@/types/domain";
 
 export async function getResidents(filters?: { q?: string; status?: ResidentStatus }) {
@@ -14,7 +15,17 @@ export async function getResidents(filters?: { q?: string; status?: ResidentStat
 }
 
 export async function putResident(resident: ResidentUpsert) {
-  return upsertResident(resident);
+  const existingResident = resident.id ? await findResidentById(resident.id) : null;
+  const persistedResident = await upsertResident(resident);
+
+  if (persistedResident.email) {
+    await ensureCognitoUserForEmail({
+      email: persistedResident.email,
+      previousEmail: existingResident?.email
+    });
+  }
+
+  return persistedResident;
 }
 
 export async function deleteResident(id: string) {

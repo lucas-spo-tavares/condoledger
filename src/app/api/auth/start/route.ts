@@ -33,10 +33,19 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
+    console.error("auth/start failed", error);
+
     if (error instanceof AuthError) {
       return NextResponse.json({ message: error.message }, { status: error.status });
     }
 
-    return NextResponse.json({ message: "Nao foi possivel enviar o codigo." }, { status: 500 });
+    const message =
+      process.env.NODE_ENV === "production" && error instanceof Error
+        ? "Nao foi possivel enviar o codigo."
+        : error instanceof Error
+          ? error.message
+          : "Nao foi possivel enviar o codigo.";
+
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

@@ -1,6 +1,13 @@
 import "server-only";
 
-import { confirmEmailOtpSignIn, startEmailOtpSignIn } from "@/lib/cognito";
+import {
+  confirmEmailOtpSignIn,
+  ensureCognitoUserForEmail,
+  findCognitoUserByEmail,
+  normalizeEmail,
+  startEmailOtpSignIn
+} from "@/lib/cognito";
+import { SIGN_IN_OTP_LENGTH } from "@/lib/schemas/auth/sign-in-schema";
 import { getResidentByEmail, getResidentById } from "@/lib/servers/residents";
 import type { CurrentUser } from "@/types/domain";
 
@@ -8,6 +15,8 @@ const SESSION_COOKIE_NAME = "condoledger_user";
 export const SESSION_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 5;
 const AUTH_MODE = process.env.AUTH_MODE ?? "cognito";
 const localOtpSessions = new Map<string, { code: string; email: string; expiresAt: number }>();
+const RESIDENT_SESSION_PREFIX = "resident:";
+const EXTERNAL_SESSION_PREFIX = "external:";
 const LOCAL_CURRENT_USER: CurrentUser = {
   id: "local-user",
   name: "Local User",
@@ -42,51 +51,51 @@ export class AuthError extends Error {
 }
 
 export async function startOtpSignIn(email: string): Promise<StartOtpSignInResult> {
-  const resident = await requireActiveResident(email);
+  const normalizedEmail = normalizeEmail(email);
+  const resident = await getResidentByEmail(normalizedEmail);
 
   if (isLocalAuthMode()) {
     return {
       currentUser: LOCAL_CURRENT_USER,
-      email: resident.email ?? email
+      email: resident?.email ?? normalizedEmail
     };
   }
 
-  try {
-    const response = await startEmailOtpSignIn(resident.email ?? email);
-    const session = response.Session;
-
-    if (!session) {
-      throw new Error("Cognito did not return a session.");
+  if (resident) {
+    if (resident.status !== "active") {
+      throw new AuthError("Apenas moradores ativos podem acessar a aplicação.", 403);
     }
 
-    return {
-      session: `cognito:${session}`,
-      email: resident.email ?? email,
-      maskedDestination: maskEmail(resident.email ?? email)
-    };
-  } catch {
-    const session = `local:${crypto.randomUUID()}`;
-    const code = createOtpCode();
+    if (!resident.email) {
+      throw new AuthError("Morador sem e-mail cadastrado.", 403);
+    }
 
-    localOtpSessions.set(session, {
-      code,
-      email: resident.email ?? email,
-      expiresAt: Date.now() + 10 * 60 * 1000
+    await ensureCognitoUserForEmail({
+      email: resident.email,
+      previousEmail: resident.email
     });
 
-    return {
-      session,
-      email: resident.email ?? email,
-      maskedDestination: maskEmail(resident.email ?? email)
-    };
+    return startCognitoOtp(resident.email);
   }
+
+  const cognitoUser = await findCognitoUserByEmail(normalizedEmail);
+
+  if (!cognitoUser) {
+    throw new AuthError("Nenhum usuário Cognito cadastrado com este e-mail.", 404);
+  }
+
+  return startCognitoOtp(normalizedEmail);
 }
 
 export async function confirmOtpSignIn(params: { email: string; code: string; session: string }) {
-  const resident = await requireActiveResident(params.email);
+  const normalizedEmail = normalizeEmail(params.email);
+  const resident = await getResidentByEmail(normalizedEmail);
 
   if (isLocalAuthMode()) {
-    return LOCAL_CURRENT_USER;
+    return {
+      currentUser: LOCAL_CURRENT_USER,
+      sessionToken: getCurrentUserSessionToken(LOCAL_CURRENT_USER.id)
+    };
   }
 
   if (params.session.startsWith("local:")) {
@@ -96,7 +105,7 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
       throw new AuthError("Código expirado. Solicite um novo OTP.", 410);
     }
 
-    if (localSession.email.trim().toLowerCase() !== params.email.trim().toLowerCase()) {
+    if (localSession.email.trim().toLowerCase() !== normalizedEmail) {
       throw new AuthError("Código inválido.", 400);
     }
 
@@ -110,13 +119,31 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
     }
 
     localOtpSessions.delete(params.session);
-    return buildCurrentUser(resident);
+    if (resident) {
+      if (resident.status !== "active") {
+        throw new AuthError("Apenas moradores ativos podem acessar a aplicação.", 403);
+      }
+
+      if (!resident.email) {
+        throw new AuthError("Morador sem e-mail cadastrado.", 403);
+      }
+
+      return {
+        currentUser: buildCurrentUser(resident),
+        sessionToken: getCurrentUserSessionToken(resident.id)
+      };
+    }
+
+    return {
+      currentUser: buildExternalCurrentUser(normalizedEmail),
+      sessionToken: getCurrentUserSessionToken(normalizedEmail, "external")
+    };
   }
 
   const rawSession = params.session.startsWith("cognito:") ? params.session.slice("cognito:".length) : params.session;
   try {
     await confirmEmailOtpSignIn({
-      email: resident.email ?? params.email,
+      email: resident?.email ?? normalizedEmail,
       code: params.code,
       session: rawSession
     });
@@ -124,13 +151,53 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
     throw new AuthError("Código inválido.", 400);
   }
 
-  return buildCurrentUser(resident);
+  if (resident) {
+    if (resident.status !== "active") {
+      throw new AuthError("Apenas moradores ativos podem acessar a aplicação.", 403);
+    }
+
+    if (!resident.email) {
+      throw new AuthError("Morador sem e-mail cadastrado.", 403);
+    }
+
+    return {
+      currentUser: buildCurrentUser(resident),
+      sessionToken: getCurrentUserSessionToken(resident.id)
+    };
+  }
+
+  return {
+    currentUser: buildExternalCurrentUser(normalizedEmail),
+    sessionToken: getCurrentUserSessionToken(normalizedEmail, "external")
+  };
 }
 
 export async function getCurrentUserFromResidentId(residentId: string | undefined): Promise<CurrentUser | null> {
+  return getCurrentUserFromSessionToken(residentId);
+}
+
+export async function getCurrentUserFromSessionToken(sessionToken: string | undefined): Promise<CurrentUser | null> {
   if (isLocalAuthMode()) {
     return getLocalCurrentUser();
   }
+
+  if (!sessionToken) {
+    return null;
+  }
+
+  if (sessionToken.startsWith(EXTERNAL_SESSION_PREFIX)) {
+    const email = sessionToken.slice(EXTERNAL_SESSION_PREFIX.length).trim().toLowerCase();
+
+    if (!email) {
+      return null;
+    }
+
+    return buildExternalCurrentUser(email);
+  }
+
+  const residentId = sessionToken.startsWith(RESIDENT_SESSION_PREFIX)
+    ? sessionToken.slice(RESIDENT_SESSION_PREFIX.length)
+    : sessionToken;
 
   if (residentId) {
     const resident = await getResidentById(residentId);
@@ -170,26 +237,22 @@ function buildCurrentUser(resident: NonNullable<ResidentLookup>) {
   } satisfies CurrentUser;
 }
 
-async function requireActiveResident(email: string) {
-  const resident = await getResidentByEmail(email);
-
-  if (!resident) {
-    throw new AuthError("Nenhum morador cadastrado com este e-mail.", 404);
-  }
-
-  if (resident.status !== "active") {
-    throw new AuthError("Apenas moradores ativos podem acessar a aplicação.", 403);
-  }
-
-  if (!resident.email) {
-    throw new AuthError("Morador sem e-mail cadastrado.", 403);
-  }
-
-  return resident;
+function buildExternalCurrentUser(email: string): CurrentUser {
+  return {
+    id: email,
+    name: "Usuário externo",
+    email,
+    unit: "Externo",
+    residentTypeLabel: "Externo",
+    isAdministrator: false
+  };
 }
 
 function createOtpCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  const min = 10 ** (SIGN_IN_OTP_LENGTH - 1);
+  const max = 10 ** SIGN_IN_OTP_LENGTH;
+
+  return Math.floor(min + Math.random() * (max - min)).toString();
 }
 
 function maskEmail(email: string) {
@@ -204,4 +267,23 @@ function maskEmail(email: string) {
 
 function isLocalAuthMode() {
   return AUTH_MODE.toLowerCase() === "local";
+}
+
+function getCurrentUserSessionToken(id: string, kind: "resident" | "external" = "resident") {
+  return `${kind === "resident" ? RESIDENT_SESSION_PREFIX : EXTERNAL_SESSION_PREFIX}${id}`;
+}
+
+async function startCognitoOtp(email: string): Promise<StartOtpSignInResult> {
+  const response = await startEmailOtpSignIn(email);
+  const session = response.Session;
+
+  if (!session) {
+    throw new Error("Cognito did not return a session.");
+  }
+
+  return {
+    session: `cognito:${session}`,
+    email,
+    maskedDestination: maskEmail(email)
+  };
 }

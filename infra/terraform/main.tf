@@ -190,7 +190,10 @@ resource "aws_iam_role_policy" "web_lambda" {
         Effect = "Allow"
         Action = [
           "cognito-idp:InitiateAuth",
-          "cognito-idp:RespondToAuthChallenge"
+          "cognito-idp:RespondToAuthChallenge",
+          "cognito-idp:ListUsers",
+          "cognito-idp:AdminCreateUser",
+          "cognito-idp:AdminUpdateUserAttributes"
         ]
         Resource = aws_cognito_user_pool.main.arn
       }

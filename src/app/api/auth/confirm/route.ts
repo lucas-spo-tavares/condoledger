@@ -23,10 +23,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const currentUser = await confirmOtpSignIn(result.data);
+    const { currentUser, sessionToken } = await confirmOtpSignIn(result.data);
 
     const response = NextResponse.json({ currentUser });
-    response.cookies.set(getCurrentUserCookieName(), currentUser.id, {
+    response.cookies.set(getCurrentUserCookieName(), sessionToken, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

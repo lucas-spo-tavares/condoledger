@@ -1,18 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, KeyRound, Loader2, RefreshCw, ShieldCheck, UserCircle2 } from "lucide-react";
+import { KeyRound, ShieldCheck, UserCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Controller } from "react-hook-form";
 
 import { confirmAuthOtp, startAuthOtp } from "@/lib/apis/auth";
 import { useSignInEmailForm, useSignInOtpForm } from "@/lib/forms/auth/useSignInForm";
-import { FormField } from "@/components/organisms/form-field";
+import { SignInEmailStepCard } from "@/components/organisms/auth/sign-in-email-step-card";
+import { SignInOtpStepCard } from "@/components/organisms/auth/sign-in-otp-step-card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 type AuthStep = "email" | "otp";
 
@@ -27,6 +23,14 @@ export function SignInTemplate() {
   const [success, setSuccess] = React.useState("");
   const [isSending, setIsSending] = React.useState(false);
   const [isConfirming, setIsConfirming] = React.useState(false);
+
+  React.useEffect(() => {
+    if (step !== "otp" || !session) {
+      return;
+    }
+
+    otpForm.reset({ code: "" });
+  }, [otpForm, session, step]);
 
   async function handleStart(values: { email: string }) {
     setIsSending(true);
@@ -43,7 +47,6 @@ export function SignInTemplate() {
       }
 
       emailForm.reset({ email: response.email });
-      otpForm.reset({ code: "" });
       setSession(response.session ?? "");
       setMaskedDestination(response.maskedDestination ?? "");
       setStep("otp");
@@ -81,12 +84,10 @@ export function SignInTemplate() {
               Acesso privado
             </Badge>
             <div className="space-y-3">
-              <h1 className="max-w-md text-4xl font-semibold tracking-tight text-balance">
-                Condomínio com acesso organizado para moradores ativos.
-              </h1>
+              <h1 className="max-w-md text-4xl font-semibold tracking-tight text-balance">CondoLedger</h1>
               <p className="max-w-lg text-sm leading-6 text-muted-foreground">
-                Entre com o e-mail cadastrado, confirme o código enviado e acesse os pagamentos, despesas e
-                relatórios.
+                Entre com um e-mail cadastrado no condomínio ou no Cognito, confirme o código enviado e acesse os
+                pagamentos, despesas e relatórios.
               </p>
             </div>
           </div>
@@ -96,8 +97,8 @@ export function SignInTemplate() {
                 <ShieldCheck className="size-5" />
               </div>
               <div>
-                <p className="text-sm font-medium">Apenas ativos</p>
-                <p className="text-xs text-muted-foreground">Moradores inativos não conseguem entrar.</p>
+                <p className="text-sm font-medium">Moradores e Cognito</p>
+                <p className="text-xs text-muted-foreground">Moradores com e-mail entram pelo cadastro do condomínio; demais usuários precisam existir no Cognito.</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -112,100 +113,28 @@ export function SignInTemplate() {
           </div>
         </section>
 
-        <Card className="border-border bg-card shadow-lg">
-          <CardHeader className="space-y-3 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-                <UserCircle2 className="size-5" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">Entrar na aplicação</CardTitle>
-                <CardDescription>Acesso restrito aos moradores ativos.</CardDescription>
-              </div>
-            </div>
-            {step === "otp" ? (
-              <div className="rounded-xl border border-border bg-background p-3 text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">{maskedDestination}</p>
-                <p className="mt-1">
-                  Digite o código de 6 dígitos que enviamos. Se precisar, você pode pedir um novo.
-                </p>
-              </div>
-            ) : null}
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {step === "email" ? (
-              <form className="space-y-4" onSubmit={emailForm.handleSubmit(handleStart)}>
-                <Controller
-                  control={emailForm.control}
-                  name="email"
-                  render={({ field, fieldState }) => (
-                    <FormField error={fieldState.error?.message} label="E-mail">
-                      <Input
-                        {...field}
-                        id="email"
-                        inputMode="email"
-                        placeholder="morador@exemplo.com"
-                        type="email"
-                      />
-                    </FormField>
-                  )}
-                />
-                <Button className="w-full" disabled={isSending} type="submit">
-                  {isSending ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
-                  Enviar codigo
-                </Button>
-              </form>
-            ) : (
-              <form className="space-y-4" onSubmit={otpForm.handleSubmit(handleConfirm)}>
-                <Controller
-                  control={otpForm.control}
-                  name="code"
-                  render={({ field, fieldState }) => (
-                    <FormField error={fieldState.error?.message} label="Codigo OTP">
-                      <InputOTP maxLength={6} onValueChange={field.onChange} value={field.value}>
-                        <InputOTPGroup>
-                          {Array.from({ length: 6 }).map((_, index) => (
-                            <InputOTPSlot index={index} key={index} />
-                          ))}
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </FormField>
-                  )}
-                />
-                <Button className="w-full" disabled={isConfirming} type="submit">
-                  {isConfirming ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
-                  Confirmar acesso
-                </Button>
-              </form>
-            )}
+        {step === "email" ? (
+          <SignInEmailStepCard
+            control={emailForm.control}
+            isSending={isSending}
+            onSubmit={emailForm.handleSubmit(handleStart)}
+          />
+        ) : (
+          <SignInOtpStepCard
+            control={otpForm.control}
+            isConfirming={isConfirming}
+            isSending={isSending}
+            maskedDestination={maskedDestination}
+            onBackToEmail={() => setStep("email")}
+            onConfirm={otpForm.handleSubmit(handleConfirm)}
+            onResend={() => {
+              void handleStart({ email: emailForm.getValues("email") });
+            }}
+          />
+        )}
 
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              {step === "otp" ? (
-                <Button
-                  disabled={isSending}
-                  onClick={() => {
-                    void handleStart({ email: emailForm.getValues("email") });
-                  }}
-                  type="button"
-                  variant="ghost"
-                >
-                  <RefreshCw className="size-4" />
-                  Reenviar codigo
-                </Button>
-              ) : (
-                <span />
-              )}
-              {step === "otp" ? (
-                <Button onClick={() => setStep("email")} type="button" variant="ghost">
-                  Trocar e-mail
-                </Button>
-              ) : null}
-            </div>
-
-            {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
-          </CardContent>
-        </Card>
+        {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
       </div>
     </main>
   );

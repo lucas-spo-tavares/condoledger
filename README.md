@@ -129,6 +129,16 @@ npm run deploy:infra
 
 `npm run deploy:infra` provisions the shared AWS resources only, such as S3 and Cognito. It does not deploy the Next.js Lambda or CloudFront distribution. Use `npm run deploy` when you want to deploy the full web application.
 
+To backfill Cognito users for residents who already have e-mail addresses, run:
+
+```bash
+npm run cognito:sync-residents
+```
+
+That script scans residents with e-mail and creates or updates the matching Cognito users.
+
+Residents with e-mail are also synced to Cognito automatically when they are created or updated, and users that exist only in Cognito can sign in if their e-mail is registered there.
+
 ## Current Scope
 
 - Admin dashboard
