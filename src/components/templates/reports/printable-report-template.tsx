@@ -50,6 +50,16 @@ export function PrintableReportTemplate({
   }, [reportMonth]);
 
   const residentsById = React.useMemo(() => new Map(residents.map((resident) => [resident.id, resident])), [residents]);
+  const receiptPages = React.useMemo(() => {
+    const pages: ReceiptListItem[][] = [];
+    const receiptsPerPage = 20;
+
+    for (let index = 0; index < receipts.length; index += receiptsPerPage) {
+      pages.push(receipts.slice(index, index + receiptsPerPage));
+    }
+
+    return pages.length ? pages : [[]];
+  }, [receipts]);
 
   return (
     <>
@@ -149,52 +159,58 @@ export function PrintableReportTemplate({
           </Card>
       </PreviewPage>
 
-      <PreviewPage>
-        <section className="flex flex-col gap-4">
-          <Card className="min-w-0 break-inside-avoid">
-            <CardHeader>
-              <CardTitle>Recebimentos individuais</CardTitle>
-              <CardDescription>Valores recebidos ou registrados por morador no mês selecionado.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-hidden rounded-md border">
-                <table className="w-full border-collapse text-sm">
-                  <thead className="bg-muted/40">
-                    <tr className="[&>th]:border-b [&>th]:px-3 [&>th]:py-2 [&>th]:text-left [&>th]:font-medium">
-                      <th>Morador</th>
-                      <th>Unidade</th>
-                      <th>Descrição</th>
-                      <th className="text-right">Valor</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {receipts.length ? (
-                      receipts.map((receipt) => {
-                        const resident = residentsById.get(receipt.residentId);
+      {receiptPages.map((receiptPage, pageIndex) => {
+        const isLastPage = pageIndex === receiptPages.length - 1;
 
-                        return (
-                          <tr key={receipt.id} className="[&>td]:border-b [&>td]:px-3 [&>td]:py-2">
-                            <td className="font-medium">{resident?.name ?? "Morador removido"}</td>
-                            <td>{resident?.unit ?? "-"}</td>
-                            <td>{receipt.description ?? "-"}</td>
-                            <td className="text-right">{formatCurrency(receipt.amountInCents)}</td>
+        return (
+          <PreviewPage key={`receipts-page-${pageIndex}`} breakAfterPage={!isLastPage}>
+            <section className="flex h-full min-h-0 flex-col gap-4">
+              <Card className="min-w-0 break-inside-avoid">
+                <CardHeader>
+                  <CardTitle>Recebimentos individuais</CardTitle>
+                  <CardDescription>Valores recebidos ou registrados por morador no mês selecionado.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-hidden rounded-md border">
+                    <table className="w-full border-collapse text-sm">
+                      <thead className="bg-muted/40">
+                        <tr className="[&>th]:border-b [&>th]:px-3 [&>th]:py-2 [&>th]:text-left [&>th]:font-medium">
+                          <th>Morador</th>
+                          <th>Unidade</th>
+                          <th>Descrição</th>
+                          <th className="text-right">Valor</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {receiptPage.length ? (
+                          receiptPage.map((receipt) => {
+                            const resident = residentsById.get(receipt.residentId);
+
+                            return (
+                              <tr key={receipt.id} className="[&>td]:border-b [&>td]:px-3 [&>td]:py-2">
+                                <td className="font-medium">{resident?.name ?? "Morador removido"}</td>
+                                <td>{resident?.unit ?? "-"}</td>
+                                <td>{receipt.description ?? "-"}</td>
+                                <td className="text-right">{formatCurrency(receipt.amountInCents)}</td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td className="px-3 py-6 text-center text-sm text-muted-foreground" colSpan={4}>
+                              Nenhum recebimento encontrado para este período.
+                            </td>
                           </tr>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td className="px-3 py-6 text-center text-sm text-muted-foreground" colSpan={4}>
-                          Nenhum recebimento encontrado para este período.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      </PreviewPage>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          </PreviewPage>
+        );
+      })}
     </>
   );
 }
