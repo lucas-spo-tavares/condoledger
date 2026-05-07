@@ -193,7 +193,10 @@ resource "aws_iam_role_policy" "web_lambda" {
           "cognito-idp:RespondToAuthChallenge",
           "cognito-idp:ListUsers",
           "cognito-idp:AdminCreateUser",
-          "cognito-idp:AdminUpdateUserAttributes"
+          "cognito-idp:AdminUpdateUserAttributes",
+          "cognito-idp:AdminListGroupsForUser",
+          "cognito-idp:AdminAddUserToGroup",
+          "cognito-idp:AdminRemoveUserFromGroup"
         ]
         Resource = aws_cognito_user_pool.main.arn
       }
