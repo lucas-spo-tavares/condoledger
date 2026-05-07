@@ -19,10 +19,30 @@
       "Action": [
         "iam:ListPolicies",
         "iam:ListRoles",
+        "iam:ListInstanceProfilesForRole",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:GetRole",
         "iam:GetPolicy",
-        "iam:GetPolicyVersion"
+        "iam:GetPolicyVersion",
+        "iam:ListPolicyVersions"
       ],
       "Resource": "*"
+    },
+    {
+      "Sid": "IAMCleanupTerraform",
+      "Effect": "Allow",
+      "Action": [
+        "iam:DeleteRole",
+        "iam:DeleteRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:DeletePolicy",
+        "iam:DeletePolicyVersion"
+      ],
+      "Resource": [
+        "arn:aws:iam::868112351099:role/condoledger-prod-*",
+        "arn:aws:iam::868112351099:policy/condoledger-prod-*"
+      ]
     }
   ]
 }
