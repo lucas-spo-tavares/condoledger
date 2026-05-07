@@ -1,10 +1,13 @@
 export async function request<T>(input: RequestInfo | URL, init?: RequestInit) {
+  const isFormData = init?.body instanceof FormData;
   const response = await fetch(input, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers
-    }
+    headers: isFormData
+      ? init?.headers
+      : {
+          "Content-Type": "application/json",
+          ...init?.headers
+        }
   });
 
   if (!response.ok) {

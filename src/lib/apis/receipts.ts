@@ -1,5 +1,6 @@
 import { request } from "@/lib/commons/request";
-import type { Receipt, ReceiptUpsert } from "@/types/domain";
+import { buildMultipartPayload } from "@/lib/apis/attachments";
+import type { Receipt, ReceiptListItem, ReceiptUpsert } from "@/types/domain";
 
 export type ReceiptQueryParams = {
   month?: string;
@@ -18,13 +19,19 @@ export async function getReceipts(params?: ReceiptQueryParams) {
   }
 
   const queryString = searchParams.toString();
-  return request<Receipt[]>(queryString ? `/api/receipts?${queryString}` : "/api/receipts");
+  return request<ReceiptListItem[]>(queryString ? `/api/receipts?${queryString}` : "/api/receipts");
+}
+
+export async function getReceipt(id: string) {
+  return request<Receipt>(`/api/receipts?id=${encodeURIComponent(id)}`);
 }
 
 export async function putReceipt(receipt: ReceiptUpsert) {
+  const body = await buildMultipartPayload(receipt, receipt.proofAttachments);
+
   return request<Receipt>("/api/receipts", {
     method: "PUT",
-    body: JSON.stringify(receipt)
+    body
   });
 }
 

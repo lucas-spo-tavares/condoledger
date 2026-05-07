@@ -13,6 +13,7 @@ type AttachmentCardItem = {
   name: string;
   previewUrl: string;
   type: string;
+  storageKey?: string;
 };
 
 type AttachmentFilesCardProps<TFieldValues extends FieldValues> = {
@@ -80,7 +81,8 @@ export function AttachmentFilesCard<TFieldValues extends FieldValues>({
         id: item.id,
         name: item.name,
         previewUrl: item.previewUrl,
-        type: item.type
+        type: item.type,
+        storageKey: item.storageKey
       }));
     }
 

@@ -28,6 +28,7 @@ export type FileAttachment = {
   name: string;
   previewUrl: string;
   type: "application/pdf" | "image/jpeg" | "image/png";
+  storageKey?: string;
 };
 
 export type Receipt = {
@@ -38,6 +39,10 @@ export type Receipt = {
   amountInCents: number;
   receivedAt: string;
   proofAttachments: FileAttachment[];
+};
+
+export type ReceiptListItem = Omit<Receipt, "proofAttachments"> & {
+  proofAttachmentCount: number;
 };
 
 export type ReceiptUpsert = Omit<Receipt, "id"> & {
@@ -59,6 +64,10 @@ export type Expense = {
   amountInCents: number;
   paidAt: string;
   attachments: FileAttachment[];
+};
+
+export type ExpenseListItem = Omit<Expense, "attachments"> & {
+  attachmentCount: number;
 };
 
 export type ExpenseUpsert = Omit<Expense, "id" | "month"> & {

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/db/prisma";
-import { mapReceipt, toMonthDate, toTimestamp } from "@/lib/repositories/mappers";
+import { mapReceipt, mapReceiptListItem, toMonthDate, toTimestamp } from "@/lib/repositories/mappers";
 import type { ReceiptUpsert } from "@/types/domain";
 
 const receiptInclude = {
@@ -9,9 +9,18 @@ const receiptInclude = {
   resident: true
 };
 
+const receiptListInclude = {
+  _count: {
+    select: {
+      attachments: true
+    }
+  },
+  resident: true
+};
+
 export async function findReceipts(filters?: { month?: string; q?: string }) {
   const receipts = await prisma.receipt.findMany({
-    include: receiptInclude,
+    include: receiptListInclude,
     where: {
       month: filters?.month ? toMonthDate(filters.month) : undefined,
       ...(filters?.q
@@ -29,7 +38,7 @@ export async function findReceipts(filters?: { month?: string; q?: string }) {
 
   return receipts
     .sort((left, right) => left.resident.name.localeCompare(right.resident.name, "pt-BR", { sensitivity: "base" }))
-    .map(mapReceipt);
+    .map(mapReceiptListItem);
 }
 
 export async function findReceiptById(id: string) {
@@ -43,12 +52,15 @@ export async function findReceiptById(id: string) {
 
 export async function upsertReceipt(receipt: ReceiptUpsert) {
   const persistedReceipt = await prisma.$transaction(async (transaction) => {
+    const receiptId = receipt.id ?? crypto.randomUUID();
+
     const persisted = await transaction.receipt.upsert({
       include: receiptInclude,
       where: {
-        id: receipt.id ?? "00000000-0000-0000-0000-000000000000"
+        id: receiptId
       },
       create: {
+        id: receiptId,
         residentId: receipt.residentId,
         month: toMonthDate(receipt.month),
         description: receipt.description ?? null,
@@ -57,7 +69,9 @@ export async function upsertReceipt(receipt: ReceiptUpsert) {
         attachments: {
           create: receipt.proofAttachments.map((attachment) => ({
             id: attachment.id,
-            previewUrl: attachment.previewUrl
+            previewUrl: attachment.storageKey ?? attachment.previewUrl,
+            fileName: attachment.name,
+            contentType: attachment.type
           }))
         }
       },
@@ -71,7 +85,9 @@ export async function upsertReceipt(receipt: ReceiptUpsert) {
           deleteMany: {},
           create: receipt.proofAttachments.map((attachment) => ({
             id: attachment.id,
-            previewUrl: attachment.previewUrl
+            previewUrl: attachment.storageKey ?? attachment.previewUrl,
+            fileName: attachment.name,
+            contentType: attachment.type
           }))
         }
       }

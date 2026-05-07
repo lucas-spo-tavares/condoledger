@@ -1,18 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 import { getZodFieldErrors } from "@/lib/commons/zod";
 import { receiptSchema } from "@/lib/schemas/receipts/receipt-schema";
-import { deleteReceipt, getReceipts, putReceipt } from "@/lib/servers/receipts";
+import { getCurrentUserCookieName, getCurrentUserFromSessionToken } from "@/lib/servers/auth";
+import { deleteReceipt, getReceipt, getReceipts, putReceipt } from "@/lib/servers/receipts";
 
 export async function GET(request: NextRequest) {
+  const id = request.nextUrl.searchParams.get("id");
   const month = request.nextUrl.searchParams.get("month") ?? undefined;
   const q = request.nextUrl.searchParams.get("q") ?? undefined;
+
+  if (id) {
+    return NextResponse.json(await getReceipt(id));
+  }
 
   return NextResponse.json(await getReceipts({ month, q }));
 }
 
 export async function PUT(request: NextRequest) {
-  const result = receiptSchema.safeParse(await request.json());
+  const contentType = request.headers.get("content-type") ?? "";
+  const formData = contentType.includes("multipart/form-data") ? await request.formData() : null;
+  const payload = formData ? formData.get("payload") : await request.json();
+
+  let parsedPayload: unknown;
+
+  try {
+    parsedPayload = typeof payload === "string" ? JSON.parse(payload) : payload;
+  } catch {
+    return NextResponse.json({ message: "invalid receipt payload" }, { status: 400 });
+  }
+
+  const result = receiptSchema.safeParse(parsedPayload);
 
   if (!result.success) {
     return NextResponse.json(
@@ -24,7 +43,16 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(await putReceipt(result.data));
+  if (result.data.id) {
+    const cookieStore = await cookies();
+    const currentUser = await getCurrentUserFromSessionToken(cookieStore.get(getCurrentUserCookieName())?.value);
+
+    if (!currentUser?.isAdministrator) {
+      return NextResponse.json({ message: "apenas administradores podem editar recebimentos" }, { status: 403 });
+    }
+  }
+
+  return NextResponse.json(await putReceipt(result.data, formData ?? undefined));
 }
 
 export async function DELETE(request: NextRequest) {

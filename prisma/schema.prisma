@@ -76,13 +76,15 @@ model Expense {
 }
 
 model Attachment {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  receiptId  String?  @map("receipt_id") @db.Uuid
-  expenseId  String?  @map("expense_id") @db.Uuid
-  previewUrl String   @map("preview_url")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  receipt    Receipt? @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-  expense    Expense? @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  receiptId   String?  @map("receipt_id") @db.Uuid
+  expenseId   String?  @map("expense_id") @db.Uuid
+  previewUrl  String   @map("preview_url")
+  fileName    String   @map("file_name")
+  contentType String   @map("content_type")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  receipt     Receipt? @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  expense     Expense? @relation(fields: [expenseId], references: [id], onDelete: Cascade)
 
   @@index([receiptId])
   @@index([expenseId])

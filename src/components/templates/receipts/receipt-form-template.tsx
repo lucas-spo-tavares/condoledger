@@ -10,23 +10,19 @@ import { toReceipt, useReceiptForm } from "@/lib/forms/receipts/useReceiptForm";
 import { useReceiptsMutation } from "@/lib/hooks/receipts/useReceiptsMutation";
 import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
 import { getReceiptFormDefaultValues } from "@/lib/schemas/receipts/receipt-schema";
-import { useReceiptsQuery } from "@/lib/hooks/receipts/useReceiptsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
-import type { ReceiptUpsert } from "@/types/domain";
+import type { Receipt, ReceiptUpsert } from "@/types/domain";
 
 type ReceiptFormTemplateProps = {
-  receiptId?: string | null;
+  receipt?: Receipt | null;
 };
 
-export function ReceiptFormTemplate({ receiptId = null }: ReceiptFormTemplateProps) {
+export function ReceiptFormTemplate({ receipt = null }: ReceiptFormTemplateProps) {
   const goBack = useSafeBackNavigation("/receipts");
-  const receiptsQuery = useReceiptsQuery();
   const residentsQuery = useResidentsQuery();
   const receiptsMutation = useReceiptsMutation();
-  const receipt = receiptId ? receiptsQuery.data?.find((item) => item.id === receiptId) ?? null : null;
   const form = useReceiptForm(receipt);
-  const isEditing = Boolean(receiptId);
-  const isMissingReceipt = Boolean(receiptId) && receiptsQuery.isSuccess && !receipt;
+  const isEditing = Boolean(receipt);
 
   function handleCancel() {
     goBack();
@@ -56,62 +52,50 @@ export function ReceiptFormTemplate({ receiptId = null }: ReceiptFormTemplatePro
             {isEditing ? "Editar recebimento" : "Registrar recebimento"}
           </h1>
         </div>
-        {isMissingReceipt ? (
+        <>
           <Card>
             <CardHeader>
               <CardTitle>Dados do recebimento</CardTitle>
-              <CardDescription>Atualize os dados do recebimento selecionado.</CardDescription>
+              <CardDescription>
+                {isEditing
+                  ? "Atualize os dados do recebimento selecionado."
+                  : "Registre um recebimento manual e, se houver, informe o comprovante."}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Recebimento nao encontrado.</p>
+              <ReceiptForm residents={residentsQuery.data ?? []} />
             </CardContent>
           </Card>
-        ) : (
-          <>
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados do recebimento</CardTitle>
-                <CardDescription>
-                  {isEditing
-                    ? "Atualize os dados do recebimento selecionado."
-                    : "Registre um recebimento manual e, se houver, informe o comprovante."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ReceiptForm residents={residentsQuery.data ?? []} />
-              </CardContent>
-            </Card>
-            <AttachmentFilesCard
-              accept="application/pdf,image/jpeg,image/png"
-              addLabel="Adicionar comprovantes"
-              control={form.control}
-              description="Selecione um ou mais comprovantes do recebimento. Cada arquivo abre em nova aba."
-              emptyLabel="Nenhum comprovante anexado ainda."
-              multiple
-              name="proofAttachments"
-              setValue={form.setValue}
-              title="Arquivos do recebimento"
-            />
-            <div className="flex justify-end gap-2">
-              <Button disabled={receiptsMutation.isPending} onClick={handleCancel} type="button" variant="outline">
-                Cancelar
+          <AttachmentFilesCard
+            accept="application/pdf,image/jpeg,image/png"
+            addLabel="Adicionar comprovantes"
+            control={form.control}
+            description="Selecione um ou mais comprovantes do recebimento. Cada arquivo abre em nova aba."
+            emptyLabel="Nenhum comprovante anexado ainda."
+            multiple
+            name="proofAttachments"
+            setValue={form.setValue}
+            title="Arquivos do recebimento"
+          />
+          <div className="flex justify-end gap-2">
+            <Button disabled={receiptsMutation.isPending} onClick={handleCancel} type="button" variant="outline">
+              Cancelar
+            </Button>
+            {!isEditing ? (
+              <Button
+                disabled={receiptsMutation.isPending}
+                onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toReceipt(values)))}
+                type="button"
+                variant="secondary"
+              >
+                Salvar e adicionar novo
               </Button>
-              {!isEditing ? (
-                <Button
-                  disabled={receiptsMutation.isPending}
-                  onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toReceipt(values)))}
-                  type="button"
-                  variant="secondary"
-                >
-                  Salvar e adicionar novo
-                </Button>
-              ) : null}
-              <Button disabled={receiptsMutation.isPending} type="submit">
-                Salvar recebimento
-              </Button>
-            </div>
-          </>
-        )}
+            ) : null}
+            <Button disabled={receiptsMutation.isPending} type="submit">
+              Salvar recebimento
+            </Button>
+          </div>
+        </>
       </form>
     </FormProvider>
   );

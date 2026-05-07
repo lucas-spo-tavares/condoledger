@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -12,10 +13,18 @@ import {
 import type { Receipt, ReceiptUpsert } from "@/types/domain";
 
 export function useReceiptForm(receipt?: Receipt | null) {
-  return useForm<ReceiptFormInput, unknown, ReceiptFormValues>({
+  const form = useForm<ReceiptFormInput, unknown, ReceiptFormValues>({
     resolver: zodResolver(receiptFormSchema),
     defaultValues: receipt ? toReceiptFormValues(receipt) : getReceiptFormDefaultValues()
   });
+
+  React.useEffect(() => {
+    if (receipt) {
+      form.reset(toReceiptFormValues(receipt));
+    }
+  }, [form, receipt]);
+
+  return form;
 }
 
 export function toReceiptFormValues(receipt: Receipt): ReceiptFormValues {

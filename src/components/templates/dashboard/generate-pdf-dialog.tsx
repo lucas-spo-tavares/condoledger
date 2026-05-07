@@ -15,9 +15,10 @@ import {
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export function GeneratePdfDialog({ defaultDescription }: { defaultDescription: string }) {
+  const MAX_DESCRIPTION_LENGTH = 800;
   const [description, setDescription] = React.useState(defaultDescription);
 
   React.useEffect(() => {
@@ -55,13 +56,19 @@ export function GeneratePdfDialog({ defaultDescription }: { defaultDescription: 
           <label className="text-sm font-medium" htmlFor="pdf-description">
             Descrição
           </label>
-          <Input
+          <Textarea
             autoFocus
             id="pdf-description"
+            maxLength={MAX_DESCRIPTION_LENGTH}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Relatório mensal do condomínio"
             value={description}
           />
+          <div className="flex items-center justify-end text-xs text-muted-foreground">
+            <span className={description.length >= MAX_DESCRIPTION_LENGTH ? "text-destructive" : ""}>
+              {description.length}/{MAX_DESCRIPTION_LENGTH}
+            </span>
+          </div>
         </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>

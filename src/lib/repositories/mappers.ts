@@ -1,8 +1,11 @@
-import type { Expense, FileAttachment, Receipt, Resident, ResidentType } from "@/types/domain";
+import type { Expense, ExpenseListItem, FileAttachment, Receipt, ReceiptListItem, Resident, ResidentType } from "@/types/domain";
+import { createSignedAttachmentUrl, isRemoteAttachmentUrl } from "@/lib/storage/s3";
 
 type AttachmentRecord = {
   id: string;
   previewUrl: string;
+  fileName: string;
+  contentType: string;
   createdAt: Date;
 };
 
@@ -35,6 +38,18 @@ type ReceiptRecord = {
   attachments: AttachmentRecord[];
 };
 
+type ReceiptSummaryRecord = {
+  id: string;
+  residentId: string;
+  month: Date;
+  description: string | null;
+  amountInCents: number;
+  receivedAt: Date;
+  _count: {
+    attachments: number;
+  };
+};
+
 type ExpenseRecord = {
   id: string;
   month: Date;
@@ -43,6 +58,18 @@ type ExpenseRecord = {
   amountInCents: number;
   paidAt: Date;
   attachments: AttachmentRecord[];
+};
+
+type ExpenseSummaryRecord = {
+  id: string;
+  month: Date;
+  category: string;
+  description: string;
+  amountInCents: number;
+  paidAt: Date;
+  _count: {
+    attachments: number;
+  };
 };
 
 export function toDateOnlyString(value: Date) {
@@ -80,7 +107,9 @@ export function mapResident(record: ResidentRecord): Resident {
   };
 }
 
-export function mapReceipt(record: ReceiptRecord): Receipt {
+export async function mapReceipt(record: ReceiptRecord): Promise<Receipt> {
+  const proofAttachments = await Promise.all(record.attachments.map(mapAttachment));
+
   return {
     id: record.id,
     residentId: record.residentId,
@@ -88,11 +117,25 @@ export function mapReceipt(record: ReceiptRecord): Receipt {
     description: record.description ?? undefined,
     amountInCents: record.amountInCents,
     receivedAt: record.receivedAt.toISOString(),
-    proofAttachments: record.attachments.map(mapAttachment)
+    proofAttachments
   };
 }
 
-export function mapExpense(record: ExpenseRecord): Expense {
+export function mapReceiptListItem(record: ReceiptSummaryRecord): ReceiptListItem {
+  return {
+    id: record.id,
+    residentId: record.residentId,
+    month: toDateOnlyString(record.month),
+    description: record.description ?? undefined,
+    amountInCents: record.amountInCents,
+    receivedAt: record.receivedAt.toISOString(),
+    proofAttachmentCount: record._count.attachments
+  };
+}
+
+export async function mapExpense(record: ExpenseRecord): Promise<Expense> {
+  const attachments = await Promise.all(record.attachments.map(mapAttachment));
+
   return {
     id: record.id,
     month: toDateOnlyString(record.month),
@@ -100,31 +143,46 @@ export function mapExpense(record: ExpenseRecord): Expense {
     description: record.description,
     amountInCents: record.amountInCents,
     paidAt: record.paidAt.toISOString(),
-    attachments: record.attachments.map(mapAttachment)
+    attachments
   };
 }
 
-function mapAttachment(record: AttachmentRecord): FileAttachment {
+export function mapExpenseListItem(record: ExpenseSummaryRecord): ExpenseListItem {
   return {
     id: record.id,
-    name: getFileName(record.previewUrl),
-    previewUrl: record.previewUrl,
-    type: getAttachmentType(record.previewUrl)
+    month: toDateOnlyString(record.month),
+    category: record.category,
+    description: record.description,
+    amountInCents: record.amountInCents,
+    paidAt: record.paidAt.toISOString(),
+    attachmentCount: record._count.attachments
   };
 }
 
-function getFileName(previewUrl: string) {
-  return previewUrl.split("/").pop() || previewUrl;
+async function mapAttachment(record: AttachmentRecord): Promise<FileAttachment> {
+  const storageKey = record.previewUrl;
+
+  return {
+    id: record.id,
+    name: record.fileName || getFileName(storageKey),
+    previewUrl: isRemoteAttachmentUrl(storageKey) ? storageKey : await createSignedAttachmentUrl(storageKey),
+    type: getAttachmentType(record.contentType || storageKey),
+    storageKey
+  };
 }
 
-function getAttachmentType(previewUrl: string): FileAttachment["type"] {
-  const normalizedUrl = previewUrl.toLowerCase();
+function getFileName(value: string) {
+  return value.split("/").pop() || value;
+}
 
-  if (normalizedUrl.endsWith(".pdf")) {
+function getAttachmentType(value: string): FileAttachment["type"] {
+  const normalizedValue = value.toLowerCase();
+
+  if (normalizedValue.includes("pdf")) {
     return "application/pdf";
   }
 
-  if (normalizedUrl.endsWith(".png")) {
+  if (normalizedValue.includes("png")) {
     return "image/png";
   }
 

@@ -8,15 +8,15 @@ import { DashboardCharts } from "@/components/templates/dashboard/dashboard-char
 import { PreviewPage } from "@/components/templates/reports/preview-page";
 import { formatCurrency, formatDate, formatMonth } from "@/lib/commons/formats";
 import type { DashboardMonthPoint } from "@/lib/reports/dashboard-series";
-import type { Expense, MonthlyReport, Receipt, Resident } from "@/types/domain";
+import type { ExpenseListItem, MonthlyReport, ReceiptListItem, Resident } from "@/types/domain";
 
 type PrintableReportTemplateProps = {
   description: string;
   report: MonthlyReport | null;
   activeResidentsCount: number;
   residents: Resident[];
-  receipts: Receipt[];
-  expenses: Expense[];
+  receipts: ReceiptListItem[];
+  expenses: ExpenseListItem[];
   dashboardSeries: DashboardMonthPoint[];
 };
 
@@ -62,7 +62,6 @@ export function PrintableReportTemplate({
                 {report ? formatMonth(report.month) : formatMonth(reportMonth)}
               </CardTitle>
             </div>
-            <CardDescription>{description}</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-4 gap-3">
             <div className="rounded-md border bg-background p-3">

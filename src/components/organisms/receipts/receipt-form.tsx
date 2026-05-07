@@ -57,10 +57,11 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
           control={control}
           name="month"
           render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Mes">
+            <FormField error={fieldState.error?.message} label="Mês de competência">
               <MonthPicker
+                disabled
                 onValueChange={field.onChange}
-                placeholder="Selecione o mes"
+                placeholder="Mês de competência"
                 value={field.value}
               />
             </FormField>

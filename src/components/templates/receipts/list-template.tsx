@@ -18,6 +18,7 @@ import { useDebounce } from "@/lib/hooks/debounce";
 import { useDeleteReceiptsMutation } from "@/lib/hooks/receipts/useDeleteReceiptsMutation";
 import { useReceiptsQuery } from "@/lib/hooks/receipts/useReceiptsQuery";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
+import { useCurrentUser } from "@/components/providers/current-user-provider";
 
 function ReceiptDescription({ description }: { description: string }) {
   return (
@@ -53,6 +54,7 @@ export function ReceiptsTemplate() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const currentUser = useCurrentUser();
   const residentsQuery = useResidentsQuery();
   const deleteReceiptsMutation = useDeleteReceiptsMutation();
   const residents = residentsQuery.data ?? [];
@@ -84,6 +86,7 @@ export function ReceiptsTemplate() {
     q: debouncedNameSearch
   });
   const receipts = receiptsQuery.data ?? [];
+  const canEditReceipts = currentUser?.isAdministrator ?? false;
   const totalReceivedInCents = receipts.reduce((total, receipt) => total + receipt.amountInCents, 0);
 
   return (
@@ -153,12 +156,12 @@ export function ReceiptsTemplate() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {receipt.proofAttachments.length ? (
+                        {receipt.proofAttachmentCount ? (
                           <span className="inline-flex items-center gap-1 text-sm text-primary">
                             <Paperclip className="size-4" />
-                            {receipt.proofAttachments.length > 1
-                              ? `${receipt.proofAttachments.length} anexos`
-                              : "anexado"}
+                            {receipt.proofAttachmentCount > 1
+                              ? `${receipt.proofAttachmentCount} anexos`
+                              : "1 anexo"}
                           </span>
                         ) : (
                           <span className="text-sm text-muted-foreground">pendente</span>
@@ -166,11 +169,13 @@ export function ReceiptsTemplate() {
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-2">
-                          <Button asChild size="icon" type="button" variant="outline">
-                            <Link href={`/receipts/${receipt.id}/edit`}>
-                              <Pencil className="size-4" />
-                            </Link>
-                          </Button>
+                          {canEditReceipts ? (
+                            <Button asChild size="icon" type="button" variant="outline">
+                              <Link href={`/receipts/${receipt.id}/edit`}>
+                                <Pencil className="size-4" />
+                              </Link>
+                            </Button>
+                          ) : null}
                           <ConfirmDeleteDialog
                             disabled={deleteReceiptsMutation.isPending}
                             description="Tem certeza que deseja remover este recebimento? Esta operacao nao pode ser desfeita."

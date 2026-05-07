@@ -1,5 +1,6 @@
 import { request } from "@/lib/commons/request";
-import type { Expense, ExpenseUpsert } from "@/types/domain";
+import { buildMultipartPayload } from "@/lib/apis/attachments";
+import type { Expense, ExpenseListItem, ExpenseUpsert } from "@/types/domain";
 
 export type ExpenseQueryParams = {
   month?: string;
@@ -18,13 +19,19 @@ export async function getExpenses(params?: ExpenseQueryParams) {
   }
 
   const queryString = searchParams.toString();
-  return request<Expense[]>(queryString ? `/api/expenses?${queryString}` : "/api/expenses");
+  return request<ExpenseListItem[]>(queryString ? `/api/expenses?${queryString}` : "/api/expenses");
+}
+
+export async function getExpense(id: string) {
+  return request<Expense>(`/api/expenses?id=${encodeURIComponent(id)}`);
 }
 
 export async function putExpense(expense: ExpenseUpsert) {
+  const body = await buildMultipartPayload(expense, expense.attachments);
+
   return request<Expense>("/api/expenses", {
     method: "PUT",
-    body: JSON.stringify(expense)
+    body
   });
 }
 

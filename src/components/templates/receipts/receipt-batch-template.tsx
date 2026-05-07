@@ -15,8 +15,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useBatchReceiptsMutation } from "@/lib/hooks/receipts/useBatchReceiptsMutation";
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
 import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
-import { createReceiptBatchItemValues } from "@/lib/schemas/receipts/receipt-batch-schema";
 import { useReceiptBatchForm } from "@/lib/forms/receipts/useReceiptBatchForm";
+import { createReceiptBatchItemValues } from "@/lib/schemas/receipts/receipt-batch-schema";
 import type { ReceiptBatchFormValues } from "@/lib/schemas/receipts/receipt-batch-schema";
 import type { Resident } from "@/types/domain";
 
@@ -33,7 +33,6 @@ function createDefaultItem(resident: Resident) {
   return createReceiptBatchItemValues({
     residentId: resident.id,
     amount: resident.monthlyContributionInCents / 100,
-    month: getCurrentMonthValue(),
     receivedAt: getTodayValue()
   });
 }
@@ -44,7 +43,11 @@ export function ReceiptBatchTemplate() {
   const batchReceiptsMutation = useBatchReceiptsMutation();
   const residents = residentsQuery.data ?? [];
   const isLoadingResidents = residentsQuery.isLoading;
-  const form = useReceiptBatchForm({ items: [] });
+  const form = useReceiptBatchForm({
+    description: "",
+    month: getCurrentMonthValue(),
+    items: []
+  });
   const { control, handleSubmit, reset } = form;
   const { fields, remove } = useFieldArray({
     control,
@@ -53,27 +56,25 @@ export function ReceiptBatchTemplate() {
   const hasSeededRowsRef = React.useRef(false);
 
   React.useEffect(() => {
-    if (hasSeededRowsRef.current) {
-      return;
-    }
-
-    if (!residentsQuery.isSuccess) {
+    if (hasSeededRowsRef.current || !residentsQuery.isSuccess) {
       return;
     }
 
     reset({
+      description: "",
+      month: getCurrentMonthValue(),
       items: residents.map((resident) => createDefaultItem(resident))
     });
     hasSeededRowsRef.current = true;
-  }, [reset, residents, residentsQuery.isSuccess]);
+  }, [residents, residentsQuery.isSuccess, reset]);
 
   function onSubmit(values: ReceiptBatchFormValues) {
     batchReceiptsMutation.mutate(
       values.items.map((item) => ({
         residentId: item.residentId,
-        month: item.month,
+        month: values.month,
         amountInCents: Math.round(item.amount * 100),
-        description: item.description?.trim() || undefined,
+        description: values.description?.trim() || undefined,
         receivedAt: item.receivedAt,
         proofAttachments: []
       })),
@@ -107,7 +108,7 @@ export function ReceiptBatchTemplate() {
           <CardTitle>Prévia dos lançamentos</CardTitle>
           <CardDescription>
             {fields.length
-              ? `${fields.length} moradores ativos serão incluídos. Cada linha pode ser editada individualmente.`
+              ? `${fields.length} moradores ativos serão incluídos. A descrição e a competência abaixo serão aplicadas a todos os lançamentos.`
               : isLoadingResidents
                 ? "Carregando moradores ativos..."
                 : "Nenhum morador ativo disponível para lançamento."}
@@ -115,15 +116,45 @@ export function ReceiptBatchTemplate() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-5 grid gap-3 rounded-lg border bg-muted/20 p-4 md:grid-cols-2">
+              <Controller
+                control={control}
+                name="month"
+                render={({ field, fieldState }) => (
+                  <div className="grid gap-1">
+                    <MonthPicker
+                      disabled
+                      onValueChange={field.onChange}
+                      placeholder="Mês de competência"
+                      value={field.value}
+                    />
+                    <span className="min-h-4 text-xs text-destructive">{fieldState.error?.message || "\u00A0"}</span>
+                  </div>
+                )}
+              />
+              <Controller
+                control={control}
+                name="description"
+                render={({ field, fieldState }) => (
+                  <div className="grid gap-1 md:col-span-2">
+                    <Input
+                      {...field}
+                      placeholder="Descrição aplicada a todos os lançamentos"
+                      value={field.value ?? ""}
+                    />
+                    <span className="min-h-4 text-xs text-destructive">{fieldState.error?.message || "\u00A0"}</span>
+                  </div>
+                )}
+              />
+            </div>
+
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Morador</TableHead>
                   <TableHead>Unidade</TableHead>
                   <TableHead>Valor</TableHead>
-                  <TableHead>Mês</TableHead>
                   <TableHead>Recebido em</TableHead>
-                  <TableHead>Descricao</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -158,43 +189,10 @@ export function ReceiptBatchTemplate() {
                       <TableCell>
                         <Controller
                           control={control}
-                          name={`items.${index}.month`}
-                          render={({ field: monthField, fieldState }) => (
-                            <div className="grid gap-1">
-                              <MonthPicker onValueChange={monthField.onChange} value={monthField.value} />
-                              <span className="min-h-4 text-xs text-destructive">
-                                {fieldState.error?.message || "\u00A0"}
-                              </span>
-                            </div>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Controller
-                          control={control}
                           name={`items.${index}.receivedAt`}
                           render={({ field: receivedAtField, fieldState }) => (
                             <div className="grid gap-1">
                               <DatePicker onValueChange={receivedAtField.onChange} value={receivedAtField.value} />
-                              <span className="min-h-4 text-xs text-destructive">
-                                {fieldState.error?.message || "\u00A0"}
-                              </span>
-                            </div>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Controller
-                          control={control}
-                          name={`items.${index}.description`}
-                          render={({ field: descriptionField, fieldState }) => (
-                            <div className="grid gap-1">
-                              <Input
-                                {...descriptionField}
-                                className="min-w-64"
-                                placeholder="Descricao"
-                                value={descriptionField.value ?? ""}
-                              />
                               <span className="min-h-4 text-xs text-destructive">
                                 {fieldState.error?.message || "\u00A0"}
                               </span>
@@ -219,13 +217,13 @@ export function ReceiptBatchTemplate() {
                 })}
                 {isLoadingResidents ? (
                   <TableRow>
-                    <TableCell className="text-sm text-muted-foreground" colSpan={7}>
+                    <TableCell className="text-sm text-muted-foreground" colSpan={5}>
                       Carregando moradores ativos...
                     </TableCell>
                   </TableRow>
                 ) : !fields.length ? (
                   <TableRow>
-                    <TableCell className="text-sm text-muted-foreground" colSpan={7}>
+                    <TableCell className="text-sm text-muted-foreground" colSpan={5}>
                       Cadastre ou ative moradores para habilitar o lançamento em lote.
                     </TableCell>
                   </TableRow>

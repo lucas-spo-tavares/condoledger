@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import type { Expense, MonthlyReport, Receipt, Resident } from "@/types/domain";
+import type { MonthlyReport, Resident } from "@/types/domain";
 
 export type DashboardMonthPoint = {
   month: string;
@@ -30,8 +30,8 @@ function sumByMonth<T>(items: T[], getMonth: (item: T) => string, getValue: (ite
 
 export function buildDashboardSeries(params: {
   residents: Resident[];
-  receipts: Receipt[];
-  expenses: Expense[];
+  receipts: Array<{ month: string; amountInCents: number }>;
+  expenses: Array<{ month: string; amountInCents: number }>;
   reports: MonthlyReport[];
 }): DashboardMonthPoint[] {
   const monthSet = new Set<string>();

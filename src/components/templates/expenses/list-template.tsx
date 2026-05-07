@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Paperclip, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
@@ -24,6 +24,7 @@ export function ExpensesTemplate() {
   const [month, setMonth] = React.useState(currentMonth);
   const [search, setSearch] = React.useState("");
   const debouncedSearch = useDebounce(search, 1000);
+
   const expensesQuery = useExpensesQuery({
     month,
     q: debouncedSearch
@@ -64,6 +65,7 @@ export function ExpensesTemplate() {
                   <TableHead>Descricao</TableHead>
                   <TableHead>Pago em</TableHead>
                   <TableHead>Valor</TableHead>
+                  <TableHead>Arquivos</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -74,6 +76,16 @@ export function ExpensesTemplate() {
                     <TableCell>{expense.description}</TableCell>
                     <TableCell>{formatDate(expense.paidAt)}</TableCell>
                     <TableCell>{formatCurrency(expense.amountInCents)}</TableCell>
+                    <TableCell>
+                      {expense.attachmentCount ? (
+                        <span className="inline-flex items-center gap-1 text-sm text-primary">
+                          <Paperclip className="size-4" />
+                          {expense.attachmentCount > 1 ? `${expense.attachmentCount} anexos` : "1 anexo"}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">pendente</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2">
                         <Button asChild size="icon" type="button" variant="outline">

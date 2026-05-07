@@ -1,5 +1,6 @@
 import "server-only";
 
+import { normalizeAttachmentsForPersistence } from "@/lib/servers/attachments";
 import {
   deleteExpense as deleteExpenseRecord,
   findExpenseById,
@@ -12,8 +13,24 @@ export async function getExpenses(filters?: { month?: string; q?: string }) {
   return findExpenses(filters);
 }
 
-export async function putExpense(expense: ExpenseUpsert) {
-  return upsertExpense(expense);
+export async function getExpense(id: string) {
+  return findExpenseById(id);
+}
+
+export async function putExpense(expense: ExpenseUpsert, formData?: FormData) {
+  const expenseId = expense.id ?? crypto.randomUUID();
+  const attachments = await normalizeAttachmentsForPersistence({
+    attachments: expense.attachments,
+    entityId: expenseId,
+    formData,
+    scope: "expenses"
+  });
+
+  return upsertExpense({
+    ...expense,
+    id: expenseId,
+    attachments
+  });
 }
 
 export async function deleteExpense(id: string) {

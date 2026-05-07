@@ -10,21 +10,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toExpense, useExpenseForm } from "@/lib/forms/expenses/useExpenseForm";
 import { useExpensesMutation } from "@/lib/hooks/expenses/useExpensesMutation";
 import { getExpenseFormDefaultValues } from "@/lib/schemas/expenses/expense-schema";
-import { useExpensesQuery } from "@/lib/hooks/expenses/useExpensesQuery";
+import type { Expense } from "@/types/domain";
 import type { ExpenseUpsert } from "@/types/domain";
 
 type ExpenseFormTemplateProps = {
-  expenseId?: string | null;
+  expense?: Expense | null;
 };
 
-export function ExpenseFormTemplate({ expenseId = null }: ExpenseFormTemplateProps) {
+export function ExpenseFormTemplate({ expense = null }: ExpenseFormTemplateProps) {
   const router = useRouter();
-  const expensesQuery = useExpensesQuery();
   const expensesMutation = useExpensesMutation();
-  const expense = expenseId ? expensesQuery.data?.find((item) => item.id === expenseId) ?? null : null;
   const form = useExpenseForm(expense);
-  const isEditing = Boolean(expenseId);
-  const isMissingExpense = Boolean(expenseId) && expensesQuery.isSuccess && !expense;
+  const isEditing = Boolean(expense);
 
   function handleCancel() {
     router.push("/expenses");
@@ -49,59 +46,47 @@ export function ExpenseFormTemplate({ expenseId = null }: ExpenseFormTemplatePro
             <p className="text-sm text-muted-foreground">Operacao do condominio</p>
             <h1 className="text-2xl font-semibold tracking-normal">{isEditing ? "Editar despesa" : "Nova despesa"}</h1>
           </div>
-          {isMissingExpense ? (
+          <form className="grid gap-5" onSubmit={form.handleSubmit((values) => handleSubmit(toExpense(values)))}>
             <Card>
               <CardHeader>
                 <CardTitle>Dados da despesa</CardTitle>
-                <CardDescription>Atualize os dados da despesa selecionada.</CardDescription>
+                <CardDescription>
+                  {isEditing
+                    ? "Atualize os dados da despesa selecionada."
+                    : "Registre uma despesa mensal do condominio."}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">Despesa nao encontrada.</p>
+                <ExpenseForm />
               </CardContent>
             </Card>
-          ) : (
-            <form className="grid gap-5" onSubmit={form.handleSubmit((values) => handleSubmit(toExpense(values)))}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dados da despesa</CardTitle>
-                  <CardDescription>
-                    {isEditing
-                      ? "Atualize os dados da despesa selecionada."
-                      : "Registre uma despesa mensal do condominio."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ExpenseForm />
-                </CardContent>
-              </Card>
-              <AttachmentFilesCard
-                control={form.control}
-                description="Adicione comprovantes, PDFs e fotos em um mesmo lugar."
-                emptyLabel="Nenhum arquivo anexado ainda. Use 'Adicionar arquivos' para incluir PDFs, JPGs ou PNGs."
-                name="attachments"
-                setValue={form.setValue}
-                title="Arquivos da despesa"
-              />
-              <div className="flex justify-end gap-2">
-                <Button disabled={expensesMutation.isPending} onClick={handleCancel} type="button" variant="outline">
-                  Cancelar
+            <AttachmentFilesCard
+              control={form.control}
+              description="Adicione comprovantes, PDFs e fotos em um mesmo lugar."
+              emptyLabel="Nenhum arquivo anexado ainda. Use 'Adicionar arquivos' para incluir PDFs, JPGs ou PNGs."
+              name="attachments"
+              setValue={form.setValue}
+              title="Arquivos da despesa"
+            />
+            <div className="flex justify-end gap-2">
+              <Button disabled={expensesMutation.isPending} onClick={handleCancel} type="button" variant="outline">
+                Cancelar
+              </Button>
+              {!isEditing ? (
+                <Button
+                  disabled={expensesMutation.isPending}
+                  onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toExpense(values)))}
+                  type="button"
+                  variant="secondary"
+                >
+                  Salvar e adicionar novo
                 </Button>
-                {!isEditing ? (
-                  <Button
-                    disabled={expensesMutation.isPending}
-                    onClick={form.handleSubmit((values) => handleSubmitAndAddNew(toExpense(values)))}
-                    type="button"
-                    variant="secondary"
-                  >
-                    Salvar e adicionar novo
-                  </Button>
-                ) : null}
-                <Button disabled={expensesMutation.isPending} type="submit">
-                  Salvar despesa
-                </Button>
-              </div>
-            </form>
-          )}
+              ) : null}
+              <Button disabled={expensesMutation.isPending} type="submit">
+                Salvar despesa
+              </Button>
+            </div>
+          </form>
       </div>
     </FormProvider>
   );

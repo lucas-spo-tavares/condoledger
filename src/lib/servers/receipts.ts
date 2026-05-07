@@ -1,5 +1,6 @@
 import "server-only";
 
+import { normalizeAttachmentsForPersistence } from "@/lib/servers/attachments";
 import {
   deleteReceipt as deleteReceiptRecord,
   findReceiptById,
@@ -12,8 +13,24 @@ export async function getReceipts(filters?: { month?: string; q?: string }) {
   return findReceipts(filters);
 }
 
-export async function putReceipt(receipt: ReceiptUpsert) {
-  return upsertReceipt(receipt);
+export async function getReceipt(id: string) {
+  return findReceiptById(id);
+}
+
+export async function putReceipt(receipt: ReceiptUpsert, formData?: FormData) {
+  const receiptId = receipt.id ?? crypto.randomUUID();
+  const proofAttachments = await normalizeAttachmentsForPersistence({
+    attachments: receipt.proofAttachments,
+    entityId: receiptId,
+    formData,
+    scope: "receipts"
+  });
+
+  return upsertReceipt({
+    ...receipt,
+    id: receiptId,
+    proofAttachments
+  });
 }
 
 export async function deleteReceipt(id: string) {

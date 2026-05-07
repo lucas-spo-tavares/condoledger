@@ -2,17 +2,34 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getZodFieldErrors } from "@/lib/commons/zod";
 import { expenseSchema } from "@/lib/schemas/expenses/expense-schema";
-import { deleteExpense, getExpenses, putExpense } from "@/lib/servers/expenses";
+import { deleteExpense, getExpense, getExpenses, putExpense } from "@/lib/servers/expenses";
 
 export async function GET(request: NextRequest) {
+  const id = request.nextUrl.searchParams.get("id");
   const month = request.nextUrl.searchParams.get("month") ?? undefined;
   const q = request.nextUrl.searchParams.get("q") ?? undefined;
+
+  if (id) {
+    return NextResponse.json(await getExpense(id));
+  }
 
   return NextResponse.json(await getExpenses({ month, q }));
 }
 
 export async function PUT(request: NextRequest) {
-  const result = expenseSchema.safeParse(await request.json());
+  const contentType = request.headers.get("content-type") ?? "";
+  const formData = contentType.includes("multipart/form-data") ? await request.formData() : null;
+  const payload = formData ? formData.get("payload") : await request.json();
+
+  let parsedPayload: unknown;
+
+  try {
+    parsedPayload = typeof payload === "string" ? JSON.parse(payload) : payload;
+  } catch {
+    return NextResponse.json({ message: "invalid expense payload" }, { status: 400 });
+  }
+
+  const result = expenseSchema.safeParse(parsedPayload);
 
   if (!result.success) {
     return NextResponse.json(
@@ -24,7 +41,7 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(await putExpense(result.data));
+  return NextResponse.json(await putExpense(result.data, formData ?? undefined));
 }
 
 export async function DELETE(request: NextRequest) {

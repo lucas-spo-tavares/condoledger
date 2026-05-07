@@ -8,10 +8,12 @@ import { getResidents } from "@/lib/servers/residents";
 export default async function MonthlyReportPage({
   searchParams
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     description?: string;
-  };
+  }>;
 }) {
+  const resolvedSearchParams = await searchParams;
+
   const [residents, receipts, expenses, reports] = await Promise.all([
     getResidents(),
     getReceipts(),
@@ -26,7 +28,7 @@ export default async function MonthlyReportPage({
     reports
   });
   const currentReport = reports[0] ?? null;
-  const description = searchParams?.description?.trim() || "Relatório mensal do condomínio";
+  const description = resolvedSearchParams?.description?.trim() || "Relatório mensal do condomínio";
 
   return (
     <PrintableReportTemplate

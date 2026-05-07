@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -12,10 +13,18 @@ import {
 import type { Expense, ExpenseUpsert } from "@/types/domain";
 
 export function useExpenseForm(expense?: Expense | null) {
-  return useForm<ExpenseFormInput, unknown, ExpenseFormValues>({
+  const form = useForm<ExpenseFormInput, unknown, ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: expense ? toExpenseFormValues(expense) : getExpenseFormDefaultValues()
   });
+
+  React.useEffect(() => {
+    if (expense) {
+      form.reset(toExpenseFormValues(expense));
+    }
+  }, [expense, form]);
+
+  return form;
 }
 
 export function toExpenseFormValues(expense: Expense): ExpenseFormValues {
