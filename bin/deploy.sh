@@ -23,10 +23,11 @@ set +a
 echo "Running checks"
 npm run db:generate
 npm run typecheck
+npm run build:lambda
 
 echo "Applying Prisma migrations"
 npm run db:deploy
 
-bash "$DEPLOY_INFRA_SCRIPT"
+DEPLOY_WEB_APP=true bash "$DEPLOY_INFRA_SCRIPT"
 
 echo "Deploy finished"

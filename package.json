@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:lambda": "next build && bash bin/package-lambda.sh",
+    "package:lambda": "bash bin/package-lambda.sh",
     "deploy": "bash bin/deploy.sh",
     "deploy:infra": "bash bin/deploy-infra.sh",
     "destroy": "bash bin/destroy.sh",

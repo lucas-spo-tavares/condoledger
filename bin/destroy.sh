@@ -20,8 +20,14 @@ set -a
 source "$PROD_ENV_FILE"
 set +a
 
+export TF_VAR_aws_region="${TF_VAR_aws_region:-${AWS_REGION:-}}"
 export TF_VAR_database_url="${TF_VAR_database_url:-${DATABASE_URL:-}}"
 export TF_VAR_direct_database_url="${TF_VAR_direct_database_url:-${DIRECT_DATABASE_URL:-}}"
+
+if [[ -z "$TF_VAR_aws_region" ]]; then
+  echo "AWS_REGION or TF_VAR_aws_region is required in .env.prod."
+  exit 1
+fi
 
 if [[ -z "$TF_VAR_database_url" ]]; then
   echo "DATABASE_URL or TF_VAR_database_url is required in .env.prod."

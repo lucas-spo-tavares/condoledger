@@ -10,7 +10,8 @@ CondoLedger is a web-based condo management system for monthly dues, manual paym
 - shadcn/ui components
 - PostgreSQL with Prisma
 - Amazon Cognito with email OTP
-- AWS Lambda for standalone deployment
+- AWS Lambda Web Adapter for standalone Next.js deployment
+- Amazon CloudFront as the public web entrypoint
 - Terraform
 - Docker Compose with PostgreSQL
 
@@ -74,20 +75,18 @@ Next.js loads `.env.local` automatically during `npm run dev`, `npm run build`, 
 
 Terraform does not read `.env.local` automatically. Use AWS environment variables for credentials and either Terraform defaults, `TF_VAR_*` variables, or a `*.tfvars` file for Terraform inputs.
 
-For production deploys, create a local `.env.prod` file after you have the Neon connection string and the Terraform-managed AWS resources. This repo ignores that file, and `npm run deploy` reads it before building or deploying.
+For production deploys, create a local `.env.prod` file after you have the Neon connection string. This repo ignores that file, and `npm run deploy` reads it before building or deploying.
 
 ```bash
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 DATABASE_URL=<postgres connection url>
+DIRECT_DATABASE_URL=<direct postgres connection url>
 AUTH_MODE=cognito
-COGNITO_USER_POOL_ID=<terraform output>
-COGNITO_CLIENT_ID=<terraform output>
-PROOFS_BUCKET_NAME=<terraform output>
 ```
 
-`bin/deploy.sh` maps `DATABASE_URL` and `DIRECT_DATABASE_URL` from `.env.prod` to the Terraform `TF_VAR_*` inputs automatically, so you do not need to duplicate those values.
+`bin/deploy.sh` maps `AWS_REGION`, `DATABASE_URL`, and `DIRECT_DATABASE_URL` from `.env.prod` to the Terraform `TF_VAR_*` inputs automatically, so you do not need to duplicate those values. Cognito and S3 runtime values are injected into the Lambda by Terraform.
 
 ## Infrastructure
 
@@ -97,7 +96,9 @@ Terraform lives in `infra/terraform` and provisions:
 - Cognito User Pool
 - Cognito web app client
 - Cognito groups for admins and residents
-- Standalone Lambda deployment resources will be added in the next phase
+- Lambda function running the Next.js standalone server
+- Lambda Function URL used as the CloudFront origin
+- CloudFront distribution for the public web entrypoint
 
 ```bash
 cd infra/terraform
@@ -112,13 +113,21 @@ For the manual deploy flow:
 npm run deploy
 ```
 
-`npm run deploy` loads `.env.prod`, runs typecheck, applies Prisma migrations, applies the Terraform-managed AWS infrastructure, and prints Terraform outputs.
+`npm run deploy` loads `.env.prod`, runs typecheck, builds the Next.js standalone Lambda package, applies Prisma migrations, applies the Terraform-managed AWS infrastructure, and prints Terraform outputs.
 
-If you only want the Terraform-managed AWS infrastructure, run:
+The Lambda package is generated at `infra/lambda/condoledger-web.zip` from `.next/standalone`, `.next/static`, and `public`. If you only need to rebuild the package, run:
+
+```bash
+npm run build:lambda
+```
+
+If you only want the base AWS infrastructure, run:
 
 ```bash
 npm run deploy:infra
 ```
+
+`npm run deploy:infra` provisions the shared AWS resources only, such as S3 and Cognito. It does not deploy the Next.js Lambda or CloudFront distribution. Use `npm run deploy` when you want to deploy the full web application.
 
 ## Current Scope
 
