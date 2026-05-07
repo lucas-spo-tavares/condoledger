@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Paperclip, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ConfirmDeleteDialog } from "@/components/organisms/confirm-delete-dialog";
 import { Button } from "@/components/ui/button";
@@ -16,14 +17,32 @@ import { useDeleteExpensesMutation } from "@/lib/hooks/expenses/useDeleteExpense
 import { useExpensesQuery } from "@/lib/hooks/expenses/useExpensesQuery";
 
 export function ExpensesTemplate() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const deleteExpensesMutation = useDeleteExpensesMutation();
   const currentMonth = React.useMemo(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString().slice(0, 10);
   }, []);
-  const [month, setMonth] = React.useState(currentMonth);
-  const [search, setSearch] = React.useState("");
+  const month = searchParams.get("month") ?? currentMonth;
+  const search = searchParams.get("q") ?? "";
   const debouncedSearch = useDebounce(search, 1000);
+
+  function updateSearchParams(nextParams: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    for (const [key, value] of Object.entries(nextParams)) {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   const expensesQuery = useExpensesQuery({
     month,
@@ -46,9 +65,9 @@ export function ExpensesTemplate() {
           </Button>
         </div>
         <div className="grid gap-3 rounded-lg border border-border bg-card p-4 lg:grid-cols-[240px_1fr]">
-          <MonthPicker onValueChange={setMonth} value={month} />
+          <MonthPicker onValueChange={(value) => updateSearchParams({ month: value })} value={month} />
           <Input
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => updateSearchParams({ q: event.target.value || null })}
             placeholder="Buscar por categoria ou descricao"
             value={search}
           />

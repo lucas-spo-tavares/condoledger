@@ -1,7 +1,8 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 import { FormField } from "@/components/organisms/form-field";
 import { CurrencyInput } from "@/components/ui/currency-input";
@@ -15,6 +16,8 @@ type ResidentFormProps = {
 
 export function ResidentForm({ residentTypes }: ResidentFormProps) {
   const { control } = useFormContext<ResidentFormValues>();
+  const emailValue = useWatch({ control, name: "email" });
+  const canToggleAdministrator = z.string().email().safeParse(emailValue?.trim() || "").success;
 
   return (
     <div className="grid gap-4">
@@ -98,17 +101,24 @@ export function ResidentForm({ residentTypes }: ResidentFormProps) {
           control={control}
           name="isAdministrator"
           render={({ field }) => (
-            <label className="md:col-span-2 flex cursor-pointer items-start gap-3 rounded-md border bg-background p-3 text-sm font-medium">
+            <label
+              className={`md:col-span-2 flex items-start gap-3 rounded-md border bg-background p-3 text-sm font-medium ${
+                canToggleAdministrator ? "cursor-pointer" : "cursor-not-allowed opacity-60"
+              }`}
+            >
               <input
                 checked={Boolean(field.value)}
                 className="mt-1 size-4 rounded border-input text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                disabled={!canToggleAdministrator}
                 onChange={(event) => field.onChange(event.target.checked)}
                 type="checkbox"
               />
               <span className="grid gap-1">
                 <span>Administrador</span>
                 <span className="text-xs font-normal text-muted-foreground">
-                  Pode operar a area privada com permissao de administrador.
+                  {canToggleAdministrator
+                    ? "Pode operar a area privada com permissao de administrador."
+                    : "Informe um e-mail valido para liberar esta opcao."}
                 </span>
               </span>
             </label>

@@ -136,7 +136,7 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
     }
 
     return {
-      currentUser: buildExternalCurrentUser(normalizedEmail),
+      currentUser: await buildExternalCurrentUser(normalizedEmail),
       sessionToken: getCurrentUserSessionToken(normalizedEmail, "external")
     };
   }
@@ -168,7 +168,7 @@ export async function confirmOtpSignIn(params: { email: string; code: string; se
   }
 
   return {
-    currentUser: buildExternalCurrentUser(normalizedEmail),
+    currentUser: await buildExternalCurrentUser(normalizedEmail),
     sessionToken: getCurrentUserSessionToken(normalizedEmail, "external")
   };
 }
@@ -193,7 +193,7 @@ export async function getCurrentUserFromSessionToken(sessionToken: string | unde
       return null;
     }
 
-    return buildExternalCurrentUser(email);
+    return await buildExternalCurrentUser(email);
   }
 
   const residentId = sessionToken.startsWith(RESIDENT_SESSION_PREFIX)
@@ -240,14 +240,16 @@ async function buildCurrentUser(resident: NonNullable<ResidentLookup>) {
   } satisfies CurrentUser;
 }
 
-function buildExternalCurrentUser(email: string): CurrentUser {
+async function buildExternalCurrentUser(email: string): Promise<CurrentUser> {
+  const isAdministrator = await isCognitoUserInGroupByEmail(email);
+
   return {
     id: email,
     name: "Usuário externo",
     email,
     unit: "Externo",
     residentTypeLabel: "Externo",
-    isAdministrator: false
+    isAdministrator
   };
 }
 

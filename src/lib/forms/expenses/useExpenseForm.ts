@@ -40,6 +40,7 @@ export function toExpenseFormValues(expense: Expense): ExpenseFormValues {
 
 export function toExpense(values: ExpenseFormValues): ExpenseUpsert {
   return {
+    id: values.id,
     category: values.category,
     description: values.description,
     amountInCents: Math.round(values.amount * 100),

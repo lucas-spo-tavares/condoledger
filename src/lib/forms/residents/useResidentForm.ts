@@ -33,6 +33,7 @@ export function toResidentFormValues(resident: Resident): ResidentFormValues {
 
 export function toResident(values: ResidentFormValues): ResidentUpsert {
   return {
+    id: values.id,
     name: values.name,
     email: values.email?.trim() || undefined,
     unit: values.unit.trim(),

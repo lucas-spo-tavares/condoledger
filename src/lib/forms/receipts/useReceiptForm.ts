@@ -41,6 +41,7 @@ export function toReceiptFormValues(receipt: Receipt): ReceiptFormValues {
 
 export function toReceipt(values: ReceiptFormValues): ReceiptUpsert {
   return {
+    id: values.id,
     residentId: values.residentId,
     month: values.month,
     description: values.description?.trim() || undefined,

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 
 import { AttachmentFilesCard } from "@/components/organisms/attachment-files-card";
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toExpense, useExpenseForm } from "@/lib/forms/expenses/useExpenseForm";
 import { useExpensesMutation } from "@/lib/hooks/expenses/useExpensesMutation";
+import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
 import { getExpenseFormDefaultValues } from "@/lib/schemas/expenses/expense-schema";
 import type { Expense } from "@/types/domain";
 import type { ExpenseUpsert } from "@/types/domain";
@@ -18,18 +18,18 @@ type ExpenseFormTemplateProps = {
 };
 
 export function ExpenseFormTemplate({ expense = null }: ExpenseFormTemplateProps) {
-  const router = useRouter();
+  const goBack = useSafeBackNavigation("/expenses");
   const expensesMutation = useExpensesMutation();
   const form = useExpenseForm(expense);
   const isEditing = Boolean(expense);
 
   function handleCancel() {
-    router.push("/expenses");
+    goBack();
   }
 
   function handleSubmit(nextExpense: ExpenseUpsert) {
     expensesMutation.mutate(nextExpense, {
-      onSuccess: () => router.push("/expenses")
+      onSuccess: () => goBack()
     });
   }
 
