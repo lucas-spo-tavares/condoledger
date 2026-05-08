@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 import { getZodFieldErrors } from "@/lib/commons/zod";
 import { receiptSchema } from "@/lib/schemas/receipts/receipt-schema";
-import { getCurrentUserCookieName, getCurrentUserFromSessionToken } from "@/lib/servers/auth";
 import { deleteReceipt, getReceipt, getReceipts, putReceipt } from "@/lib/servers/receipts";
 
 export async function GET(request: NextRequest) {
@@ -41,15 +39,6 @@ export async function PUT(request: NextRequest) {
       },
       { status: 400 }
     );
-  }
-
-  if (result.data.id) {
-    const cookieStore = await cookies();
-    const currentUser = await getCurrentUserFromSessionToken(cookieStore.get(getCurrentUserCookieName())?.value);
-
-    if (!currentUser?.isAdministrator) {
-      return NextResponse.json({ message: "apenas administradores podem editar recebimentos" }, { status: 403 });
-    }
   }
 
   return NextResponse.json(await putReceipt(result.data, formData ?? undefined));
