@@ -32,6 +32,24 @@ function isBlobUrl(url: string) {
   return url.startsWith("blob:");
 }
 
+function getNormalizedAttachmentType(file: Pick<File, "type" | "name">) {
+  const normalizedName = file.name.toLowerCase();
+
+  if (file.type === "application/pdf" || normalizedName.endsWith(".pdf")) {
+    return "application/pdf";
+  }
+
+  if (file.type === "image/png" || normalizedName.endsWith(".png")) {
+    return "image/png";
+  }
+
+  if (file.type === "image/jpeg" || file.type === "image/jpg" || normalizedName.endsWith(".jpg") || normalizedName.endsWith(".jpeg")) {
+    return "image/jpeg";
+  }
+
+  return "";
+}
+
 function isImage(type: string) {
   return type === "image/jpeg" || type === "image/png";
 }
@@ -41,11 +59,13 @@ function isPdf(type: string) {
 }
 
 function createAttachment(file: File): AttachmentCardItem {
+  const type = getNormalizedAttachmentType(file);
+
   return {
     id: crypto.randomUUID(),
     name: file.name,
     previewUrl: URL.createObjectURL(file),
-    type: file.type
+    type
   };
 }
 
@@ -144,9 +164,7 @@ export function AttachmentFilesCard<TFieldValues extends FieldValues>({
       return;
     }
 
-    const acceptedFiles = files.filter((file) => {
-      return file.type === "application/pdf" || file.type === "image/jpeg" || file.type === "image/png";
-    });
+    const acceptedFiles = files.filter((file) => Boolean(getNormalizedAttachmentType(file)));
 
     if (!acceptedFiles.length) {
       event.target.value = "";
