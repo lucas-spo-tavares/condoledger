@@ -1,6 +1,10 @@
 import "server-only";
 
-import { ensureCognitoUserForEmail, syncCognitoAdminGroupMembership } from "@/lib/cognito";
+import {
+  ensureCognitoUserForEmail,
+  syncCognitoAdminGroupMembership,
+  syncCognitoResidentGroupMembership
+} from "@/lib/cognito";
 import {
   findResidentByEmail,
   findResidentById,
@@ -27,6 +31,7 @@ export async function putResident(resident: ResidentUpsert) {
       email: persistedResident.email,
       previousEmail: existingResident?.email
     });
+    await syncCognitoResidentGroupMembership(persistedResident.email);
   }
 
   await syncCognitoAdminGroupMembership({

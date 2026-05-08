@@ -198,6 +198,10 @@ export async function removeCognitoUserFromGroupByEmail(email: string, groupName
   );
 }
 
+export async function syncCognitoResidentGroupMembership(email: string) {
+  await addCognitoUserToGroupByEmail(email, "Residents");
+}
+
 export async function syncCognitoAdminGroupMembership(params: {
   email?: string;
   previousEmail?: string;

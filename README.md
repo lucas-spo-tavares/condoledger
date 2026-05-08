@@ -81,10 +81,12 @@ For production deploys, create a local `.env.prod` file after you have the Neon 
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
-DATABASE_URL=<postgres connection url>
-DIRECT_DATABASE_URL=<direct postgres connection url>
+DATABASE_URL=<postgres connection url, preferably with sslmode=verify-full>
+DIRECT_DATABASE_URL=<direct postgres connection url, preferably with sslmode=verify-full>
 AUTH_MODE=cognito
 ```
+
+If you intentionally want libpq-style SSL semantics instead of the current safer default, use `uselibpqcompat=true&sslmode=require`.
 
 `bin/deploy.sh` maps `AWS_REGION`, `DATABASE_URL`, and `DIRECT_DATABASE_URL` from `.env.prod` to the Terraform `TF_VAR_*` inputs automatically, so you do not need to duplicate those values. Cognito and S3 runtime values are injected into the Lambda by Terraform.
 

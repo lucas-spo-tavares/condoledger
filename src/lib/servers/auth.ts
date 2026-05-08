@@ -6,7 +6,8 @@ import {
   findCognitoUserByEmail,
   isCognitoUserInGroupByEmail,
   normalizeEmail,
-  startEmailOtpSignIn
+  startEmailOtpSignIn,
+  syncCognitoResidentGroupMembership
 } from "@/lib/cognito";
 import { SIGN_IN_OTP_LENGTH } from "@/lib/schemas/auth/sign-in-schema";
 import { getResidentByEmail, getResidentById } from "@/lib/servers/residents";
@@ -75,6 +76,7 @@ export async function startOtpSignIn(email: string): Promise<StartOtpSignInResul
       email: resident.email,
       previousEmail: resident.email
     });
+    await syncCognitoResidentGroupMembership(resident.email);
 
     return startCognitoOtp(resident.email);
   }
@@ -84,6 +86,8 @@ export async function startOtpSignIn(email: string): Promise<StartOtpSignInResul
   if (!cognitoUser) {
     throw new AuthError("Nenhum usuário Cognito cadastrado com este e-mail.", 404);
   }
+
+  await syncCognitoResidentGroupMembership(normalizedEmail);
 
   return startCognitoOtp(normalizedEmail);
 }
