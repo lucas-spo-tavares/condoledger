@@ -6,6 +6,7 @@
     "node": "22.16.0"
   },
   "scripts": {
+    "predev": "npm run db:deploy",
     "dev": "next dev",
     "build": "next build",
     "build:lambda": "next build && bash bin/package-lambda.sh",

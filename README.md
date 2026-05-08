@@ -52,6 +52,8 @@ Start the app:
 npm run dev
 ```
 
+The `npm run dev` command runs Prisma migrations first through the `predev` script, then starts Next.js.
+
 The app runs at `http://localhost:3000`.
 
 ## Environment
