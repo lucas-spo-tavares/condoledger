@@ -13,9 +13,12 @@ import type { Resident } from "@/types/domain";
 
 type ReceiptFormProps = {
   residents: Resident[];
+  variant?: "backoffice" | "portal";
+  residentLabel?: string;
 };
 
-export function ReceiptForm({ residents }: ReceiptFormProps) {
+export function ReceiptForm({ residents, variant = "backoffice", residentLabel }: ReceiptFormProps) {
+  const isPortal = variant === "portal";
   const { control, setValue } = useFormContext<ReceiptFormValues>();
 
   function handleResidentChange(residentId: string, onChange: (value: string) => void) {
@@ -32,79 +35,129 @@ export function ReceiptForm({ residents }: ReceiptFormProps) {
 
   return (
     <div className="grid gap-4">
-      <div className="grid gap-3 md:grid-cols-2">
-        <Controller
-          control={control}
-          name="residentId"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Morador">
-              <select
-                {...field}
-                onChange={(event) => handleResidentChange(event.target.value, field.onChange)}
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="">Selecione</option>
-                {residents.map((resident) => (
-                  <option key={resident.id} value={resident.id}>
-                    {resident.name} | {resident.unit}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-          )}
-        />
-        <Controller
-          control={control}
-          name="month"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Mês de competência">
-              <MonthPicker
-                disabled
-                onValueChange={field.onChange}
-                placeholder="Mês de competência"
-                value={field.value}
-              />
-            </FormField>
-          )}
-        />
-        <Controller
-          control={control}
-          name="amount"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Valor">
-              <CurrencyInput
-                className="min-w-32"
-                onBlur={field.onBlur}
-                onValueChange={field.onChange}
-                ref={field.ref}
-                value={typeof field.value === "number" ? field.value : 0}
-              />
-            </FormField>
-          )}
-        />
-        <Controller
-          control={control}
-          name="receivedAt"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Recebido em">
-              <DatePicker onValueChange={field.onChange} value={field.value ?? ""} />
-            </FormField>
-          )}
-        />
-        <Controller
-          control={control}
-          name="description"
-          render={({ field, fieldState }) => (
-            <FormField error={fieldState.error?.message} label="Descricao">
-              <Input
-                {...field}
-                placeholder="Observacoes sobre este recebimento"
-                value={field.value ?? ""}
-              />
-            </FormField>
-          )}
-        />
-      </div>
+      {isPortal ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField label="Morador">
+            <Input disabled value={residentLabel ?? "Usuário"} />
+          </FormField>
+          <Controller
+            control={control}
+            name="month"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Mês de competência">
+                <MonthPicker disabled onValueChange={field.onChange} value={field.value} />
+              </FormField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="amount"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Valor">
+                <CurrencyInput
+                  className="min-w-32"
+                  onBlur={field.onBlur}
+                  onValueChange={field.onChange}
+                  ref={field.ref}
+                  value={typeof field.value === "number" ? field.value : 0}
+                />
+              </FormField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="receivedAt"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Pago em">
+                <DatePicker onValueChange={field.onChange} value={field.value ?? ""} />
+              </FormField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="description"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Observação">
+                <Input {...field} placeholder="Detalhes opcionais" value={field.value ?? ""} />
+              </FormField>
+            )}
+          />
+        </div>
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          <Controller
+            control={control}
+            name="residentId"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Morador">
+                <select
+                  {...field}
+                  onChange={(event) => handleResidentChange(event.target.value, field.onChange)}
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">Selecione</option>
+                  {residents.map((resident) => (
+                    <option key={resident.id} value={resident.id}>
+                      {resident.name} | {resident.unit}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="month"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Mês de competência">
+                <MonthPicker
+                  disabled
+                  onValueChange={field.onChange}
+                  placeholder="Mês de competência"
+                  value={field.value}
+                />
+              </FormField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="amount"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Valor">
+                <CurrencyInput
+                  className="min-w-32"
+                  onBlur={field.onBlur}
+                  onValueChange={field.onChange}
+                  ref={field.ref}
+                  value={typeof field.value === "number" ? field.value : 0}
+                />
+              </FormField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="receivedAt"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Recebido em">
+                <DatePicker onValueChange={field.onChange} value={field.value ?? ""} />
+              </FormField>
+            )}
+          />
+          <Controller
+            control={control}
+            name="description"
+            render={({ field, fieldState }) => (
+              <FormField error={fieldState.error?.message} label="Descricao">
+                <Input
+                  {...field}
+                  placeholder="Observacoes sobre este recebimento"
+                  value={field.value ?? ""}
+                />
+              </FormField>
+            )}
+          />
+        </div>
+      )}
     </div>
   );
 }

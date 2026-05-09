@@ -16,7 +16,12 @@ import { useDebounce } from "@/lib/hooks/debounce";
 import { useDeleteExpensesMutation } from "@/lib/hooks/expenses/useDeleteExpensesMutation";
 import { useExpensesQuery } from "@/lib/hooks/expenses/useExpensesQuery";
 
-export function ExpensesTemplate() {
+type ExpensesTemplateProps = {
+  canCreateExpense?: boolean;
+  canManageExpenses?: boolean;
+};
+
+export function ExpensesTemplate({ canCreateExpense = true, canManageExpenses = true }: ExpensesTemplateProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -57,12 +62,14 @@ export function ExpensesTemplate() {
             <p className="text-sm text-muted-foreground">Operacao do condominio</p>
             <h1 className="text-2xl font-semibold tracking-normal">Despesas</h1>
           </div>
-          <Button asChild>
-            <Link href="/expenses/new">
-              <Plus className="size-4" />
-              Nova despesa
-            </Link>
-          </Button>
+          {canCreateExpense ? (
+            <Button asChild>
+              <Link href="/backoffice/expenses/new">
+                <Plus className="size-4" />
+                Nova despesa
+              </Link>
+            </Button>
+          ) : null}
         </div>
         <div className="grid gap-3 rounded-lg border border-border bg-card p-4 lg:grid-cols-[240px_1fr]">
           <MonthPicker onValueChange={(value) => updateSearchParams({ month: value })} value={month} />
@@ -85,7 +92,7 @@ export function ExpensesTemplate() {
                   <TableHead>Pago em</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Arquivos</TableHead>
-                  <TableHead className="text-right">Acoes</TableHead>
+                  {canManageExpenses ? <TableHead className="text-right">Acoes</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -105,23 +112,25 @@ export function ExpensesTemplate() {
                         <span className="text-sm text-muted-foreground">pendente</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-2">
-                        <Button asChild size="icon" type="button" variant="outline">
-                          <Link href={`/expenses/${expense.id}/edit`}>
-                            <Pencil className="size-4" />
-                          </Link>
-                        </Button>
-                        <ConfirmDeleteDialog
-                          disabled={deleteExpensesMutation.isPending}
-                          description="Tem certeza que deseja remover esta despesa? Esta operacao nao pode ser desfeita."
-                          onConfirm={() => deleteExpensesMutation.mutate(expense.id)}
-                          title="Confirmar exclusao"
-                        >
-                          <Trash2 className="size-4" />
-                        </ConfirmDeleteDialog>
-                      </div>
-                    </TableCell>
+                    {canManageExpenses ? (
+                      <TableCell>
+                        <div className="flex justify-end gap-2">
+                          <Button asChild size="icon" type="button" variant="outline">
+                            <Link href={`/backoffice/expenses/${expense.id}/edit`}>
+                              <Pencil className="size-4" />
+                            </Link>
+                          </Button>
+                          <ConfirmDeleteDialog
+                            disabled={deleteExpensesMutation.isPending}
+                            description="Tem certeza que deseja remover esta despesa? Esta operacao nao pode ser desfeita."
+                            onConfirm={() => deleteExpensesMutation.mutate(expense.id)}
+                            title="Confirmar exclusao"
+                          >
+                            <Trash2 className="size-4" />
+                          </ConfirmDeleteDialog>
+                        </div>
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 ))}
               </TableBody>

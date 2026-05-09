@@ -1,10 +1,12 @@
 import { request } from "@/lib/commons/request";
 import { buildMultipartPayload } from "@/lib/apis/attachments";
-import type { Receipt, ReceiptListItem, ReceiptUpsert } from "@/types/domain";
+import type { Receipt, ReceiptListItem, ReceiptStatus, ReceiptUpsert } from "@/types/domain";
 
 export type ReceiptQueryParams = {
   month?: string;
   q?: string;
+  status?: ReceiptStatus;
+  mine?: boolean;
 };
 
 export async function getReceipts(params?: ReceiptQueryParams) {
@@ -16,6 +18,14 @@ export async function getReceipts(params?: ReceiptQueryParams) {
 
   if (params?.q) {
     searchParams.set("q", params.q);
+  }
+
+  if (params?.status) {
+    searchParams.set("status", params.status);
+  }
+
+  if (params?.mine) {
+    searchParams.set("mine", "true");
   }
 
   const queryString = searchParams.toString();
@@ -38,5 +48,12 @@ export async function putReceipt(receipt: ReceiptUpsert) {
 export async function deleteReceipt(id: string) {
   return request<{ id: string }>(`/api/receipts?id=${encodeURIComponent(id)}`, {
     method: "DELETE"
+  });
+}
+
+export async function reviewReceipt(params: { id: string; status: Exclude<ReceiptStatus, "pending">; reviewNote?: string }) {
+  return request<Receipt>("/api/receipts", {
+    method: "PATCH",
+    body: JSON.stringify(params)
   });
 }

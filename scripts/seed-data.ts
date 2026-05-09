@@ -1028,6 +1028,7 @@ function buildReceipts(): Receipt[] {
         month: statement.month,
         amountInCents: receipt.amountInCents,
         receivedAt: statement.month,
+        status: "confirmed",
         proofAttachments: []
       };
     })

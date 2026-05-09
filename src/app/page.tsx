@@ -7,5 +7,9 @@ export default async function Home() {
   const cookieStore = await cookies();
   const currentUser = await getCurrentUserFromSessionToken(cookieStore.get(getCurrentUserCookieName())?.value);
 
-  redirect(currentUser ? "/dashboard" : "/sign-in");
+  if (!currentUser) {
+    redirect("/sign-in");
+  }
+
+  redirect(currentUser.isAdministrator ? "/backoffice/dashboard" : "/portal/dashboard");
 }

@@ -9,6 +9,9 @@ export function useReceiptsMutation() {
 
   return useMutation({
     mutationFn: putReceipt,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["receipts"] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["receipts"] });
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    }
   });
 }

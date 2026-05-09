@@ -53,21 +53,18 @@ body {
 
 @page {
   size: A4 portrait;
+  margin: 8mm;
 }
 
 @media print {
   html,
   body {
     width: 210mm;
-    min-height: 297mm;
+    min-height: 0;
+    margin: 0 !important;
   }
 
   body {
     background: #ffffff !important;
-  }
-
-  main.report-shell-main {
-    padding-inline: 16px !important;
-    padding-block: 24px !important;
   }
 }

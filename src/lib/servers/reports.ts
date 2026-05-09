@@ -15,7 +15,7 @@ type MonthlyTotals = {
 
 export async function getReports() {
   const [receipts, expenses, initialBalances, activeResidents] = await Promise.all([
-    getReceipts(),
+    getReceipts({ status: "confirmed" }),
     getExpenses(),
     getInitialBalances(),
     getResidents({ status: "active" })

@@ -16,12 +16,13 @@ import { useBatchReceiptsMutation } from "@/lib/hooks/receipts/useBatchReceiptsM
 import { useResidentsQuery } from "@/lib/hooks/residents/useResidentsQuery";
 import { useSafeBackNavigation } from "@/lib/navigation/safe-back";
 import { useReceiptBatchForm } from "@/lib/forms/receipts/useReceiptBatchForm";
+import { getLocalTodayValue } from "@/lib/schemas/commons/date-schema";
 import { createReceiptBatchItemValues } from "@/lib/schemas/receipts/receipt-batch-schema";
 import type { ReceiptBatchFormValues } from "@/lib/schemas/receipts/receipt-batch-schema";
 import type { Resident } from "@/types/domain";
 
 function getTodayValue() {
-  return new Date().toISOString().slice(0, 10);
+  return getLocalTodayValue();
 }
 
 function getCurrentMonthValue() {
@@ -38,7 +39,7 @@ function createDefaultItem(resident: Resident) {
 }
 
 export function ReceiptBatchTemplate() {
-  const goBack = useSafeBackNavigation("/receipts");
+  const goBack = useSafeBackNavigation("/backoffice/receipts");
   const residentsQuery = useResidentsQuery({ status: "active" });
   const batchReceiptsMutation = useBatchReceiptsMutation();
   const residents = residentsQuery.data ?? [];

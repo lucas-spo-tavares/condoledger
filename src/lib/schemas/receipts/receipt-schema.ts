@@ -1,12 +1,15 @@
 import { z } from "zod";
 
 import { attachmentSchema, type AttachmentValues } from "@/lib/schemas/commons/attachment-schema";
+import { dateOnlySchema, getLocalTodayValue, isFutureDate } from "@/lib/schemas/commons/date-schema";
 
 const receiptBaseSchema = z.object({
   residentId: z.string().min(1, "Selecione o morador."),
-  month: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
+  month: dateOnlySchema,
   description: z.string().optional(),
-  receivedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
+  receivedAt: dateOnlySchema.refine((value) => !isFutureDate(value), "A data não pode ser futura."),
+  status: z.enum(["pending", "confirmed", "rejected"]).optional(),
+  reviewNote: z.string().optional(),
   proofAttachments: z.array(attachmentSchema)
 });
 
@@ -24,10 +27,12 @@ export function getReceiptFormDefaultValues(): ReceiptFormValues {
   return {
     id: undefined,
     residentId: "",
-    month: new Date().toISOString().slice(0, 10),
+    month: getLocalTodayValue(),
     description: "",
     amount: 0,
-    receivedAt: new Date().toISOString().slice(0, 10),
+    receivedAt: getLocalTodayValue(),
+    status: "confirmed",
+    reviewNote: "",
     proofAttachments: []
   };
 }

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 type DatePickerProps = {
   disabled?: boolean;
+  maxDate?: Date;
   onValueChange: (value: string) => void;
   placeholder?: string;
   value?: string | null;
@@ -27,12 +28,14 @@ function getDateValue(value?: string | null) {
 
 export function DatePicker({
   disabled = false,
+  maxDate = new Date(),
   onValueChange,
   placeholder = "Escolha uma data",
   value
 }: DatePickerProps) {
   const selectedDate = getDateValue(value);
   const buttonLabel = selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : placeholder;
+  const maxSelectableDate = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
 
   return (
     <Popover>
@@ -53,6 +56,7 @@ export function DatePicker({
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
+          disabled={{ after: maxSelectableDate }}
           selected={selectedDate}
           onSelect={(date) => {
             if (!date) {

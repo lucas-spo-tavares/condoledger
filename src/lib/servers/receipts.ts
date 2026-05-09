@@ -5,11 +5,13 @@ import {
   deleteReceipt as deleteReceiptRecord,
   findReceiptById,
   findReceipts,
+  type ReceiptFilters,
+  updateReceiptReview,
   upsertReceipt
 } from "@/lib/repositories/receipts-repository";
-import type { ReceiptUpsert } from "@/types/domain";
+import type { ReceiptStatus, ReceiptUpsert } from "@/types/domain";
 
-export async function getReceipts(filters?: { month?: string; q?: string }) {
+export async function getReceipts(filters?: ReceiptFilters) {
   return findReceipts(filters);
 }
 
@@ -41,4 +43,8 @@ export async function deleteReceipt(id: string) {
   }
 
   return { id };
+}
+
+export async function reviewReceipt(id: string, status: Exclude<ReceiptStatus, "pending">, reviewNote?: string) {
+  return updateReceiptReview({ id, status, reviewNote });
 }

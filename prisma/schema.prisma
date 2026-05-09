@@ -13,6 +13,14 @@ enum ResidentStatus {
   @@map("resident_status")
 }
 
+enum ReceiptStatus {
+  pending
+  confirmed
+  rejected
+
+  @@map("receipt_status")
+}
+
 model ResidentType {
   id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   label     String     @unique
@@ -49,11 +57,15 @@ model Receipt {
   description   String?
   amountInCents Int          @default(0) @map("amount_in_cents")
   receivedAt    DateTime     @default(now()) @map("received_at") @db.Timestamptz(6)
+  status        ReceiptStatus @default(confirmed)
+  reviewedAt    DateTime?    @map("reviewed_at") @db.Timestamptz(6)
+  reviewNote    String?      @map("review_note")
   resident      Resident     @relation(fields: [residentId], references: [id])
   attachments   Attachment[]
 
   @@index([residentId])
   @@index([month])
+  @@index([status])
   @@index([residentId, month])
   @@map("receipts")
 }

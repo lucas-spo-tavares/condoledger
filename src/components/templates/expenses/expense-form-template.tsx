@@ -18,7 +18,7 @@ type ExpenseFormTemplateProps = {
 };
 
 export function ExpenseFormTemplate({ expense = null }: ExpenseFormTemplateProps) {
-  const goBack = useSafeBackNavigation("/expenses");
+  const goBack = useSafeBackNavigation("/backoffice/expenses");
   const expensesMutation = useExpensesMutation();
   const form = useExpenseForm(expense);
   const isEditing = Boolean(expense);

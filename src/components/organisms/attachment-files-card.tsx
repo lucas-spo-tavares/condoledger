@@ -211,12 +211,12 @@ export function AttachmentFilesCard<TFieldValues extends FieldValues>({
 
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between gap-4">
+      <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1.5">
           <CardTitle>{title}</CardTitle>
           <CardDescription>{description}</CardDescription>
         </div>
-        <Button onClick={handleAddFiles} type="button" variant="outline">
+        <Button className="w-full lg:w-auto" onClick={handleAddFiles} type="button" variant="outline">
           <Plus className="size-4" />
           {addLabel}
         </Button>

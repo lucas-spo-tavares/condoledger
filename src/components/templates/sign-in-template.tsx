@@ -9,6 +9,7 @@ import { useSignInEmailForm, useSignInOtpForm } from "@/lib/forms/auth/useSignIn
 import { SignInEmailStepCard } from "@/components/organisms/auth/sign-in-email-step-card";
 import { SignInOtpStepCard } from "@/components/organisms/auth/sign-in-otp-step-card";
 import { Badge } from "@/components/ui/badge";
+import type { CurrentUser } from "@/types/domain";
 
 type AuthStep = "email" | "otp";
 
@@ -41,7 +42,7 @@ export function SignInTemplate() {
       const response = await startAuthOtp(values.email);
 
       if (response.currentUser) {
-        router.replace("/dashboard");
+        router.replace(getPostSignInPath(response.currentUser));
         router.refresh();
         return;
       }
@@ -65,8 +66,8 @@ export function SignInTemplate() {
 
     try {
       const email = emailForm.getValues("email");
-      await confirmAuthOtp({ email, code: values.code, session });
-      router.replace("/dashboard");
+      const response = await confirmAuthOtp({ email, code: values.code, session });
+      router.replace(getPostSignInPath(response.currentUser));
       router.refresh();
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Nao foi possivel confirmar o codigo.");
@@ -138,4 +139,12 @@ export function SignInTemplate() {
       </div>
     </main>
   );
+}
+
+function getPostSignInPath(currentUser: CurrentUser) {
+  if (currentUser.isAdministrator) {
+    return "/backoffice/dashboard";
+  }
+
+  return "/portal/dashboard";
 }

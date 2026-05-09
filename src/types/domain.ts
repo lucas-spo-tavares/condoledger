@@ -1,4 +1,5 @@
 export type ResidentStatus = "active" | "inactive";
+export type ReceiptStatus = "pending" | "confirmed" | "rejected";
 
 export type ResidentType = {
   id: string;
@@ -38,6 +39,9 @@ export type Receipt = {
   description?: string;
   amountInCents: number;
   receivedAt: string;
+  status: ReceiptStatus;
+  reviewedAt?: string;
+  reviewNote?: string;
   proofAttachments: FileAttachment[];
 };
 
@@ -45,8 +49,10 @@ export type ReceiptListItem = Omit<Receipt, "proofAttachments"> & {
   proofAttachmentCount: number;
 };
 
-export type ReceiptUpsert = Omit<Receipt, "id"> & {
+export type ReceiptUpsert = Omit<Receipt, "id" | "status" | "reviewedAt" | "reviewNote"> & {
   id?: string;
+  status?: ReceiptStatus;
+  reviewNote?: string;
 };
 
 export type ExpenseAttachment = {

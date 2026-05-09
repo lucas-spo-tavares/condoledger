@@ -55,7 +55,7 @@ export function ResidentsTemplate() {
           <h1 className="text-2xl font-semibold tracking-normal">Moradores</h1>
         </div>
         <Button asChild>
-          <Link href="/residents/new">
+          <Link href="/backoffice/residents/new">
             <Plus className="size-4" />
             Novo morador
           </Link>
@@ -112,7 +112,7 @@ export function ResidentsTemplate() {
                   <TableCell>
                     <div className="flex justify-end gap-2">
                       <Button asChild size="icon" type="button" variant="outline">
-                        <Link href={`/residents/${resident.id}/edit`}>
+                        <Link href={`/backoffice/residents/${resident.id}/edit`}>
                           <Pencil className="size-4" />
                         </Link>
                       </Button>

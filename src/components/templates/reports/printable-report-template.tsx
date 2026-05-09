@@ -12,6 +12,7 @@ import type { ExpenseListItem, MonthlyReport, ReceiptListItem, Resident } from "
 
 type PrintableReportTemplateProps = {
   description: string;
+  includeReceiptPages?: boolean;
   report: MonthlyReport | null;
   activeResidentsCount: number;
   residents: Resident[];
@@ -22,6 +23,7 @@ type PrintableReportTemplateProps = {
 
 export function PrintableReportTemplate({
   description,
+  includeReceiptPages = true,
   report,
   activeResidentsCount,
   residents,
@@ -96,7 +98,7 @@ export function PrintableReportTemplate({
         <DashboardCharts data={dashboardSeries} isAnimationActive={false} />
       </PreviewPage>
 
-      <PreviewPage breakAfterPage>
+      <PreviewPage breakAfterPage={includeReceiptPages}>
 
           <Card className="min-w-0 break-inside-avoid">
             <CardHeader>
@@ -159,7 +161,7 @@ export function PrintableReportTemplate({
           </Card>
       </PreviewPage>
 
-      {receiptPages.map((receiptPage, pageIndex) => {
+      {includeReceiptPages ? receiptPages.map((receiptPage, pageIndex) => {
         const isLastPage = pageIndex === receiptPages.length - 1;
 
         return (
@@ -210,7 +212,7 @@ export function PrintableReportTemplate({
             </section>
           </PreviewPage>
         );
-      })}
+      }) : null}
     </>
   );
 }

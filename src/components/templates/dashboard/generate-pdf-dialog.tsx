@@ -17,7 +17,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-export function GeneratePdfDialog({ defaultDescription }: { defaultDescription: string }) {
+export function GeneratePdfDialog({
+  defaultDescription,
+  showDescriptionDialog = true
+}: {
+  defaultDescription: string;
+  showDescriptionDialog?: boolean;
+}) {
   const MAX_DESCRIPTION_LENGTH = 800;
   const [description, setDescription] = React.useState(defaultDescription);
 
@@ -35,6 +41,15 @@ export function GeneratePdfDialog({ defaultDescription }: { defaultDescription: 
 
     const url = `/monthly${params.toString() ? `?${params.toString()}` : ""}`;
     window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  if (!showDescriptionDialog) {
+    return (
+      <Button className="w-full sm:w-auto" onClick={() => window.open("/monthly", "_blank", "noopener,noreferrer")}>
+        <Download className="size-4" />
+        Gerar PDF
+      </Button>
+    );
   }
 
   return (

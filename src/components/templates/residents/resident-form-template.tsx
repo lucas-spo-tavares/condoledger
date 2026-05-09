@@ -18,7 +18,7 @@ type ResidentFormTemplateProps = {
 };
 
 export function ResidentFormTemplate({ residentId = null }: ResidentFormTemplateProps) {
-  const goBack = useSafeBackNavigation("/residents");
+  const goBack = useSafeBackNavigation("/backoffice/residents");
   const residentTypesQuery = useResidentTypesQuery();
   const residentsQuery = useResidentsQuery();
   const residentsMutation = useResidentsMutation();

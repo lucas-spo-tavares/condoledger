@@ -18,6 +18,9 @@ type ReceiptRecord = {
   description: string | null;
   amountInCents: number;
   receivedAt: Date;
+  status: "pending" | "confirmed" | "rejected";
+  reviewedAt: Date | null;
+  reviewNote: string | null;
   attachments: AttachmentRecord[];
 };
 
@@ -28,6 +31,9 @@ type ReceiptSummaryRecord = {
   description: string | null;
   amountInCents: number;
   receivedAt: Date;
+  status: "pending" | "confirmed" | "rejected";
+  reviewedAt: Date | null;
+  reviewNote: string | null;
   _count: {
     attachments: number;
   };
@@ -43,6 +49,9 @@ export async function mapReceipt(record: ReceiptRecord): Promise<Receipt> {
     description: record.description ?? undefined,
     amountInCents: record.amountInCents,
     receivedAt: record.receivedAt.toISOString(),
+    status: record.status,
+    reviewedAt: record.reviewedAt?.toISOString(),
+    reviewNote: record.reviewNote ?? undefined,
     proofAttachments
   };
 }
@@ -55,6 +64,9 @@ export function mapReceiptListItem(record: ReceiptSummaryRecord): ReceiptListIte
     description: record.description ?? undefined,
     amountInCents: record.amountInCents,
     receivedAt: record.receivedAt.toISOString(),
+    status: record.status,
+    reviewedAt: record.reviewedAt?.toISOString(),
+    reviewNote: record.reviewNote ?? undefined,
     proofAttachmentCount: record._count.attachments
   };
 }

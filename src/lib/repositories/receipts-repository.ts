@@ -1,9 +1,11 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
+
 import { mapReceipt, mapReceiptListItem } from "@/lib/mappers/receipts";
 import { toMonthDate, toTimestamp } from "@/lib/mappers/dates";
 import { prisma } from "@/lib/db/prisma";
-import type { ReceiptUpsert } from "@/types/domain";
+import type { ReceiptStatus, ReceiptUpsert } from "@/types/domain";
 
 const receiptInclude = {
   attachments: true,
@@ -19,22 +21,33 @@ const receiptListInclude = {
   resident: true
 };
 
-export async function findReceipts(filters?: { month?: string; q?: string }) {
+export type ReceiptFilters = {
+  month?: string;
+  q?: string;
+  status?: ReceiptStatus;
+  residentId?: string;
+};
+
+export async function findReceipts(filters?: ReceiptFilters) {
+  const where: Prisma.ReceiptWhereInput = {
+    month: filters?.month ? toMonthDate(filters.month) : undefined,
+    residentId: filters?.residentId,
+    status: filters?.status,
+    ...(filters?.q
+      ? {
+          resident: {
+            name: {
+              contains: filters.q.trim(),
+              mode: "insensitive"
+            } as const
+          }
+        }
+      : {})
+  };
+
   const receipts = await prisma.receipt.findMany({
     include: receiptListInclude,
-    where: {
-      month: filters?.month ? toMonthDate(filters.month) : undefined,
-      ...(filters?.q
-        ? {
-            resident: {
-              name: {
-                contains: filters.q.trim(),
-                mode: "insensitive"
-              } as const
-            }
-          }
-        : {})
-    }
+    where
   });
 
   return receipts
@@ -67,6 +80,9 @@ export async function upsertReceipt(receipt: ReceiptUpsert) {
         description: receipt.description ?? null,
         amountInCents: receipt.amountInCents,
         receivedAt: toTimestamp(receipt.receivedAt),
+        status: receipt.status ?? "confirmed",
+        reviewNote: receipt.reviewNote ?? null,
+        reviewedAt: receipt.status && receipt.status !== "pending" ? new Date() : null,
         attachments: {
           create: receipt.proofAttachments.map((attachment) => ({
             id: attachment.id,
@@ -82,6 +98,9 @@ export async function upsertReceipt(receipt: ReceiptUpsert) {
         description: receipt.description ?? null,
         amountInCents: receipt.amountInCents,
         receivedAt: toTimestamp(receipt.receivedAt),
+        status: receipt.status ?? "confirmed",
+        reviewNote: receipt.reviewNote ?? null,
+        reviewedAt: receipt.status && receipt.status !== "pending" ? new Date() : null,
         attachments: {
           deleteMany: {},
           create: receipt.proofAttachments.map((attachment) => ({
@@ -104,4 +123,18 @@ export async function deleteReceipt(id: string) {
   await prisma.receipt.delete({
     where: { id }
   });
+}
+
+export async function updateReceiptReview(params: { id: string; status: Exclude<ReceiptStatus, "pending">; reviewNote?: string }) {
+  const receipt = await prisma.receipt.update({
+    include: receiptInclude,
+    where: { id: params.id },
+    data: {
+      status: params.status,
+      reviewNote: params.reviewNote?.trim() || null,
+      reviewedAt: new Date()
+    }
+  });
+
+  return mapReceipt(receipt);
 }

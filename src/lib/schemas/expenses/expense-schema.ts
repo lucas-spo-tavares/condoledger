@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 import { attachmentSchema, type AttachmentInput, type AttachmentValues } from "@/lib/schemas/commons/attachment-schema";
+import { dateOnlySchema, getLocalTodayValue, isFutureDate } from "@/lib/schemas/commons/date-schema";
 
 const expenseBaseSchema = z.object({
   category: z.string().min(1, "Informe a categoria."),
   description: z.string().min(2, "Informe a descricao."),
-  paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data no formato AAAA-MM-DD."),
+  paidAt: dateOnlySchema.refine((value) => !isFutureDate(value), "A data não pode ser futura."),
   attachments: z.array(attachmentSchema)
 });
 
@@ -20,14 +21,12 @@ export const expenseSchema = expenseBaseSchema.extend({
 });
 
 export function getExpenseFormDefaultValues(): ExpenseFormValues {
-  const today = new Date().toISOString().slice(0, 10);
-
   return {
     id: undefined,
     category: "",
     description: "",
     amount: 0,
-    paidAt: today,
+    paidAt: getLocalTodayValue(),
     attachments: []
   };
 }

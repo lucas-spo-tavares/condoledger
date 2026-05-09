@@ -9,7 +9,7 @@ export default async function SignInPage() {
   const currentUser = await getCurrentUserFromSessionToken(cookieStore.get(getCurrentUserCookieName())?.value);
 
   if (currentUser) {
-    redirect("/dashboard");
+    redirect(currentUser.isAdministrator ? "/backoffice/dashboard" : "/portal/dashboard");
   }
 
   return <SignInTemplate />;

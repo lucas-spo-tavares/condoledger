@@ -1,5 +1,6 @@
 import { PrintableReportTemplate } from "@/components/templates/reports/printable-report-template";
 import { buildDashboardSeries } from "@/lib/reports/dashboard-series";
+import { getCurrentUserFromRequest } from "@/lib/servers/current-user";
 import { getExpenses } from "@/lib/servers/expenses";
 import { getReports } from "@/lib/servers/reports";
 import { getReceipts } from "@/lib/servers/receipts";
@@ -13,6 +14,8 @@ export default async function MonthlyReportPage({
   }>;
 }) {
   const resolvedSearchParams = await searchParams;
+  const currentUser = await getCurrentUserFromRequest();
+  const isAdministrator = Boolean(currentUser?.isAdministrator);
 
   const [residents, receipts, expenses, reports] = await Promise.all([
     getResidents(),
@@ -28,13 +31,15 @@ export default async function MonthlyReportPage({
     reports
   });
   const currentReport = reports[0] ?? null;
-  const description = resolvedSearchParams?.description?.trim() || "Relatório mensal do condomínio";
+  const defaultDescription = "Relatório mensal do condomínio";
+  const description = isAdministrator ? resolvedSearchParams?.description?.trim() || defaultDescription : defaultDescription;
 
   return (
     <PrintableReportTemplate
       activeResidentsCount={residents.filter((resident) => resident.status === "active").length}
       dashboardSeries={dashboardSeries}
       description={description}
+      includeReceiptPages={isAdministrator}
       expenses={currentReport ? expenses.filter((expense) => expense.month === currentReport.month) : []}
       receipts={currentReport ? receipts.filter((receipt) => receipt.month === currentReport.month) : []}
       residents={residents}

@@ -9,8 +9,6 @@ export default async function PrivateLayout({ children }: { children: React.Reac
   const cookieStore = await cookies();
   const currentUser = await getCurrentUserFromSessionToken(cookieStore.get(getCurrentUserCookieName())?.value);
 
-  console.log({ currentUser })
-
   if (!currentUser) {
     redirect("/sign-in");
   }
