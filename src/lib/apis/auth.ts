@@ -3,7 +3,6 @@ import type { CurrentUser } from "@/types/domain";
 type AuthStartResponse = {
   email: string;
   session?: string;
-  maskedDestination?: string;
   currentUser?: CurrentUser;
 };
 

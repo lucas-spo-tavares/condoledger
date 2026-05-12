@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { ReportShell } from "@/components/organisms/reports/report-shell";
-import { getCurrentUserCookieName, getCurrentUserFromSessionToken } from "@/lib/servers/auth";
+import { getCurrentUserFromRequest } from "@/lib/servers/current-user";
 
 export default async function ReportsLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const currentUser = await getCurrentUserFromSessionToken(cookieStore.get(getCurrentUserCookieName())?.value);
+  const currentUser = await getCurrentUserFromRequest();
 
   if (!currentUser) {
     redirect("/sign-in");

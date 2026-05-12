@@ -4,9 +4,10 @@ import { getZodFieldErrors } from "@/lib/commons/zod";
 import { signInConfirmSchema } from "@/lib/schemas/auth/sign-in-schema";
 import {
   AuthError,
-  SESSION_COOKIE_MAX_AGE_SECONDS,
   confirmOtpSignIn,
-  getCurrentUserCookieName
+  getCurrentUserCookieName,
+  getCurrentUserIdTokenCookieName,
+  getLegacyCurrentUserCookieName
 } from "@/lib/servers/auth";
 
 export async function POST(request: NextRequest) {
@@ -23,16 +24,34 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { currentUser, sessionToken } = await confirmOtpSignIn(result.data);
+    const { currentUser, tokens } = await confirmOtpSignIn(result.data);
 
     const response = NextResponse.json({ currentUser });
-    response.cookies.set(getCurrentUserCookieName(), sessionToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: SESSION_COOKIE_MAX_AGE_SECONDS
-    });
+
+    if (tokens) {
+      response.cookies.set(getCurrentUserCookieName(), tokens.accessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: tokens.expiresIn
+      });
+      response.cookies.set(getCurrentUserIdTokenCookieName(), tokens.idToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: tokens.expiresIn
+      });
+      response.cookies.set(getLegacyCurrentUserCookieName(), "", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 0
+      });
+    }
+
     return response;
   } catch (error) {
     if (error instanceof AuthError) {

@@ -19,7 +19,6 @@ export function SignInTemplate() {
   const otpForm = useSignInOtpForm();
   const [step, setStep] = React.useState<AuthStep>("email");
   const [session, setSession] = React.useState("");
-  const [maskedDestination, setMaskedDestination] = React.useState("");
   const [error, setError] = React.useState("");
   const [success, setSuccess] = React.useState("");
   const [isSending, setIsSending] = React.useState(false);
@@ -49,7 +48,6 @@ export function SignInTemplate() {
 
       emailForm.reset({ email: response.email });
       setSession(response.session ?? "");
-      setMaskedDestination(response.maskedDestination ?? "");
       setStep("otp");
       setSuccess("Enviamos um codigo de acesso.");
     } catch (caughtError) {
@@ -123,9 +121,9 @@ export function SignInTemplate() {
         ) : (
           <SignInOtpStepCard
             control={otpForm.control}
+            email={emailForm.getValues("email")}
             isConfirming={isConfirming}
             isSending={isSending}
-            maskedDestination={maskedDestination}
             onBackToEmail={() => setStep("email")}
             onConfirm={otpForm.handleSubmit(handleConfirm)}
             onResend={() => {

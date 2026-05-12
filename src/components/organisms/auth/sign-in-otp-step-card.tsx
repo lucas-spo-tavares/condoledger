@@ -12,9 +12,9 @@ import { SIGN_IN_OTP_LENGTH, type SignInOtpFormValues } from "@/lib/schemas/auth
 
 type SignInOtpStepCardProps = {
   control: Control<SignInOtpFormValues>;
+  email: string;
   isConfirming: boolean;
   isSending: boolean;
-  maskedDestination: string;
   onBackToEmail: () => void;
   onConfirm: FormEventHandler<HTMLFormElement>;
   onResend: () => void;
@@ -22,9 +22,9 @@ type SignInOtpStepCardProps = {
 
 export function SignInOtpStepCard({
   control,
+  email,
   isConfirming,
   isSending,
-  maskedDestination,
   onBackToEmail,
   onConfirm,
   onResend
@@ -37,7 +37,7 @@ export function SignInOtpStepCard({
           <CardDescription>Acesso via cadastro do condomínio ou Cognito.</CardDescription>
         </div>
         <div className="rounded-xl border border-border bg-background p-3 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">{maskedDestination}</p>
+          <p className="font-medium text-foreground">{email}</p>
           <p className="mt-1">
             Digite o código de {SIGN_IN_OTP_LENGTH} dígitos que enviamos. Se precisar, você pode pedir um novo.
           </p>
